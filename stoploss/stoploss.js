@@ -13,12 +13,13 @@ var inventory = JSON.parse(fs.readFileSync("./inventory.json"))
 
 // internal vars
 var highwater = 0.0
-var lowwater = 0.0
 var sell_price = 0.0
+var lowwater = 500.0
+var buy_price = 0.0
 var lag_secs = 0
 var last_msg_time
 var lag_confidence = false
-var trade_block = false
+var swing_side
 var deadman_interval_id
 
 
@@ -26,6 +27,14 @@ json_log({msg:"*** STARTING ***",version: pkg.version, inventory:inventory})
 console.log('sell percentage %'+(config.quant.sell_percentage))
 process.stdout.write('connecting to mtgox...')
 
+if((typeof(inventory.btc) != 'number') ||
+   (typeof(inventory.usd) != 'number') ||
+   (inventory.btc > 0 && inventory.usd > 0) ) {
+  console.log("bogus inventories. stopping")
+  process.exit()
+}
+if(inventory.btc > 0) { swing_side = "sell" }
+if(inventory.usd > 0) { swing_side = "buy" }
 var sockio = socketio.connect(mtgoxob.socketio_url,{
   'try multiple transports': false,
   'connect timeout': 5000
@@ -81,52 +90,117 @@ mtsox.on('trade', function(trade){
                 ' qty. '+trade.amount.toFixed(1)+
                 ' highwater '+highwater.toFixed(2)+
                 ' sell_price '+sell_price.toFixed(2)+
-                ' (delay '+trade_delay.toFixed(0)+'s)')
+                ' lowwater '+lowwater.toFixed(2)+
+                ' buy_price '+buy_price.toFixed(2)+
+                ' (delay '+trade_delay.toFixed(0)+'s)'+
+                ' swing_side '+swing_side)
 
-    if(trade.price > highwater) {
-      // price rising
-      highwater = trade.price
-      sell_price = (highwater * (1-config.quant.sell_percentage/100))
-      json_log({msg:'new highwater ', highwater:highwater.toFixed(2),
-               sell_price:sell_price.toFixed(2)})
-    } else {
-      // price dropping
-      if(trade.price < sell_price) {
-        sell()
+    if(inventory.btc > 0) {
+      if(trade.price > highwater) {
+        // price rising
+        set_highwater(trade.price)
+      } else {
+        // price dropping
+        if(trade.price < sell_price) {
+          sell(trade.price)
+        }
+      }
+    }
+
+    if(inventory.usd > 0) {
+      if(trade.price < lowwater) {
+        // price falling
+        set_lowwater(trade.price)
+      } else {
+        // price rising
+        if(trade.price > buy_price) {
+          buy(trade.price)
+        }
       }
     }
   }
 })
 
-function sell(){
+function set_highwater(price) {
+  highwater = price
+  sell_price = (highwater * (1-config.quant.sell_percentage/100))
+  json_log({msg:'new highwater', highwater:highwater.toFixed(2),
+           sell_price:sell_price.toFixed(2)})
+}
+
+function set_lowwater(price) {
+  lowwater = trade.price
+  buy_price = (lowwater * (1+config.quant.buy_percentage/100))
+  json_log({msg:'new lowwater', lowwater:lowwater.toFixed(2),
+           buy_price:buy_price.toFixed(2)})
+}
+
+function sell(price){
   if (low_lag()) {
-    var sale_away_percentage = sell_price / highwater
+    var sale_away_percentage = price / highwater
     if(sale_away_percentage > 0.5 && sale_away_percentage < 1.5 ) {
       if(inventory.btc >= 0.01){
-        if(trade_block == false){
-          trade_block = true
-          var price = sell_price
+        if(swing_side == "sell"){
           json_log({msg: "SELL", sell_price: sell_price,
                                  price: price,
                                  amount: inventory.btc,
                                  lag: lag_secs})
           add_order('ask', price, inventory.btc)
-          email_alert("stoploss SOLD "+sell_price.toFixed(2)+" "+inventory.btc+"btc")
+          email_alert("stoploss SELL "+price.toFixed(2)+" "+inventory.btc+"btc")
+          inventory.usd = price*inventory.btc
           inventory.btc = 0
           save_inventory()
+          swing_side = "buy"
+          set_lowwater(price)
         } else {
-          json_log({msg: "ADD ORDER blocked by flag"})
+          json_log({msg: "SELL ORDER blocked by swing side", swing_side: swing_side})
         }
       } else {
-        json_log({msg: "ADD ORDER blocked by low inventory",
+        json_log({msg: "ADD ORDER blocked by low BTC inventory",
                   inventory: inventory})
       }
     } else {
       json_log({msg: "ADD ORDER blocked by crazy price",
-                highwater: highwater, sell_price: sell_price})
+                highwater: highwater, price: price})
     }
   } else {
     json_log({msg: "SELL aborted due to lag.", lag_confidence:lag_confidence,
+                                               lag_secs:lag_secs,
+                                               sell_price: sell_price})
+  }
+}
+
+function buy(price){
+  if (low_lag()) {
+    var sale_away_percentage = price / lowwater
+    if(sale_away_percentage > 0.5 && sale_away_percentage < 1.5 ) {
+      if(inventory.usd >= 0.01){
+        if(swing_side == "buy"){
+          var btc = inventory.usd/price
+          json_log({msg: "BUY", buy_price: buy_price,
+                                 price: price,
+                                 amount: btc,
+                                 lag: lag_secs})
+          add_order('bid', btc, inventory.usd)
+          email_alert("stoploss BUY "+price.toFixed(2)+" "+btc.toFixed(5)+"btc")
+          inventory.btc = btc
+          inventory.usd = 0
+          save_inventory()
+          swing_side = "sell"
+          set_highwater(price)
+        } else {
+          json_log({msg: "BUY ORDER blocked by swing side", swing_side: swing_side})
+        }
+      } else {
+        json_log({msg: "ADD ORDER blocked by low USD inventory",
+                  inventory: inventory})
+      }
+    } else {
+      json_log({msg: "ADD ORDER blocked by crazy price",
+                lowwater: lowwater, price: price})
+    }
+  } else {
+    json_log({msg: "BUY aborted due to lag.", lag_confidence:lag_confidence,
                                                lag_secs:lag_secs,
                                                sell_price: sell_price})
   }
