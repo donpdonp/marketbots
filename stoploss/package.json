@@ -7,7 +7,7 @@
     "mtgox-orderbook":"0.2.x",
     "mtgox":"0.0.x",
     "moment":"2.x.x",
-    "nodemailer":""
+    "nodemailer":"0.4.x"
   },
   "devDependencies": {
     "vows": ">=0.7.0"
