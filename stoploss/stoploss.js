@@ -74,7 +74,8 @@ mtsox.on('trade', function(trade){
   if(trade.price_currency == 'USD') {
     var trade_delay = (new Date() - (trade.date*1000))/1000
 
-    console.log('trade '+trade.amount.toFixed(1)+'@$'+trade.price.toFixed(2)+
+    console.log('trade $'+trade.price.toFixed(2)+
+                ' qty. '+trade.amount.toFixed(1)+
                 ' highwater '+highwater.toFixed(2)+
                 ' sell_price '+sell_price.toFixed(2)+
                 ' (delay '+trade_delay.toFixed(0)+'s)')
@@ -183,7 +184,7 @@ function email_alert(msg){
   var body = {}
   body.from = config.email.from
   body.to = config.email.to
-  body.subject = msg
+  body.subject = config.email.server+":"+msg
   json_log({msg:"email", body: body})
   var smtpTransport = nodemailer.createTransport("SMTP",{host: "localhost"});
   smtpTransport.sendMail(body, function(error, response){
