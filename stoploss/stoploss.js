@@ -97,16 +97,21 @@ mtsox.on('trade', function(trade){
     if(swing_side == "sell"){
       msg = msg + ' highwater '+highwater.toFixed(2)+
                 ' sell '+sell_price.toFixed(2)
+      if(buy_price > 0) {
+        msg = msg + ' +'+(trade.price-buy_price).toFixed(2)
+      }
     }
     if(swing_side == "buy"){
       msg = msg + ' lowwater '+lowwater.toFixed(2)+
                 ' buy '+buy_price.toFixed(2)
+      if(sell_price > 0) {
+        msg = msg + ' +'+(sell_price-trade.price).toFixed(2)
+      }
     }
     if(trade_delay > 3){
       msg = msg + ' (delay '+trade_delay.toFixed(0)+'s)'
     }
-    msg = msg + ' swing_side '+swing_side +
-                ' '+JSON.stringify(inventory)
+    msg = msg + ' '+JSON.stringify(inventory)
 
     console.log(msg)
 
