@@ -88,7 +88,7 @@ mtsox.on('trade', function(trade){
 
     var msg = ""
     msg = msg + 'trade $'+trade.price.toFixed(2)+
-                ' qty. '+trade.amount.toFixed(1)
+                ' x'+trade.amount.toFixed(1)
     if(swing_side == "sell"){
       msg = msg + ' highwater '+highwater.toFixed(2)+
                 ' sell '+sell_price.toFixed(2)
@@ -97,8 +97,12 @@ mtsox.on('trade', function(trade){
       msg = msg + ' lowwater '+lowwater.toFixed(2)+
                 ' buy '+buy_price.toFixed(2)
     }
-    msg = msg + ' (delay '+trade_delay.toFixed(0)+'s)'+
-                ' swing_side '+swing_side
+    if(trade_delay > 3){
+      msg = msg + ' (delay '+trade_delay.toFixed(0)+'s)'
+    }
+    msg = msg + ' swing_side '+swing_side +
+                ' '+JSON.stringify(inventory)
+
     console.log(msg)
 
     if(inventory.btc > 0) {
@@ -278,6 +282,8 @@ function freshen_last_msg_time(){
 }
 
 function save_inventory(){
+  inventory.btc = parseFloat(inventory.btc.toFixed(8))
+  inventory.usd = parseFloat(inventory.usd.toFixed(5))
   json_log({msg:"save_inventory",inventory:inventory})
   fs.writeFileSync("./inventory.json", JSON.stringify(inventory))
 }
