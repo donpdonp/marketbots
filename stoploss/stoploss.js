@@ -8,10 +8,6 @@ var mtgoxob = require('mtgox-orderbook')
 var config = JSON.parse(fs.readFileSync("./config.json"))
 var mtgox = new Mtgoxjs(config.mtgox)
 
-// user config
-var sell_percent = 0.01
-var buy_percent = 1.0
-
 var inventory = JSON.parse(fs.readFileSync("./inventory.json"))
 
 // internal vars
@@ -25,11 +21,12 @@ var trade_block = false
 var deadman_interval_id
 
 json_log({msg:"load inventory",inventory:inventory})
-console.log('sell percentage %'+(sell_percent))
+console.log('sell percentage %'+(config.quant.sell_percentage))
 process.stdout.write('connecting to mtgox...')
 
 var sockio = socketio.connect(mtgoxob.socketio_url,{
-  'try multiple transports': false
+  'try multiple transports': false,
+  'connect timeout': 5000
 })
 var mtsox = mtgoxob.attach(sockio, 'usd')
 
@@ -77,7 +74,7 @@ mtsox.on('trade', function(trade){
   if(trade.price_currency == 'USD') {
     var trade_delay = (new Date() - (trade.date*1000))/1000
 
-    console.log('trade $'+trade.price.toFixed(2)+
+    console.log('trade '+trade.amount.toFixed(1)+'@$'+trade.price.toFixed(2)+
                 ' highwater '+highwater.toFixed(2)+
                 ' sell_price '+sell_price.toFixed(2)+
                 ' (delay '+trade_delay.toFixed(0)+'s)')
@@ -85,7 +82,7 @@ mtsox.on('trade', function(trade){
     if(trade.price > highwater) {
       // price rising
       highwater = trade.price
-      sell_price = (highwater * (1-sell_percent/100))
+      sell_price = (highwater * (1-config.quant.sell_percentage/100))
       console.log('new highwater '+highwater.toFixed(2)+
                   ' new sell_price '+sell_price.toFixed(2))
     } else {
