@@ -5,6 +5,7 @@ var socketio = require('socket.io-client')
 var Mtgoxjs = require('mtgox')
 var mtgoxob = require('mtgox-orderbook')
 
+var pkg = require('./package.json')
 var config = JSON.parse(fs.readFileSync("./config.json"))
 var mtgox = new Mtgoxjs(config.mtgox)
 
@@ -20,7 +21,8 @@ var lag_confidence = false
 var trade_block = false
 var deadman_interval_id
 
-json_log({msg:"load inventory",inventory:inventory})
+
+json_log({msg:"*** STARTING ***",version: pkg.version, inventory:inventory})
 console.log('sell percentage %'+(config.quant.sell_percentage))
 process.stdout.write('connecting to mtgox...')
 
@@ -31,7 +33,7 @@ var sockio = socketio.connect(mtgoxob.socketio_url,{
 var mtsox = mtgoxob.attach(sockio, 'usd')
 
 mtsox.on('connect', function(trade){
-  json_log({msg: "*** connected to mtgox ***"})
+  json_log({msg: "connected to mtgox"})
   setTimeout(function(){mtsox.subscribe("lag")}, 1000) // trade.lag
   deadman_interval_id = setInterval(deadman_switch, 5000)
 })
@@ -105,7 +107,7 @@ function sell(){
           json_log({msg: "SELL", sell_price: sell_price,
                                  amount: inventory.btc,
                                  lag: lag_secs})
-          add_order('ask', null, inventory.btc)
+          add_order('ask', 'market', inventory.btc)
           email_alert("stoploss SOLD "+sell_price.toFixed(2)+" "+inventory.btc+"btc")
           inventory.btc = 0
           save_inventory()
@@ -132,18 +134,27 @@ function low_lag(){
 }
 
 function add_order(bidask, price, amount){
+  json_log({msg: "add order called", bidask: bidask,
+                              price: price,
+                              amount: amount,
+                              lag: lag_secs})
+
   var price_int = price * 1E5
   var amount_int = amount * 1E8
 
-  json_log({msg: "ADD ORDER", bidask: bidask,
-                              price_int: price_int,
-                              amount_int: amount_int,
-                              lag: lag_secs})
-
-  //mtgox.query('/1/BTCUSD/order/add',
-  //              {type: 'ask',
-  //               amount_int: amount_int },
-  //              function(error, result){})
+  if((typeof(price) == 'number' && price > 0) || (price == 'market')){
+    var order = { type: bidask,
+                  amount_int: amount_int}
+    if(price > 0) {
+      order.price_int = price_int
+    }
+    //mtgox.query('/1/BTCUSD/order/add',
+    //              {type: 'ask',
+    //               amount_int: amount_int },
+    //              function(error, result){})
+    order.query = '/1/BTCUSD/order/add'
+    json_log(order)
+  }
 }
 
 function order_info(){

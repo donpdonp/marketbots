@@ -1,13 +1,13 @@
 {
   "name": "stoploss",
-  "version":"0.0.1",
+  "version": "0.0.2",
   "private": true,
   "dependencies": {
-    "socket.io-client":">=0.9.11",
-    "mtgox-orderbook":"0.2.x",
-    "mtgox":"0.0.x",
-    "moment":"2.x.x",
-    "nodemailer":"0.4.x"
+    "socket.io-client": ">=0.9.11",
+    "mtgox-orderbook": "0.2.x",
+    "mtgox": "0.0.x",
+    "moment": "2.x.x",
+    "nodemailer": "0.4.x"
   },
   "devDependencies": {
     "vows": ">=0.7.0"
