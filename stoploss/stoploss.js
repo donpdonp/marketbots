@@ -24,7 +24,7 @@ var deadman_interval_id
 
 
 json_log({msg:"*** STARTING ***",version: pkg.version, inventory:inventory})
-console.log('sell percentage %'+(config.quant.sell_percentage))
+console.log(config.quant)
 process.stdout.write('connecting to mtgox...')
 
 if((typeof(inventory.btc) != 'number') ||
@@ -167,7 +167,7 @@ function sell(price){
                                  lag: lag_secs})
           add_order('ask', price, inventory.btc)
           email_alert("stoploss SELL "+price.toFixed(2)+" "+inventory.btc+"btc")
-          inventory.usd = price*inventory.btc*(1-config.mtgox.fee)
+          inventory.usd = price*inventory.btc*(1-(config.mtgox.fee_percentage/100))
           inventory.btc = 0
           save_inventory()
           swing_side = "buy"
@@ -203,7 +203,7 @@ function buy(price){
                                  lag: lag_secs})
           add_order('bid', btc, inventory.usd)
           email_alert("stoploss BUY "+price.toFixed(2)+" "+btc.toFixed(5)+"btc")
-          inventory.btc = btc*(1-config.mtgox.fee)
+          inventory.btc = btc*(1-(config.mtgox.fee_percentage/100))
           inventory.usd = 0
           save_inventory()
           swing_side = "sell"
