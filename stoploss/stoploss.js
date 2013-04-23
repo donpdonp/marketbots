@@ -105,10 +105,12 @@ function sell(){
       if(inventory.btc >= 0.01){
         if(trade_block == false){
           trade_block = true
+          var price = sell_price + 50
           json_log({msg: "SELL", sell_price: sell_price,
+                                 price: price,
                                  amount: inventory.btc,
                                  lag: lag_secs})
-          add_order('ask', 'market', inventory.btc)
+          add_order('ask', price, inventory.btc)
           email_alert("stoploss SOLD "+sell_price.toFixed(2)+" "+inventory.btc+"btc")
           inventory.btc = 0
           save_inventory()
@@ -140,18 +142,14 @@ function add_order(bidask, price, amount){
                               amount: amount,
                               lag: lag_secs})
 
-  var price_int = price * 1E5
-  var amount_int = amount * 1E8
-
   if((typeof(price) == 'number' && price > 0) || (price == 'market')){
+    var amount_int = parseInt(amount * 1E8)
     var order = { type: bidask,
                   amount_int: amount_int}
     if(price > 0) {
-      order.price_int = price_int
+      order.price_int = parseInt(price * 1E5)
     }
-    //mtgox.query('/1/BTCUSD/order/add',
-    //              {type: 'ask',
-    //               amount_int: amount_int },
+    //mtgox.query('/1/BTCUSD/order/add', order,
     //              function(error, result){})
     order.query = '/1/BTCUSD/order/add'
     json_log(order)
