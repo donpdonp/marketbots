@@ -35,6 +35,7 @@ var mtsox = mtgoxob.attach(sockio, 'usd')
 mtsox.on('connect', function(trade){
   json_log({msg: "connected to mtgox"})
   setTimeout(function(){mtsox.subscribe("lag")}, 1000) // trade.lag
+  freshen_last_msg_time()
   deadman_interval_id = setInterval(deadman_switch, 5000)
 })
 
@@ -48,7 +49,7 @@ mtsox.on('subscribe', function(sub){
 })
 
 mtsox.on('message', function(sub){
-  last_msg_time = new Date()
+  freshen_last_msg_time()
 })
 
 mtsox.on('lag', function(lag){
@@ -86,8 +87,8 @@ mtsox.on('trade', function(trade){
       // price rising
       highwater = trade.price
       sell_price = (highwater * (1-config.quant.sell_percentage/100))
-      console.log('new highwater '+highwater.toFixed(2)+
-                  ' new sell_price '+sell_price.toFixed(2))
+      json_log({msg:'new highwater ', highwater:highwater.toFixed(2),
+               sell_price:sell_price.toFixed(2)})
     } else {
       // price dropping
       if(trade.price < sell_price) {
@@ -184,6 +185,10 @@ function deadman_switch(){
               last_msg_delay: last_msg_delay})
     email_alert("deadman: mtgox not responding! "+last_msg_delay+"s")
   }
+}
+
+function freshen_last_msg_time(){
+  last_msg_time = new Date()
 }
 
 function save_inventory(){
