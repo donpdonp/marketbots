@@ -86,14 +86,20 @@ mtsox.on('trade', function(trade){
   if(trade.price_currency == 'USD') {
     var trade_delay = (new Date() - (trade.date*1000))/1000
 
-    console.log('trade $'+trade.price.toFixed(2)+
-                ' qty. '+trade.amount.toFixed(1)+
-                ' highwater '+highwater.toFixed(2)+
-                ' sell_price '+sell_price.toFixed(2)+
-                ' lowwater '+lowwater.toFixed(2)+
-                ' buy_price '+buy_price.toFixed(2)+
-                ' (delay '+trade_delay.toFixed(0)+'s)'+
-                ' swing_side '+swing_side)
+    var msg = ""
+    msg = msg + 'trade $'+trade.price.toFixed(2)+
+                ' qty. '+trade.amount.toFixed(1)
+    if(swing_side == "sell"){
+      msg = msg + ' highwater '+highwater.toFixed(2)+
+                ' sell '+sell_price.toFixed(2)
+    }
+    if(swing_side == "buy"){
+      msg = msg + ' lowwater '+lowwater.toFixed(2)+
+                ' buy '+buy_price.toFixed(2)
+    }
+    msg = msg + ' (delay '+trade_delay.toFixed(0)+'s)'+
+                ' swing_side '+swing_side
+    console.log(msg)
 
     if(inventory.btc > 0) {
       if(trade.price > highwater) {
@@ -129,7 +135,7 @@ function set_highwater(price) {
 }
 
 function set_lowwater(price) {
-  lowwater = trade.price
+  lowwater = price
   buy_price = (lowwater * (1+config.quant.buy_percentage/100))
   json_log({msg:'new lowwater', lowwater:lowwater.toFixed(2),
            buy_price:buy_price.toFixed(2)})
