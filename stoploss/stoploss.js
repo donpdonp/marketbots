@@ -105,7 +105,7 @@ function sell(){
       if(inventory.btc >= 0.01){
         if(trade_block == false){
           trade_block = true
-          var price = sell_price + 50
+          var price = sell_price
           json_log({msg: "SELL", sell_price: sell_price,
                                  price: price,
                                  amount: inventory.btc,
@@ -149,6 +149,7 @@ function add_order(bidask, price, amount){
     if(price > 0) {
       order.price_int = parseInt(price * 1E5)
     }
+    /*
     mtgox.query('/1/BTCUSD/order/add', order,
                   function(error, result){
                     if(error){
@@ -157,6 +158,7 @@ function add_order(bidask, price, amount){
                       json_log({msg:"ADD ORDER result",result:result})
                     }
                   })
+    */
     order.query = '/1/BTCUSD/order/add'
     json_log(order)
   }
