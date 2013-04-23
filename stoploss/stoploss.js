@@ -35,6 +35,11 @@ if((typeof(inventory.btc) != 'number') ||
 }
 if(inventory.btc > 0) { swing_side = "sell" }
 if(inventory.usd > 0) { swing_side = "buy" }
+if(config.quant.sell_percentage < config.mtgox.fee ||
+  config.quant.buy_percentage < config.mtgox.fee) {
+  console.log("buy/sell percentage is less than fee! stopping")
+  process.exit()
+}
 var sockio = socketio.connect(mtgoxob.socketio_url,{
   'try multiple transports': false,
   'connect timeout': 5000
@@ -157,7 +162,7 @@ function sell(price){
                                  lag: lag_secs})
           add_order('ask', price, inventory.btc)
           email_alert("stoploss SELL "+price.toFixed(2)+" "+inventory.btc+"btc")
-          inventory.usd = price*inventory.btc
+          inventory.usd = price*inventory.btc*(1-config.mtgox.fee)
           inventory.btc = 0
           save_inventory()
           swing_side = "buy"
@@ -193,7 +198,7 @@ function buy(price){
                                  lag: lag_secs})
           add_order('bid', btc, inventory.usd)
           email_alert("stoploss BUY "+price.toFixed(2)+" "+btc.toFixed(5)+"btc")
-          inventory.btc = btc
+          inventory.btc = btc*(1-config.mtgox.fee)
           inventory.usd = 0
           save_inventory()
           swing_side = "sell"
