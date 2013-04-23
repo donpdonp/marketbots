@@ -170,7 +170,7 @@ function deadman_switch(){
   if(last_msg_delay > 30) {
     json_log({msg: "deadman: mtgox connection not responding!",
               last_msg_delay: last_msg_delay})
-    process.exit()
+    email_alert("deadman: mtgox not responding! "+last_msg_delay+"s")
   }
 }
 
