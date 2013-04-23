@@ -1,0 +1,5 @@
+node_modules/
+
+/stoploss/config.json
+/stoploss/inventory.json
+/stoploss/act.log
