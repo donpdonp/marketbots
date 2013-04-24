@@ -13,8 +13,10 @@ var inventory = JSON.parse(fs.readFileSync("./inventory.json"))
 
 // internal vars
 var highwater = 0.0
+var target_highwater = 0
 var sell_price = 0.0
 var lowwater = 500.0
+var target_lowwater = 500.0
 var buy_price = 0.0
 var lag_secs = 0
 var last_msg_time
@@ -95,6 +97,7 @@ mtsox.on('trade', function(trade){
                 ' x'+trade.amount.toFixed(1)
     if(swing_side == "sell"){
       msg = msg + ' highwater '+highwater.toFixed(2)+
+                ' target '+target_highwater.toFixed(2)+
                 ' sell '+sell_price.toFixed(2)
       if(buy_price > 0) {
         msg = msg + ' +'+(trade.price-buy_price).toFixed(2)
@@ -102,6 +105,7 @@ mtsox.on('trade', function(trade){
     }
     if(swing_side == "buy"){
       msg = msg + ' lowwater '+lowwater.toFixed(2)+
+                ' target '+target_lowwater.toFixed(2)+
                 ' buy '+buy_price.toFixed(2)
       if(sell_price > 0) {
         msg = msg + ' +'+(sell_price-trade.price).toFixed(2)
@@ -120,7 +124,8 @@ mtsox.on('trade', function(trade){
         set_highwater(trade.price)
       } else {
         // price dropping
-        if(trade.price < sell_price) {
+        if(trade.price < sell_price &&
+           highwater >= target_highwater) {
           sell(trade.price)
         }
       }
@@ -132,7 +137,8 @@ mtsox.on('trade', function(trade){
         set_lowwater(trade.price)
       } else {
         // price rising
-        if(trade.price > buy_price) {
+        if(trade.price > buy_price &&
+           lowwater <= target_lowwater) {
           buy(trade.price)
         }
       }
@@ -144,6 +150,7 @@ function set_highwater(price) {
   highwater = price
   sell_price = (highwater * (1-config.quant.bounce_percentage/100))
   json_log({msg:'new highwater', highwater:highwater.toFixed(2),
+           target_highwater: target_highwater.toFixed(2),
            sell_price:sell_price.toFixed(2)})
 }
 
@@ -151,6 +158,7 @@ function set_lowwater(price) {
   lowwater = price
   buy_price = (lowwater * (1+config.quant.bounce_percentage/100))
   json_log({msg:'new lowwater', lowwater:lowwater.toFixed(2),
+           target_lowwater: target_lowwater.toFixed(2),
            buy_price:buy_price.toFixed(2)})
 }
 
@@ -170,7 +178,8 @@ function sell(price){
           inventory.btc = 0
           save_inventory()
           swing_side = "buy"
-          set_lowwater(price*(1-config.quant.gap_percentage/100))
+          target_lowwater = price*(1-config.quant.gap_percentage/100)
+          set_lowwater(price)
         } else {
           json_log({msg: "SELL ORDER blocked by swing side", swing_side: swing_side})
         }
@@ -200,13 +209,14 @@ function buy(price){
                                  price: price,
                                  amount: btc,
                                  lag: lag_secs})
-          add_order('bid', price, inventory.usd)
+          add_order('bid', price, btc)
           email_alert("stoploss BUY "+price.toFixed(2)+" "+btc.toFixed(5)+"btc")
           inventory.btc = btc*(1-(config.mtgox.fee_percentage/100))
           inventory.usd = 0
           save_inventory()
           swing_side = "sell"
-          set_highwater(price*(1+config.quant.gap_percentage/100))
+          target_highwater = price*(1+config.quant.gap_percentage/100)
+          set_highwater(price)
         } else {
           json_log({msg: "BUY ORDER blocked by swing side", swing_side: swing_side})
         }
