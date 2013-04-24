@@ -180,6 +180,7 @@ function sell(price){
           swing_side = "buy"
           target_lowwater = price*(1-config.quant.gap_percentage/100)
           set_lowwater(price)
+          sell_price = price
         } else {
           json_log({msg: "SELL ORDER blocked by swing side", swing_side: swing_side})
         }
@@ -217,6 +218,7 @@ function buy(price){
           swing_side = "sell"
           target_highwater = price*(1+config.quant.gap_percentage/100)
           set_highwater(price)
+          buy_price = price
         } else {
           json_log({msg: "BUY ORDER blocked by swing side", swing_side: swing_side})
         }
