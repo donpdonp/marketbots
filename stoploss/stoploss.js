@@ -35,9 +35,8 @@ if((typeof(inventory.btc) != 'number') ||
 }
 if(inventory.btc > 0) { swing_side = "sell" }
 if(inventory.usd > 0) { swing_side = "buy" }
-if(config.quant.sell_percentage < config.mtgox.fee ||
-  config.quant.buy_percentage < config.mtgox.fee) {
-  console.log("buy/sell percentage is less than fee! stopping")
+if(config.quant.gap_percentage < config.mtgox.fee) {
+  console.log("gap percentage is less than fee percentage! stopping")
   process.exit()
 }
 var sockio = socketio.connect(mtgoxob.socketio_url,{
@@ -143,14 +142,14 @@ mtsox.on('trade', function(trade){
 
 function set_highwater(price) {
   highwater = price
-  sell_price = (highwater * (1-config.quant.sell_percentage/100))
+  sell_price = (highwater * (1-config.quant.bounce_percentage/100))
   json_log({msg:'new highwater', highwater:highwater.toFixed(2),
            sell_price:sell_price.toFixed(2)})
 }
 
 function set_lowwater(price) {
   lowwater = price
-  buy_price = (lowwater * (1+config.quant.buy_percentage/100))
+  buy_price = (lowwater * (1+config.quant.bounce_percentage/100))
   json_log({msg:'new lowwater', lowwater:lowwater.toFixed(2),
            buy_price:buy_price.toFixed(2)})
 }
@@ -171,7 +170,7 @@ function sell(price){
           inventory.btc = 0
           save_inventory()
           swing_side = "buy"
-          set_lowwater(price)
+          set_lowwater(price*(1-config.quant.gap_percentage/100))
         } else {
           json_log({msg: "SELL ORDER blocked by swing side", swing_side: swing_side})
         }
@@ -201,13 +200,13 @@ function buy(price){
                                  price: price,
                                  amount: btc,
                                  lag: lag_secs})
-          add_order('bid', btc, inventory.usd)
+          add_order('bid', price, inventory.usd)
           email_alert("stoploss BUY "+price.toFixed(2)+" "+btc.toFixed(5)+"btc")
           inventory.btc = btc*(1-(config.mtgox.fee_percentage/100))
           inventory.usd = 0
           save_inventory()
           swing_side = "sell"
-          set_highwater(price)
+          set_highwater(price*(1+config.quant.gap_percentage/100))
         } else {
           json_log({msg: "BUY ORDER blocked by swing side", swing_side: swing_side})
         }

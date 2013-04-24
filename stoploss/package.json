@@ -1,6 +1,6 @@
 {
   "name": "stoploss",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "dependencies": {
     "socket.io-client": ">=0.9.11",
