@@ -24,9 +24,9 @@ var lag_confidence = false
 var swing_side
 var deadman_interval_id
 
-
-json_log({msg:"*** STARTING ***",version: pkg.version, inventory:inventory})
-console.log(config.quant)
+json_log({msg:"*** STARTING ***",version: pkg.version})
+json_log({quant: config.quant})
+json_log({inventory:inventory})
 process.stdout.write('connecting to mtgox...')
 
 if((typeof(inventory.btc) != 'number') ||
@@ -122,13 +122,15 @@ mtsox.on('trade', function(trade){
       if(trade.price > highwater) {
         // price rising
         set_highwater(trade.price)
+        if(target_highwater == 0) {
+          set_target_highwater_for(trade.price)
+          json_log({msg:"setting initial highwater on first trade",
+                    price:trade.price, target_highwater:target_highwater})
+        }
       }
       if(trade.price > target_highwater &&
          trade.price < sell_price) {
-        if(trade.price < target_highwater &&
-           highwater >= target_highwater) {
-          sell(trade.price)
-        }
+        sell(trade.price)
       }
     }
 
@@ -136,6 +138,11 @@ mtsox.on('trade', function(trade){
       if(trade.price < lowwater) {
         // price falling
         set_lowwater(trade.price)
+        if(target_lowwater == 500.0) {
+          set_target_lowwater_for(trade.price)
+          json_log({msg:"setting initial lowwater on first trade",
+                    price:trade.price, target_lowwater:target_lowwater})
+        }
       }
       if(trade.price < target_lowwater &&
          trade.price > buy_price) {
@@ -144,6 +151,14 @@ mtsox.on('trade', function(trade){
     }
   }
 })
+
+function set_target_highwater_for(price){
+  target_highwater = price*(1+config.quant.gap_percentage/100)
+}
+
+function set_target_lowwater_for(price){
+  target_lowwater = price*(1-config.quant.gap_percentage/100)
+}
 
 function set_highwater(price) {
   highwater = price
@@ -177,7 +192,7 @@ function sell(price){
           inventory.btc = 0
           save_inventory()
           swing_side = "buy"
-          target_lowwater = price*(1-config.quant.gap_percentage/100)
+          set_target_lowwater_for(price)
           set_lowwater(price)
           sell_price = price
         } else {
@@ -215,7 +230,7 @@ function buy(price){
           inventory.usd = 0
           save_inventory()
           swing_side = "sell"
-          target_highwater = price*(1+config.quant.gap_percentage/100)
+          set_target_highwater_for(price)
           set_highwater(price)
           buy_price = price
         } else {
