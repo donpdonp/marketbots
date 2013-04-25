@@ -142,10 +142,11 @@ mtsox.on('trade', function(trade){
       if(trade.price > highwater) {
         // price rising
         set_highwater(trade.price)
-      }
-      if(trade.price > target_highwater &&
-         trade.price < sell_price) {
-        sell(trade.price)
+      } else {
+        if(trade.price > target_highwater &&
+           trade.price < sell_price) {
+          sell(trade.price)
+        }
       }
     }
 
@@ -153,10 +154,11 @@ mtsox.on('trade', function(trade){
       if(trade.price < lowwater) {
         // price falling
         set_lowwater(trade.price)
-      }
-      if(trade.price < target_lowwater &&
-         trade.price > buy_price) {
-        buy(trade.price)
+      } else {
+        if(trade.price < target_lowwater &&
+           trade.price > buy_price) {
+          buy(trade.price)
+        }
       }
     }
   }
