@@ -310,9 +310,11 @@ function order_info(){
 }
 
 function json_log(o){
-  var msg = ""+moment().format()+" "+JSON.stringify(o)+"\n"
-  process.stdout.write(msg)
-  fs.appendFile('act.log', msg)
+  var msg = JSON.stringify(o)+"\n"
+  var display_msg = moment().format("ddd HH:MM:ss")+" "+msg
+  var log_msg = moment().format()+" "+msg
+  process.stdout.write(display_msg)
+  fs.appendFile('act.log', log_msg)
 }
 
 function deadman_switch(){
