@@ -29,14 +29,26 @@ json_log({quant: config.quant})
 json_log({inventory:inventory})
 process.stdout.write('connecting to mtgox...')
 
-if((typeof(inventory.btc) != 'number') ||
-   (typeof(inventory.usd) != 'number') ||
-   (inventory.btc > 0 && inventory.usd > 0) ) {
+if((typeof(inventory.btc.amount) != 'number') ||
+   (typeof(inventory.usd.amount) != 'number') ||
+   ((typeof(inventory.btc.price) != 'number') &&
+    (typeof(inventory.usd.price) != 'number')) ||
+   (inventory.btc.amount > 0 && inventory.usd.amount > 0) ) {
   console.log("bogus inventories. stopping")
   process.exit()
 }
-if(inventory.btc > 0) { swing_side = "sell" }
-if(inventory.usd > 0) { swing_side = "buy" }
+
+if(inventory.btc.amount > 0) {
+  swing_side = "sell"
+  set_target_highwater_for(inventory.usd.price)
+  buy_price = inventory.usd.price
+}
+if(inventory.usd.amount > 0) {
+  swing_side = "buy"
+  set_target_lowwater_for(inventory.btc.price)
+  sell_price = inventory.btc.price
+}
+
 if(config.quant.gap_percentage < config.mtgox.fee) {
   console.log("gap percentage is less than fee percentage! stopping")
   process.exit()
@@ -124,19 +136,12 @@ mtsox.on('trade', function(trade){
       msg = msg + ' (lag '+lag_secs.toFixed(1)+'s)'
     }
 
-    json_log({trade:msg, inventory: inventory})
+    json_log({trade:msg, btc: inventory.btc.amount, usd: inventory.usd.amount})
 
     if(swing_side == "sell") {
       if(trade.price > highwater) {
         // price rising
         set_highwater(trade.price)
-        if(target_highwater == 0) {
-          set_target_highwater_for(trade.price)
-          buy_price = trade.price
-          json_log({msg:"setting initial highwater and buy_price on first trade",
-                    price:trade.price, buy_price:buy_price,
-                    target_highwater:target_highwater})
-        }
       }
       if(trade.price > target_highwater &&
          trade.price < sell_price) {
@@ -148,13 +153,6 @@ mtsox.on('trade', function(trade){
       if(trade.price < lowwater) {
         // price falling
         set_lowwater(trade.price)
-        if(target_lowwater == 500.0) {
-          set_target_lowwater_for(trade.price)
-          sell_price = trade.price
-          json_log({msg:"setting initial lowwater and sell_price on first trade",
-                    price:trade.price, sell_price: sell_price,
-                    target_lowwater:target_lowwater})
-        }
       }
       if(trade.price < target_lowwater &&
          trade.price > buy_price) {
@@ -192,16 +190,18 @@ function sell(price){
   if (low_lag()) {
     var sale_away_percentage = price / highwater
     if(sale_away_percentage > 0.5 && sale_away_percentage < 1.5 ) {
-      if(inventory.btc >= 0.01){
+      if(inventory.btc.amount >= 0.01){
         if(swing_side == "sell"){
           json_log({msg: "SELL", sell_price: sell_price,
                                  price: price,
-                                 amount: inventory.btc,
+                                 amount: inventory.btc.amount,
                                  lag: lag_secs})
-          add_order('ask', price, inventory.btc)
-          email_alert("stoploss SELL "+price.toFixed(2)+" "+inventory.btc+"btc")
-          inventory.usd = price*inventory.btc*(1-(config.mtgox.fee_percentage/100))
-          inventory.btc = 0
+          add_order('ask', price, inventory.btc.amount)
+          email_alert("stoploss SELL "+price.toFixed(2)+" "+inventory.btc.amount+"btc")
+          inventory.btc.price = price*(1-(config.mtgox.fee_percentage/100))
+          inventory.usd.amount = inventory.usd.price*inventory.btc.amount
+          inventory.usd.price = null
+          inventory.btc.amount = 0
           save_inventory()
           swing_side = "buy"
           set_target_lowwater_for(price)
@@ -229,17 +229,19 @@ function buy(price){
   if (low_lag()) {
     var sale_away_percentage = price / lowwater
     if(sale_away_percentage > 0.5 && sale_away_percentage < 1.5 ) {
-      if(inventory.usd >= 0.01){
+      if(inventory.usd.amount >= 0.01){
         if(swing_side == "buy"){
-          var btc = inventory.usd/price
+          var btc = inventory.usd.amount/price
           json_log({msg: "BUY", buy_price: buy_price,
                                  price: price,
                                  amount: btc,
                                  lag: lag_secs})
           add_order('bid', price, btc)
           email_alert("stoploss buy "+price.toFixed(2)+" "+btc.toFixed(5)+"btc")
-          inventory.btc = btc*(1-(config.mtgox.fee_percentage/100))
-          inventory.usd = 0
+          inventory.usd.price = price
+          inventory.btc.amount = btc*(1-(config.mtgox.fee_percentage/100))
+          inventory.btc.price = null
+          inventory.usd.amount = 0
           save_inventory()
           swing_side = "sell"
           set_target_highwater_for(price)
@@ -331,8 +333,9 @@ function freshen_last_msg_time(){
 }
 
 function save_inventory(){
-  inventory.btc = parseFloat(inventory.btc.toFixed(8))
-  inventory.usd = parseFloat(inventory.usd.toFixed(5))
+  // reformat numbers
+  inventory.btc.amount.amount = parseFloat(inventory.btc.amount.toFixed(8))
+  inventory.usd.amount.amount = parseFloat(inventory.usd.amount.toFixed(5))
   json_log({msg:"save_inventory",inventory:inventory})
   fs.writeFileSync("./inventory.json", JSON.stringify(inventory))
 }
