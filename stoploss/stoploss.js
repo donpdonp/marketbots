@@ -300,14 +300,12 @@ function add_order(bidask, price, amount){
 }
 
 function order_info(){
-  console.log('--order info--')
   mtgox.query('/1/generic/orders', function(error, result){
-    console.log('--got info--')
     if(error){
-      console.log(error)
+      json_log(error)
     } else {
       result.forEach(function(e){
-        console.log(e.type+' '+e.price.display+' '+e.amount.display)
+        json_log(e)
       })
     }
   })
