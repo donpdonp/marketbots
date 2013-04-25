@@ -124,8 +124,10 @@ mtsox.on('trade', function(trade){
         set_highwater(trade.price)
         if(target_highwater == 0) {
           set_target_highwater_for(trade.price)
-          json_log({msg:"setting initial highwater on first trade",
-                    price:trade.price, target_highwater:target_highwater})
+          buy_price = trade.price
+          json_log({msg:"setting initial highwater and buy_price on first trade",
+                    price:trade.price, buy_price:buy_price,
+                    target_highwater:target_highwater})
         }
       }
       if(trade.price > target_highwater &&
@@ -140,8 +142,10 @@ mtsox.on('trade', function(trade){
         set_lowwater(trade.price)
         if(target_lowwater == 500.0) {
           set_target_lowwater_for(trade.price)
-          json_log({msg:"setting initial lowwater on first trade",
-                    price:trade.price, target_lowwater:target_lowwater})
+          sell_price = trade.price
+          json_log({msg:"setting initial lowwater and sell_price on first trade",
+                    price:trade.price, sell_price: sell_price,
+                    target_lowwater:target_lowwater})
         }
       }
       if(trade.price < target_lowwater &&
