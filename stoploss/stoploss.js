@@ -83,10 +83,10 @@ mtsox.on('lag', function(lag){
   if (lag.qid) {
     var lag_age_secs = lag.age/1000000
     var delay_secs = (new Date() - new Date(lag.stamp/1000))/1000
-    if (delay_secs < 6) {
+    if (delay_secs < 30) {
       lag_confidence = true
       lag_secs = lag_age_secs
-      if (lag_secs > 5) {
+      if (lag_secs > config.quant.max_lag) {
         console.log('lag '+ lag_secs + "s delay: "+delay_secs+"s.")
       }
     } else {
@@ -268,7 +268,7 @@ function buy(price){
 }
 
 function low_lag(){
-  return lag_confidence == true && (lag_secs < 5)
+  return lag_confidence == true && (lag_secs < config.quant.max_lag)
 }
 
 function add_order(bidask, price, amount){
