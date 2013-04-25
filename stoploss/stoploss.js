@@ -100,7 +100,10 @@ mtsox.on('trade', function(trade){
                 ' target '+target_highwater.toFixed(2)+
                 ' sell '+sell_price.toFixed(2)
       if(buy_price > 0) {
-        msg = msg + ' +'+(trade.price-buy_price).toFixed(2)
+        var buy_diff = trade.price-buy_price
+        var diff_sign = ''
+        if (buy_diff > 0) { diff_sign = '+'}
+        msg = msg + ' '+diff_sign+buy_diff.toFixed(2)
       }
     }
     if(swing_side == "buy"){
@@ -108,7 +111,10 @@ mtsox.on('trade', function(trade){
                 ' target '+target_lowwater.toFixed(2)+
                 ' buy '+buy_price.toFixed(2)
       if(sell_price > 0) {
-        msg = msg + ' +'+(sell_price-trade.price).toFixed(2)
+        var sell_diff = sell_price-trade.price
+        var diff_sign = ''
+        if (sell_diff > 0) { diff_sign = '+'}
+        msg = msg + ' '+diff_sign+sell_diff.toFixed(2)
       }
     }
     if(trade_delay > 3){
