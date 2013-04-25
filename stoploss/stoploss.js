@@ -27,7 +27,7 @@ var deadman_interval_id
 json_log({msg:"*** STARTING ***",version: pkg.version})
 json_log({quant: config.quant})
 json_log({inventory:inventory})
-process.stdout.write('connecting to mtgox...')
+console.log('connecting to mtgox...')
 
 if((typeof(inventory.btc.amount) != 'number') ||
    (typeof(inventory.usd.amount) != 'number') ||
@@ -53,6 +53,9 @@ if(config.quant.gap_percentage < config.mtgox.fee) {
   console.log("gap percentage is less than fee percentage! stopping")
   process.exit()
 }
+
+order_info()
+/* CONNECT TO MTGOX */
 var sockio = socketio.connect(mtgoxob.socketio_url,{
   'try multiple transports': false,
   'connect timeout': 5000
