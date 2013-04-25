@@ -118,7 +118,7 @@ mtsox.on('trade', function(trade){
 
     console.log(msg)
 
-    if(inventory.btc > 0) {
+    if(swing_side == "sell") {
       if(trade.price > highwater) {
         // price rising
         set_highwater(trade.price)
@@ -131,7 +131,7 @@ mtsox.on('trade', function(trade){
       }
     }
 
-    if(inventory.usd > 0) {
+    if(swing_side == "buy") {
       if(trade.price < lowwater) {
         // price falling
         set_lowwater(trade.price)
