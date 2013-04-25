@@ -51,14 +51,12 @@ mtsox.on('connect', function(trade){
   json_log({msg: "connected to mtgox"})
   setTimeout(function(){mtsox.subscribe("lag")}, 1000) // trade.lag
   freshen_last_msg_time()
-  //deadman_interval_id = setInterval(deadman_switch, 5000)
-  email_alert("mtgox connected")
+  deadman_interval_id = setInterval(deadman_switch, 5000)
 })
 
 mtsox.on('disconnect', function(trade){
   json_log({msg: "disconnected to mtgox"})
-  //clearInterval(deadman_interval_id)
-  email_alert("mtgox disconnected")
+  clearInterval(deadman_interval_id)
 })
 
 mtsox.on('subscribe', function(sub){
@@ -296,7 +294,7 @@ function deadman_switch(){
   if(last_msg_delay > 30) {
     json_log({msg: "deadman: mtgox connection not responding!",
               last_msg_delay: last_msg_delay})
-    email_alert("deadman: mtgox not responding! "+last_msg_delay+"s")
+    //email_alert("deadman: mtgox not responding! "+last_msg_delay+"s")
   }
 }
 
