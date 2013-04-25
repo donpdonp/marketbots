@@ -93,7 +93,7 @@ mtsox.on('trade', function(trade){
     var trade_delay = (new Date() - (trade.date*1000))/1000
 
     var msg = ""
-    msg = msg + 'trade $'+trade.price.toFixed(2)+
+    msg = msg + '$'+trade.price.toFixed(2)+
                 ' x'+trade.amount.toFixed(1)
     if(swing_side == "sell"){
       msg = msg + ' highwater '+highwater.toFixed(2)+
@@ -118,11 +118,13 @@ mtsox.on('trade', function(trade){
       }
     }
     if(trade_delay > 3){
-      msg = msg + ' (delay '+trade_delay.toFixed(0)+'s)'
+      msg = msg + ' (delay '+trade_delay.toFixed(1)+'s)'
     }
-    msg = msg + ' '+JSON.stringify(inventory)
+    if(lag_secs > 5){
+      msg = msg + ' (lag '+lag_secs.toFixed(1)+'s)'
+    }
 
-    console.log(msg)
+    json_log({trade:msg, inventory: inventory})
 
     if(swing_side == "sell") {
       if(trade.price > highwater) {
