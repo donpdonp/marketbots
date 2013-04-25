@@ -200,18 +200,18 @@ function sell(price){
           set_lowwater(price)
           sell_price = price
         } else {
-          json_log({msg: "SELL ORDER blocked by swing side", swing_side: swing_side})
+          json_log({msg: "sell order blocked by swing side", swing_side: swing_side})
         }
       } else {
-        json_log({msg: "ADD ORDER blocked by low BTC inventory",
+        json_log({msg: "sell order blocked by low BTC inventory",
                   inventory: inventory})
       }
     } else {
-      json_log({msg: "ADD ORDER blocked by crazy price",
+      json_log({msg: "sell order blocked by crazy price",
                 highwater: highwater, price: price})
     }
   } else {
-    json_log({msg: "SELL aborted due to lag.", lag_confidence:lag_confidence,
+    json_log({msg: "sell aborted due to lag.", lag_confidence:lag_confidence,
                                                lag_secs:lag_secs,
                                                sell_price: sell_price})
   }
@@ -229,7 +229,7 @@ function buy(price){
                                  amount: btc,
                                  lag: lag_secs})
           add_order('bid', price, btc)
-          email_alert("stoploss BUY "+price.toFixed(2)+" "+btc.toFixed(5)+"btc")
+          email_alert("stoploss buy "+price.toFixed(2)+" "+btc.toFixed(5)+"btc")
           inventory.btc = btc*(1-(config.mtgox.fee_percentage/100))
           inventory.usd = 0
           save_inventory()
@@ -238,18 +238,18 @@ function buy(price){
           set_highwater(price)
           buy_price = price
         } else {
-          json_log({msg: "BUY ORDER blocked by swing side", swing_side: swing_side})
+          json_log({msg: "buy order blocked by swing side", swing_side: swing_side})
         }
       } else {
-        json_log({msg: "ADD ORDER blocked by low USD inventory",
+        json_log({msg: "buy order blocked by low USD inventory",
                   inventory: inventory})
       }
     } else {
-      json_log({msg: "ADD ORDER blocked by crazy price",
+      json_log({msg: "buy order blocked by crazy price",
                 lowwater: lowwater, price: price})
     }
   } else {
-    json_log({msg: "BUY aborted due to lag.", lag_confidence:lag_confidence,
+    json_log({msg: "buy aborted due to lag.", lag_confidence:lag_confidence,
                                                lag_secs:lag_secs,
                                                sell_price: sell_price})
   }
