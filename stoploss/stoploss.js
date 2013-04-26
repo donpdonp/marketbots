@@ -111,9 +111,12 @@ mtsox.on('trade', function(trade){
     msg = msg + '$'+trade.price.toFixed(2)+
                 ' x'+trade.amount.toFixed(1)
     if(swing_side == "sell"){
-      msg = msg + ' highwater '+highwater.toFixed(2)+
-                ' target '+target_highwater.toFixed(2)+
-                ' sell '+sell_price.toFixed(2)
+      msg = msg + ' highwater '+highwater.toFixed(2) + ' '
+      if(highwater > target_highwater) {
+        msg = msg + '+'
+      }
+      msg = msg + 'target '+target_highwater.toFixed(2) +
+                  ' sell '+sell_price.toFixed(2)
       if(buy_price > 0) {
         var buy_diff = trade.price-buy_price
         var diff_sign = ''
@@ -122,9 +125,12 @@ mtsox.on('trade', function(trade){
       }
     }
     if(swing_side == "buy"){
-      msg = msg + ' lowwater '+lowwater.toFixed(2)+
-                ' target '+target_lowwater.toFixed(2)+
-                ' buy '+buy_price.toFixed(2)
+      msg = msg + ' lowwater '+lowwater.toFixed(2)+' '
+      if(lowwater < target_lowwater) {
+        msg = msg + '+'
+      }
+      msg = msg +'target '+target_lowwater.toFixed(2) +
+                 ' buy '+buy_price.toFixed(2)
       if(sell_price > 0) {
         var sell_diff = sell_price-trade.price
         var diff_sign = ''
