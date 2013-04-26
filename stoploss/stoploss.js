@@ -208,7 +208,7 @@ function sell(price){
                                  amount: inventory.btc.amount,
                                  lag: lag_secs})
           add_order('ask', price, inventory.btc.amount)
-          email_alert("stoploss SELL "+price.toFixed(2)+" "+inventory.btc.amount+"btc")
+          email_alert("stoploss sell "+price.toFixed(2)+" "+inventory.btc.amount+"btc")
           inventory.btc.price = price
           inventory.usd.amount = inventory.btc.price*inventory.btc.amount*(1-(config.mtgox.fee_percentage/100))
           inventory.usd.price = null
