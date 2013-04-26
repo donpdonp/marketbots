@@ -320,6 +320,18 @@ function order_info(){
   })
 }
 
+function order_status(oid){
+  mtgox.query('/1/generic/order/result', function(error, result){
+    if(error){
+      json_log(error)
+    } else {
+      result.forEach(function(e){
+        json_log(e)
+      })
+    }
+  })
+}
+
 function json_log(o){
   var msg = JSON.stringify(o)+"\n"
   var display_msg = moment().format("ddd HH:MM:ss")+" "+msg
