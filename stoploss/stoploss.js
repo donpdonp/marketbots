@@ -145,7 +145,8 @@ mtsox.on('trade', function(trade){
       msg = msg + ' (lag '+lag_secs.toFixed(1)+'s)'
     }
 
-    json_log({trade:msg, btc: inventory.btc.amount, usd: inventory.usd.amount})
+    json_log({trade:msg, btc: parseFloat(inventory.btc.amount.toFixed(5)),
+              usd: parseFloat(inventory.usd.amount.toFixed(2))})
 
     if(swing_side == "sell") {
       if(trade.price > highwater) {
@@ -323,7 +324,7 @@ function order_info(){
 function order_status(oid){
   mtgox.query('/1/generic/order/result', function(error, result){
     if(error){
-      json_log(error)
+      //json_log(error)
     } else {
       result.forEach(function(e){
         json_log(e)
