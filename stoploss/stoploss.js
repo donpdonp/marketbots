@@ -1,7 +1,6 @@
 var fs = require('fs')
 var moment = require('moment')
 var nodemailer = require("nodemailer")
-var socketio = require('socket.io-client')
 var Mtgoxjs = require('mtgox')
 var mtgoxob = require('mtgox-orderbook')
 
@@ -55,34 +54,28 @@ if(config.quant.gap_percentage < config.mtgox.fee) {
 }
 
 order_info()
-/* CONNECT TO MTGOX */
-var sockio = socketio.connect(mtgoxob.socketio_url,{
-  'try multiple transports': false,
-  'connect timeout': 5000
-})
-var mtsox = mtgoxob.attach(sockio, 'usd')
 
-mtsox.on('connect', function(trade){
+mtgoxob.on('connect', function(trade){
   json_log({msg: "connected to mtgox"})
-  setTimeout(function(){mtsox.subscribe("lag")}, 1000) // trade.lag
+  setTimeout(function(){mtgoxob.subscribe("lag")}, 1000) // trade.lag
   freshen_last_msg_time()
   deadman_interval_id = setInterval(deadman_switch, 5000)
 })
 
-mtsox.on('disconnect', function(trade){
+mtgoxob.on('disconnect', function(trade){
   json_log({msg: "disconnected to mtgox"})
   clearInterval(deadman_interval_id)
 })
 
-mtsox.on('subscribe', function(sub){
+mtgoxob.on('subscribe', function(sub){
   //console.log('subscribed '+sub)
 })
 
-mtsox.on('message', function(sub){
+mtgoxob.on('message', function(sub){
   freshen_last_msg_time()
 })
 
-mtsox.on('lag', function(lag){
+mtgoxob.on('lag', function(lag){
   if (lag.qid) {
     var lag_age_secs = lag.age/1000000
     var delay_secs = (new Date() - new Date(lag.stamp/1000))/1000
@@ -103,7 +96,7 @@ mtsox.on('lag', function(lag){
   }
 })
 
-mtsox.on('trade', function(trade){
+mtgoxob.on('trade', function(trade){
   if(trade.price_currency == 'USD') {
     var trade_delay = (new Date() - (trade.date*1000))/1000
 
@@ -378,3 +371,6 @@ function email_alert(msg){
     smtpTransport.close()
   });
 }
+
+/* CONNECT TO MTGOX */
+mtgoxob.connect('usd')
