@@ -3,8 +3,8 @@ doFile("lib/json.io")
 doFile("lib/Iodis.io")
 
 # local libs
-doFile("src/state.io")
-doFile("src/markets.io")
+doFile("io/state.io")
+doFile("io/markets.io")
 
 ("WarpBubble starting " .. Date asString("%H:%M")) println
 
