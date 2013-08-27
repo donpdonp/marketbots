@@ -1,7 +1,15 @@
 State := Object clone do (
+  rstate := nil
+  stateKey := "wbubble:state"
+
+  setup := method(
+    new := self clone
+    new load
+    new
+  )
+
   load := method (
-    stateKey := "wbubble:state"
-    rstate := redis get(stateKey)
+    rstate = redis get(stateKey)
     if(rstate == nil,
       rstate = "{}"
       redis set(stateKey, rstate))

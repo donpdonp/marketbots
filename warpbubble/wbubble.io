@@ -12,6 +12,6 @@ doFile("markets.io")
 redis := Iodis clone connect
 
 # global state
-state := State clone
+state := State setup
 
-state load println
+state rstate println
