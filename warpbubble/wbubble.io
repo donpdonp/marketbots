@@ -15,8 +15,10 @@ redis := Iodis clone connect
 state := State setup
 
 state rstate println
+mtgox := Markets clone setMarket("mtgox")
+btce := Markets clone setMarket("btce")
 loop (
-  Markets asyncSend(poll("mtgox"))
-  Markets asyncSend(poll("btce"))
+  btce asyncSend(poll)
+  mtgox asyncSend(poll)
   wait(30)
 )
