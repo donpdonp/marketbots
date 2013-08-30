@@ -1,0 +1,6 @@
+$LOAD_PATH << File.dirname(__FILE__)+"/lib"
+
+task :default do
+  require 'warpy'
+  app = Warpy.new
+end
