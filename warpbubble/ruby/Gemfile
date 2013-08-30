@@ -1,4 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'celluloid'
+#gem 'celluloid'
+#gem 'heisencoin', :git => "git://github.com/cointhink/heisencoin.git"
 
+gem 'httparty'

@@ -1,6 +1,7 @@
 $LOAD_PATH << File.dirname(__FILE__)+"/lib"
+require 'bundler/setup'
 
 task :default do
-  require 'warpy'
-  app = Warpy.new
+  require 'warp_bubble'
+  app = WarpBubble.new
 end
