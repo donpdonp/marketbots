@@ -24,4 +24,3 @@ end
 puts "WarpBubble v#{WarpBubble.version}"
 
 wb = WarpBubble.new
-puts opts[:help].inspect
