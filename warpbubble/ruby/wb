@@ -17,6 +17,11 @@ def read_config(filename)
 end
 
 CONFIG = JSON.parse(read_config('config.json'))
-opts = Slop.parse
+opts = Slop.parse do
+  banner "WarpBubble Help"
+end
 
-WarpBubble.new
+puts "WarpBubble v#{WarpBubble.version}"
+
+wb = WarpBubble.new
+puts opts[:help].inspect
