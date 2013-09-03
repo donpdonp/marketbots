@@ -4,3 +4,5 @@ source 'https://rubygems.org'
 #gem 'heisencoin', :git => "git://github.com/cointhink/heisencoin.git"
 
 gem 'httparty'
+gem 'nn-core' #, :git => "git://github.com/chuckremes/nn-core.git"
+
