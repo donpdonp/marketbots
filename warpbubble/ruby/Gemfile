@@ -1,8 +1,5 @@
 source 'https://rubygems.org'
 
-#gem 'celluloid'
-#gem 'heisencoin', :git => "git://github.com/cointhink/heisencoin.git"
-
+gem 'slop'
 gem 'httparty'
-gem 'nn-core' #, :git => "git://github.com/chuckremes/nn-core.git"
-
+gem 'redis'

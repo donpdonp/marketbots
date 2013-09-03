@@ -1,5 +1,5 @@
 require 'httparty'
-require 'nn-core'
+require 'redis'
 
 class WarpBubble
 

@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH << "./lib"
+
+require 'bundler/setup'
+
+require 'json'
+require 'slop'
+
+require 'warp_bubble'
+
+def read_config(filename)
+  unless File.exist?(filename)
+    File.open(filename,"w"){|f| f.puts({}.to_json)}
+  end
+  File.read(filename)
+end
+
+CONFIG = JSON.parse(read_config('config.json'))
+opts = Slop.parse
+
+WarpBubble.new
