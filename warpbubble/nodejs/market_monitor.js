@@ -24,8 +24,9 @@ redis_sub.on('message', function(channel, data){
   }
 })
 
-redis_sub.subscribe(wb_channel)
-//redis.publish(wb_channel, '{"action":"setup"}')
+redis_sub.subscribe(wb_channel, function(channel, count){
+  redis.publish(wb_channel, '{"action":"setup"}')
+})
 
 var exchange_roster = {}
 
@@ -69,9 +70,25 @@ function poll(exchange){
 
 var poll_levers = {
   btce: function(){
-    console.log('i am '+this.name)
+    var url = "https://btc-e.com/api/2/ltc_btc/depth"
+    var data = json_get(url)
   },
-  cryptse: function(){
-    console.log('i am '+this.name)
+  cryptsy: function(){
+    var url = "http://pubapi.cryptsy.com/api.php?method=orderdata"
+    var data = json_get(url)
+
   }
+}
+
+function json_get(url){
+  request(url, function (error, response, body) {
+    if(error){
+      console.log('error')
+      console.dir(error)
+    } else {
+      console.log('body '+typeof(body))
+      console.log(body.slice(0,150))
+    }
+    return body
+  })
 }
