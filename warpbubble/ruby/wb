@@ -24,3 +24,5 @@ end
 puts "WarpBubble v#{WarpBubble.version}"
 
 wb = WarpBubble.new
+
+WarpBubble::TickTock.new
