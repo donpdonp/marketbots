@@ -1,6 +1,8 @@
 var nanomsg = require('nanomsg')
-var redis_sub = require('redis').createClient(),
-    redis_pub = require('redis').createClient()
+var redis = require('redis').createClient(),
+    redis_sub = require('redis').createClient()
+
+var db = require('./db.js')
 
 var wb_channel = 'warp_bubble'
 
@@ -14,3 +16,4 @@ redis_sub.on('message', function(channel, data){
 })
 
 redis_sub.subscribe(wb_channel)
+db.get()
