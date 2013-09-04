@@ -1,6 +1,7 @@
 var nanomsg = require('nanomsg')
 var redis = require('redis').createClient(),
     redis_sub = require('redis').createClient()
+var request = require('request')
 
 var db = require('./db.js')
 db.setup(redis)
@@ -39,10 +40,11 @@ function setup(packet){
 }
 
 function time(packet){
-  console.log("time! "+JSON.stringify(packet))
+  //console.log("time! "+JSON.stringify(packet))
   Object.keys(exchange_roster).forEach(function(exchange_name){
     var exchange = exchange_roster[exchange_name]
-    older_than(exchange, 60, function(){
+    older_than(exchange, 60, function(age){
+      console.log(exchange_name+' data is old '+age)
       poll(exchange)
     })
   })
@@ -57,10 +59,19 @@ function older_than(exchange, max_age, cb){
     age = 1000
   }
   if(age > max_age) {
-    cb()
+    cb(age)
   }
 }
 
 function poll(exchange){
-  console.log("polling "+exchange["name"])
+  poll_levers[exchange["name"]].apply(exchange)
+}
+
+var poll_levers = {
+  btce: function(){
+    console.log('i am '+this.name)
+  },
+  cryptse: function(){
+    console.log('i am '+this.name)
+  }
 }
