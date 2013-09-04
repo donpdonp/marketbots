@@ -5,6 +5,13 @@ class WarpBubble
   @@version = "0.01"
   def self.version; @@version; end
 
+  @@services = []
+  def self.services; @@services; end
+
+  def self.add_service(descriptor)
+    @@services.push(descriptor)
+  end
+
   class Base
     @@channel_name = 'warp_bubble'
 
@@ -17,3 +24,6 @@ end
 
 Dir['lib/warp_bubble/*'].each{|filename| require filename.split('/')[-2,2].join('/')}
 
+puts "WarpBubble v#{WarpBubble.version}"
+puts "#{WarpBubble.services.map{|s| s["name"]}.inspect}"
+WarpBubble.services.map{|t| t["thread"].join}
