@@ -50,12 +50,16 @@ function time(packet){
     var exchange = exchange_roster[exchange_name]
     older_than(exchange, 60, function(age){
       poll(exchange, function(){
-        var db_key = 'warpbubble:'+exchange_name
-        console.log(exchange.name+" "+exchange.time+
-                    " ask count "+exchange.depth.asks.length+
-                    " bid count "+exchange.depth.bids.length)
-        db.set(db_key, JSON.stringify(exchange))
-        publish({"action":"exchange ready", "payload": {"name":exchange.name}})
+        if(exchange.depth){
+          var db_key = 'warpbubble:'+exchange_name
+          console.log(exchange.name+" "+exchange.time+
+                      " ask count "+exchange.depth.asks.length+
+                      " bid count "+exchange.depth.bids.length)
+          db.set(db_key, JSON.stringify(exchange))
+          publish({"action":"exchange ready", "payload": {"name":exchange.name}})
+        } else {
+          console.log("!! "+exchange.name+" update failed")
+        }
       })
     })
   })
@@ -78,7 +82,9 @@ function older_than(exchange, max_age, cb){
 function poll(exchange, cb){
   poll_levers[exchange.name].apply(exchange, [function(depth){
     exchange.depth = depth
-    exchange.time = new Date()
+    if(depth){
+      exchange.time = new Date()
+    }
     cb()
   }])
 }
@@ -112,7 +118,11 @@ function json_get(url, cb){
       console.log('!! Error')
       console.dir(error)
     } else {
-      data = JSON.parse(body)
+      try {
+        data = JSON.parse(body)
+      } catch (e) {
+        console.log("!! JSON error "+body.slice(0,80))
+      }
     }
     cb(data)
   })
