@@ -65,30 +65,38 @@ function older_than(exchange, max_age, cb){
 }
 
 function poll(exchange){
-  poll_levers[exchange["name"]].apply(exchange)
+  poll_levers[exchange.name].apply(exchange, [function(depth){
+    console.log("ask count "+depth.asks.length+" bid count "+depth.bids.length)
+    exchange.time = new Date()
+  }])
 }
 
 var poll_levers = {
-  btce: function(){
+  btce: function(cb){
     var url = "https://btc-e.com/api/2/ltc_btc/depth"
-    var data = json_get(url)
-  },
-  cryptsy: function(){
-    var url = "http://pubapi.cryptsy.com/api.php?method=orderdata"
-    var data = json_get(url)
+    var depth = json_get(url, cb)
 
+  },
+  cryptsy: function(cb){
+    var url = "http://pubapi.cryptsy.com/api.php?method=orderdata"
+    var data = json_get(url, function(depth){
+      //console.dir(depth.return.LTC)
+      depth = {"asks":depth.return.LTC.sellorders,
+               "bids":depth.return.LTC.buyorders}
+      cb(depth)
+    })
   }
 }
 
-function json_get(url){
+function json_get(url, cb){
   request(url, function (error, response, body) {
+    var data;
     if(error){
-      console.log('error')
+      console.log('!! Error')
       console.dir(error)
     } else {
-      console.log('body '+typeof(body))
-      console.log(body.slice(0,150))
+      data = JSON.parse(body)
     }
-    return body
+    cb(data)
   })
 }
