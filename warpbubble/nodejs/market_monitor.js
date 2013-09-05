@@ -25,8 +25,12 @@ redis_sub.on('message', function(channel, data){
 })
 
 redis_sub.subscribe(wb_channel, function(channel, count){
-  redis.publish(wb_channel, '{"action":"setup"}')
+  publish({"action":"setup"})
 })
+
+function publish(msg){
+  redis.publish(wb_channel, JSON.stringify(msg))
+}
 
 var exchange_roster = {}
 
@@ -45,7 +49,14 @@ function time(packet){
   Object.keys(exchange_roster).forEach(function(exchange_name){
     var exchange = exchange_roster[exchange_name]
     older_than(exchange, 60, function(age){
-      poll(exchange)
+      poll(exchange, function(){
+        var db_key = 'warpbubble:'+exchange_name
+        console.log(exchange.name+" "+exchange.time+
+                    " ask count "+exchange.depth.asks.length+
+                    " bid count "+exchange.depth.bids.length)
+        db.set(db_key, JSON.stringify(exchange))
+        publish({"action":"exchange ready", "payload": {"name":exchange.name}})
+      })
     })
   })
 }
@@ -58,16 +69,17 @@ function older_than(exchange, max_age, cb){
   } else {
     age = 300
   }
-  console.log(exchange.name+" "+(max_age - age)+" secs to go")
+  console.log(exchange.name+" "+(max_age - age).toFixed(1)+" secs to go")
   if(age > max_age) {
     cb(age)
   }
 }
 
-function poll(exchange){
+function poll(exchange, cb){
   poll_levers[exchange.name].apply(exchange, [function(depth){
-    console.log(exchange.name+" ask count "+depth.asks.length+" bid count "+depth.bids.length)
+    exchange.depth = depth
     exchange.time = new Date()
+    cb()
   }])
 }
 
