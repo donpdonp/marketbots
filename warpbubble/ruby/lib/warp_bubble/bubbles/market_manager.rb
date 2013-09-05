@@ -21,7 +21,7 @@ class WarpBubble
         get('warpbubble:'+exchange)
       end
       now = Time.now
-      times = runs.map{|r| now - Time.parse(t["time"])}
+      times = runs.map{|r| now - Time.parse(r["time"])}
       log(times.inspect)
       recent = times.all? {|t| t < 5}
       if recent
