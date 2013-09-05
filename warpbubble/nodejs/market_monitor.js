@@ -67,6 +67,8 @@ function older_than(exchange, max_age, cb){
 function poll(exchange){
   poll_levers[exchange.name].apply(exchange, [function(depth){
     console.log("ask count "+depth.asks.length+" bid count "+depth.bids.length)
+    console.dir(depth.asks[0])
+    console.dir(depth.bids[0])
     exchange.time = new Date()
   }])
 }
@@ -80,9 +82,14 @@ var poll_levers = {
   cryptsy: function(cb){
     var url = "http://pubapi.cryptsy.com/api.php?method=orderdata"
     var data = json_get(url, function(depth){
-      //console.dir(depth.return.LTC)
       depth = {"asks":depth.return.LTC.sellorders,
                "bids":depth.return.LTC.buyorders}
+      depth.asks = depth.asks.map(function(offer){
+        return [parseFloat(offer.price), parseFloat(offer.quantity)]
+      })
+      depth.bids = depth.bids.map(function(offer){
+        return [parseFloat(offer.price), parseFloat(offer.quantity)]
+      })
       cb(depth)
     })
   }
