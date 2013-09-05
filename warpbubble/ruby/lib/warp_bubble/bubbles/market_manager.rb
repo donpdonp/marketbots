@@ -7,9 +7,17 @@ class WarpBubble
 
         on.message do |channel, json|
           message = JSON.parse(json)
-          puts "MarketManager: "+message.inspect
+          puts "MarketManager: "+message["action"]
+          case message["action"]
+          when "exchange ready"
+            exchange_ready
+          end
         end
       end
+    end
+
+    def exchange_ready
+      #check for all the exchanges being ready
     end
   end
 end
