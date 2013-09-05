@@ -17,10 +17,16 @@ class WarpBubble
 
     def exchange_ready(message)
       #check for all the exchanges being ready
-      times = get('exchange_list').map do |exchange|
+      runs = get('exchange_list').map do |exchange|
         get('warpbubble:'+exchange)
       end
+      now = Time.now
+      times = runs.map{|r| now - Time.parse(t["time"])}
       log(times.inspect)
+      recent = times.all? {|t| t < 5}
+      if recent
+        log('depth recent. go!')
+      end
     end
   end
 end
