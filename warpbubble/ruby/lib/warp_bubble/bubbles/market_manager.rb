@@ -7,21 +7,24 @@ class WarpBubble
 
         on.message do |channel, json|
           message = JSON.parse(json)
-          puts "MarketManager: "+message["action"]
           case message["action"]
           when "exchange ready"
-            exchange_ready
+            exchange_ready(message)
           end
         end
       end
     end
 
-    def exchange_ready
+    def exchange_ready(message)
       #check for all the exchanges being ready
+      times = get('exchange_list').map do |exchange|
+        get('warpbubble:'+exchange)
+      end
+      log(times.inspect)
     end
   end
 end
 
-WarpBubble.add_service({"name" => "MaretManager", "thread" => Thread.new do
+WarpBubble.add_service({"name" => "MarketManager", "thread" => Thread.new do
   WarpBubble::MarketManager.new.go
 end})

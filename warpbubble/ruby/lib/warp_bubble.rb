@@ -40,7 +40,9 @@ class WarpBubble
     puts "Issuing setup"
     publish({"action" => "warp_bubble setup"})
 
-    WarpBubble.services.map{|t| t["thread"].join}
+    until WarpBubble.services.any? {|svc| svc["thread"].status.nil?}
+      WarpBubble.services.each{|svc| svc["thread"].join(1)}
+    end
   end
 
   def publish(msg)
