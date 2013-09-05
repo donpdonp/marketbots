@@ -22,7 +22,4 @@ opts = Slop.parse do
 end
 
 puts "WarpBubble v#{WarpBubble.version}"
-
-wb = WarpBubble.new
-
-WarpBubble::TickTock.new
+WarpBubble.new.mainloop

@@ -15,7 +15,7 @@ redis_sub.on("subscribe", function (channel, count) {
 redis_sub.on('message', function(channel, data){
   var packet = JSON.parse(data)
   switch(packet.action){
-    case 'setup':
+    case 'market_monitor setup':
       setup(packet)
       break;
     case 'time':
@@ -25,7 +25,7 @@ redis_sub.on('message', function(channel, data){
 })
 
 redis_sub.subscribe(wb_channel, function(channel, count){
-  publish({"action":"setup"})
+  publish({"action":"market_monitor setup"})
 })
 
 function publish(msg){
