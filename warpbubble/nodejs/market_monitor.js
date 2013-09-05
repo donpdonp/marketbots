@@ -45,7 +45,6 @@ function time(packet){
   Object.keys(exchange_roster).forEach(function(exchange_name){
     var exchange = exchange_roster[exchange_name]
     older_than(exchange, 60, function(age){
-      console.log(exchange_name+' data is old '+age)
       poll(exchange)
     })
   })
@@ -53,22 +52,20 @@ function time(packet){
 
 
 function older_than(exchange, max_age, cb){
-  var age;
+  var age_ms;
   if(exchange.time){
-    age =  exchange.time - (new Date())
+    age_ms =  (new Date()) - exchange.time
   } else {
-    age = 1000
+    age_ms = 300 * 1000
   }
-  if(age > max_age) {
-    cb(age)
+  if(age_ms > max_age*1000) {
+    cb(age_ms)
   }
 }
 
 function poll(exchange){
   poll_levers[exchange.name].apply(exchange, [function(depth){
     console.log("ask count "+depth.asks.length+" bid count "+depth.bids.length)
-    console.dir(depth.asks[0])
-    console.dir(depth.bids[0])
     exchange.time = new Date()
   }])
 }
