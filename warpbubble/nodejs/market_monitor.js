@@ -55,7 +55,7 @@ function time(packet){
           console.log(exchange.name+" "+exchange.time+
                       " ask count "+exchange.depth.asks.length+
                       " bid count "+exchange.depth.bids.length)
-          db.set(db_key, JSON.stringify(exchange))
+          db.set(db_key, exchange)
           publish({"action":"exchange ready", "payload": {"name":exchange.name}})
         } else {
           console.log("!! "+exchange.name+" update failed")
