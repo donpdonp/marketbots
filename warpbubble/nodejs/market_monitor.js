@@ -52,20 +52,21 @@ function time(packet){
 
 
 function older_than(exchange, max_age, cb){
-  var age_ms;
+  var age;
   if(exchange.time){
-    age_ms =  (new Date()) - exchange.time
+    age =  ((new Date()) - exchange.time)/1000
   } else {
-    age_ms = 300 * 1000
+    age = 300
   }
-  if(age_ms > max_age*1000) {
-    cb(age_ms)
+  console.log(exchange.name+" "+(max_age - age)+" secs to go")
+  if(age > max_age) {
+    cb(age)
   }
 }
 
 function poll(exchange){
   poll_levers[exchange.name].apply(exchange, [function(depth){
-    console.log("ask count "+depth.asks.length+" bid count "+depth.bids.length)
+    console.log(exchange.name+" ask count "+depth.asks.length+" bid count "+depth.bids.length)
     exchange.time = new Date()
   }])
 }
