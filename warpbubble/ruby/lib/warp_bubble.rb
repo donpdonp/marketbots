@@ -30,7 +30,7 @@ class WarpBubble
 
       on.message do |channel, json|
         message = JSON.parse(json)
-        puts message.inspect
+        puts "WarpBubble: "+message.inspect
       end
     end
   end
