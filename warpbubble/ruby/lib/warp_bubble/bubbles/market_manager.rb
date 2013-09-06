@@ -1,3 +1,5 @@
+require 'heisencoin/arbitrage'
+
 class WarpBubble
   class MarketManager < Base
     def go
@@ -26,6 +28,9 @@ class WarpBubble
       recent = times.all? {|t| t < 5}
       if recent
         log('depth recent. go!')
+        arby = Heisencoin::Arbitrage.new
+        arby.add_exchanges(runs)
+        arby.plan
       end
     end
   end
