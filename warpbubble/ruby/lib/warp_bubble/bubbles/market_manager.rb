@@ -25,7 +25,7 @@ class WarpBubble
       now = Time.now
       times = runs.map{|r| now - Time.parse(r["time"])}
       log(times.inspect)
-      recent = times.all? {|t| t < 5}
+      recent = times.all? {|t| t < 30}
       if recent
         log('depth recent. go!')
         arby = Heisencoin::Arbitrage.new
