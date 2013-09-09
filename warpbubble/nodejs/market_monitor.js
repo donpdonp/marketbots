@@ -38,7 +38,8 @@ function setup(packet){
   console.log('** Setup')
   db.get('exchange_list', function(value){
     value.forEach(function(exchange_name){
-      exchange_roster[exchange_name] = {name:exchange_name}
+      exchange_roster[exchange_name] = {name:exchange_name,
+                                        time: new Date("1970")}
     })
     console.dir(exchange_roster)
   })
@@ -49,18 +50,20 @@ function time(packet){
   Object.keys(exchange_roster).forEach(function(exchange_name){
     var exchange = exchange_roster[exchange_name]
     older_than(exchange, 60, function(age){
-      poll(exchange, function(){
-        if(exchange.depth){
-          var db_key = 'warpbubble:'+exchange_name
-          console.log(exchange.name+" "+exchange.time+
-                      " ask count "+exchange.depth.asks.length+
-                      " bid count "+exchange.depth.bids.length)
-          db.set(db_key, exchange)
-          publish({"action":"exchange ready", "payload": {"name":exchange.name}})
-        } else {
-          console.log("!! "+exchange.name+" update failed")
-        }
-      })
+      if(age){
+        poll(exchange, function(){
+          if(exchange.depth){
+            var db_key = 'warpbubble:'+exchange_name
+            console.log(exchange.name+" "+exchange.time+
+                        " ask count "+exchange.depth.asks.length+
+                        " bid count "+exchange.depth.bids.length)
+            db.set(db_key, exchange)
+            publish({"action":"exchange ready", "payload": {"name":exchange.name}})
+          } else {
+            console.log("!! "+exchange.name+" update failed")
+          }
+        })
+      }
     })
   })
 }
@@ -68,14 +71,18 @@ function time(packet){
 
 function older_than(exchange, max_age, cb){
   var age;
-  if(exchange.time){
+  if(!exchange.in_progress){
     age =  ((new Date()) - exchange.time)/1000
+    if(age > max_age) {
+      console.log(exchange.name+" firing!")
+      exchange.time = exchange.in_progress = new Date()
+      cb(age)
+    } else {
+      console.log(exchange.name+" waiting. "+(max_age - age).toFixed(1)+" secs to go")
+    }
   } else {
-    age = 300
-  }
-  console.log(exchange.name+" "+(max_age - age).toFixed(1)+" secs to go")
-  if(age > max_age) {
-    cb(age)
+    console.log(exchange.name+" blocked. in-progress.")
+    cb()
   }
 }
 
@@ -83,7 +90,7 @@ function poll(exchange, cb){
   poll_levers[exchange.name].apply(exchange, [function(depth){
     exchange.depth = depth
     if(depth){
-      exchange.time = new Date()
+      exchange.in_progress = null
     }
     cb()
   }])
