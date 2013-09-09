@@ -89,9 +89,7 @@ function older_than(exchange, max_age, cb){
 function poll(exchange, cb){
   poll_levers[exchange.name].apply(exchange, [function(depth){
     exchange.depth = depth
-    if(depth){
-      exchange.in_progress = null
-    }
+    exchange.in_progress = null
     cb()
   }])
 }
@@ -105,21 +103,24 @@ var poll_levers = {
   cryptsy: function(cb){
     var url = "http://pubapi.cryptsy.com/api.php?method=orderdata"
     var data = json_get(url, function(depth){
-      depth = {"asks":depth.return.LTC.sellorders,
-               "bids":depth.return.LTC.buyorders}
-      depth.asks = depth.asks.map(function(offer){
-        return [parseFloat(offer.price), parseFloat(offer.quantity)]
-      })
-      depth.bids = depth.bids.map(function(offer){
-        return [parseFloat(offer.price), parseFloat(offer.quantity)]
-      })
-      cb(depth)
+      var standard_depth
+      if(depth){
+        standard_depth = {"asks":depth.return.LTC.sellorders,
+                          "bids":depth.return.LTC.buyorders}
+        standard_depth.asks = standard_depth.asks.map(function(offer){
+          return [parseFloat(offer.price), parseFloat(offer.quantity)]
+        })
+        standard_depth.bids = standard_depth.bids.map(function(offer){
+          return [parseFloat(offer.price), parseFloat(offer.quantity)]
+        })
+      }
+      cb(standard_depth)
     })
   }
 }
 
 function json_get(url, cb){
-  request(url, function (error, response, body) {
+  request({url:url, timeout:5000}, function (error, response, body) {
     var data;
     if(error){
       console.log('!! Error')
@@ -128,7 +129,7 @@ function json_get(url, cb){
       try {
         data = JSON.parse(body)
       } catch (e) {
-        console.log("!! JSON error "+body.slice(0,80))
+        console.log("!! JSON error "+url+" "+body.slice(0,80))
       }
     }
     cb(data)
