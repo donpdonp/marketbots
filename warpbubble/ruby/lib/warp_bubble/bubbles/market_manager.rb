@@ -1,4 +1,4 @@
-require 'heisencoin/arbitrage'
+require 'heisencoin'
 
 class WarpBubble
   class MarketManager < Base
@@ -20,14 +20,13 @@ class WarpBubble
     def exchange_ready(message)
       #check for all the exchanges being ready
       runs = get('exchange_list').map do |exchange|
-        get('warpbubble:'+exchange)
+        Heisencoin::Exchange.new(get('warpbubble:'+exchange))
       end
       now = Time.now
-      times = runs.map{|r| now - Time.parse(r["time"])}
+      times = runs.map{|r| now - r.time}
       log(times.inspect)
-      recent = times.all? {|t| t < 30}
+      recent = times.all? {|t| t < 3000}
       if recent
-        log('depth recent. go!')
         arby = Heisencoin::Arbitrage.new
         arby.add_exchanges(runs)
         arby.plan
