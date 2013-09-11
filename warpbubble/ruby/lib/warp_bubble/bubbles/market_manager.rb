@@ -24,12 +24,15 @@ class WarpBubble
       end
       now = Time.now
       times = runs.map{|r| now - r.time}
-      log(times.inspect)
+      log("exchange timing #{times.inspect}")
       recent = times.all? {|t| t < 3000}
       if recent
         arby = Heisencoin::Arbitrage.new
         arby.add_exchanges(runs)
-        arby.plan
+        puts "!Plan for #{arby.exchanges.size} exchanges of #{arby.asks.offers.size} asks and #{arby.bids.offers.size} bids"
+        puts "best ask #{arby.asks.offers.first} best bid #{arby.bids.offers.first}"
+        puts "#{arby.profitable_asks.size} asks are under a bid"
+        puts arby.plan.inspect
       end
     end
   end
