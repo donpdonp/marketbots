@@ -2,6 +2,16 @@ require 'heisencoin'
 
 class WarpBubble
   class MarketManager < Base
+    def initialize
+      super
+      @arby = Heisencoin::Arbitrage.new
+      exchanges = get('exchange_list').map do |exchange|
+        Heisencoin::Exchange.new(get('warpbubble:'+exchange))
+      end
+      log("setting up exchanges #{exchanges}")
+      @arby.add_exchanges(exchanges)
+    end
+
     def go
       @chan_sub.subscribe(@@channel_name) do |on|
         on.subscribe do |channel, count|
@@ -11,30 +21,31 @@ class WarpBubble
           message = JSON.parse(json)
           case message["action"]
           when "exchange ready"
-            exchange_ready(message)
+            exchange_ready(message["payload"])
           end
         end
       end
     end
 
     def exchange_ready(message)
-      #check for all the exchanges being ready
-      runs = get('exchange_list').map do |exchange|
-        Heisencoin::Exchange.new(get('warpbubble:'+exchange))
-      end
+      exchange = @arby.exchange(message['name'])
+      puts "!! exchange #{message['name']} not found " unless exchange
       now = Time.now
-      times = runs.map{|r| now - r.time}
-      log("exchange timing #{times.inspect}")
-      recent = times.all? {|t| t < 30}
+      exchange.time = now
+      @arby.add_depth(exchange, message['depth'])
+      times = @arby.exchanges.map{|r| r.time ? (now - r.time) : nil }
+      log("exchange timings #{times.inspect}")
+      recent = times.all? {|t| t && t < 30}
       if recent
-        arby = Heisencoin::Arbitrage.new
-        arby.add_exchanges(runs)
-        puts "!Plan for #{arby.exchanges.size} exchanges of #{arby.asks.offers.size} asks and #{arby.bids.offers.size} bids"
-        puts "best ask #{arby.asks.offers.first} best bid #{arby.bids.offers.first}"
-        good_asks = arby.profitable_asks
-        puts "#{good_asks.size} asks are under a bid"
+        puts "!Plan for #{@arby.exchanges.size} exchanges of #{@arby.asks.offers.size} asks and #{@arby.bids.offers.size} bids"
+        good_asks = @arby.profitable_asks
         if good_asks.size > 0
-          puts arby.plan.inspect
+          plan = @arby.plan
+          puts plan.inspect
+          total = plan.reduce(0){|sum,p|sum+p[4]}
+          puts "#{plan[0][0].name} #{"%0.3f"%total} coins -> #{plan[0][2].name}"
+        else
+          puts "no strategy available"
         end
       end
     end

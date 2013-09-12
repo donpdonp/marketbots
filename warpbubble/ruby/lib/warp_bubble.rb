@@ -30,14 +30,14 @@ class WarpBubble
 
       on.message do |channel, json|
         message = JSON.parse(json)
-        puts "WarpBubble: "+message.inspect
+        #puts "WarpBubble: "+message.inspect
       end
     end
   end
 
   def mainloop
-    puts "Services: #{WarpBubble.services.map{|s| s["name"]}.inspect}"
-    puts "Issuing setup"
+    puts "WarpBubble: Starting services: #{WarpBubble.services.map{|s| s["name"]}.inspect}"
+    puts "WarpBubble: Issuing setup"
     publish({"action" => "warp_bubble setup"})
 
     until WarpBubble.services.any? {|svc| svc["thread"].status.nil?}

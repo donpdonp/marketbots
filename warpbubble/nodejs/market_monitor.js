@@ -51,14 +51,15 @@ function time(packet){
     var exchange = exchange_roster[exchange_name]
     older_than(exchange, 60, function(age){
       if(age){
-        poll(exchange, function(){
-          if(exchange.depth){
+        poll(exchange, function(depth){
+          if(depth){
             var db_key = 'warpbubble:'+exchange_name
             console.log(exchange.name+" "+exchange.time+
-                        " ask count "+exchange.depth.asks.length+
-                        " bid count "+exchange.depth.bids.length)
-            db.set(db_key, exchange)
-            publish({"action":"exchange ready", "payload": {"name":exchange.name}})
+                        " ask count "+depth.asks.length+
+                        " bid count "+depth.bids.length)
+            publish({"action":"exchange ready", "payload": {"name":exchange.name,
+                                                            "depth":depth,
+                                                            "at":exchange.time}})
           } else {
             console.log("!! "+exchange.name+" update failed")
           }
@@ -88,9 +89,8 @@ function older_than(exchange, max_age, cb){
 
 function poll(exchange, cb){
   poll_levers[exchange.name].apply(exchange, [function(depth){
-    exchange.depth = depth
     exchange.in_progress = null
-    cb()
+    cb(depth)
   }])
 }
 

@@ -1,6 +1,6 @@
 GIT
   remote: /home/donp/code/cointhink/heisencoin
-  revision: 6ddb73c6a436648c3c32c345209bf6751066a30c
+  revision: 1bef6b893c6c74de536c60c57c55278295f8e4e1
   specs:
     heisencoin (0.0.1)
 
