@@ -37,15 +37,15 @@ class WarpBubble
       log("exchange timings #{times.inspect}")
       recent = times.all? {|t| t && t < 30}
       if recent
-        puts "!Plan for #{@arby.exchanges.size} exchanges of #{@arby.asks.offers.size} asks and #{@arby.bids.offers.size} bids"
+        log("!Plan for #{@arby.exchanges.map(&:name)}. #{@arby.asks.offers.size} asks and #{@arby.bids.offers.size} bids")
         good_asks = @arby.profitable_asks
         if good_asks.size > 0
           plan = @arby.plan
-          puts "plan: #{plan}"
+          log("plan: #{plan}")
           total = plan.reduce(0){|sum,p|sum+p[4]}
-          puts "#{plan[0][0].name} #{"%0.3f"%total} coins -> #{plan[0][2].name}"
+          log("#{plan[0][0].name} #{"%0.3f"%total} coins -> #{plan[0][2].name}")
         else
-          puts "Spread is #{"%0.5f" % @arby.spread}. no strategy available."
+          log("Spread is #{"%0.5f" % @arby.spread}. #{@arby.asks.offers.first.exchange.name} wins. no strategy available.")
         end
       end
     end
