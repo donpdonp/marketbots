@@ -41,11 +41,11 @@ class WarpBubble
         good_asks = @arby.profitable_asks
         if good_asks.size > 0
           plan = @arby.plan
-          puts plan.inspect
+          puts "plan: #{plan}"
           total = plan.reduce(0){|sum,p|sum+p[4]}
           puts "#{plan[0][0].name} #{"%0.3f"%total} coins -> #{plan[0][2].name}"
         else
-          puts "no strategy available"
+          puts "Spread is #{"%0.5f" % @arby.spread}. no strategy available."
         end
       end
     end
