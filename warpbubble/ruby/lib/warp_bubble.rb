@@ -50,4 +50,5 @@ class WarpBubble
   end
 end
 
-Dir['lib/warp_bubble/bubbles/*'].each{|filename| require filename.split('/')[-3,3].join('/')}
+Dir['lib/warp_bubble/bubbles/**/*rb'].map{|filename| filename.split('/').drop(1).join('/')}.each{|f| require f}
+
