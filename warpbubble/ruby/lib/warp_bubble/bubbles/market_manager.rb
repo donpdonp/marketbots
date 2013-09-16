@@ -56,7 +56,10 @@ class WarpBubble
 
     def plan_ready(payload)
       log('plan ready '+payload.inspect)
-      publish({'action' => 'exchange balance', 'payload' => {'exchange'=>'btce'}})
+      @arby.exchanges.each do |exg|
+        publish({'action' => 'exchange balance', 'payload' => {'exchange'=>exg.name,
+                                                               'currency'=>'ltc'}})
+      end
     end
 
     def balance_ready(payload)
