@@ -8,7 +8,7 @@ class WarpBubble
       exchanges = get('exchange_list').map do |exchange|
         Heisencoin::Exchange.new(get('warpbubble:'+exchange))
       end
-      log("setting up exchanges #{exchanges}")
+      log("setting up exchanges #{exchanges.map(&:name)}")
       @arby.add_exchanges(exchanges)
     end
 
@@ -59,6 +59,8 @@ class WarpBubble
       @arby.exchanges.each do |exg|
         publish({'action' => 'exchange balance', 'payload' => {'exchange'=>exg.name,
                                                                'currency'=>'ltc'}})
+        publish({'action' => 'exchange balance', 'payload' => {'exchange'=>exg.name,
+                                                               'currency'=>'btc'}})
       end
     end
 

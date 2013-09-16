@@ -28,7 +28,7 @@ class WarpBubble
       end
 
       def balance(payload)
-        log("balance request")
+        log("balance request for #{payload["currency"]}")
         balances = post('getinfo')
         publish({"action" => "balance ready", "payload" => {"exchange" => "cryptsy",
                                                             "amount" => balances["balances_available"][payload["currency"].upcase],
@@ -42,6 +42,8 @@ class WarpBubble
         result = HTTParty.post @@api_url, {:body => params, :headers => headers, :format => :json}
         if result.parsed_response["success"] == "1"
           result.parsed_response["return"]
+        else
+          log "API error "+result.response
         end
       end
 
