@@ -15,7 +15,7 @@ class WarpBubble
     end
 
     def log(msg)
-      puts self.class.name+": "+msg
+      puts self.class.name+": "+msg.to_s
     end
 
     def get(key)

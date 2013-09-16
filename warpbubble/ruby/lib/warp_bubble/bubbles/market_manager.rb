@@ -24,6 +24,8 @@ class WarpBubble
             exchange_ready(message["payload"])
           when "plan ready"
             plan_ready(message["payload"])
+          when "balance ready"
+            balance_ready(message["payload"])
           end
         end
       end
@@ -47,7 +49,7 @@ class WarpBubble
           log("#{plan[0][0].name} #{"%0.3f"%total} coins -> #{plan[0][2].name}")
           publish({'action' => 'plan ready', 'payload' => {'plan' => plan}})
         else
-          log("Spread is #{"%0.5f" % @arby.spread}. #{@arby.asks.offers.first.exchange.name} wins. no strategy available.")
+          log("Spread is #{"%0.5f" % @arby.spread}. #{@arby.asks.offers.first.exchange.name} leads. no strategy available.")
         end
       end
     end
@@ -55,6 +57,10 @@ class WarpBubble
     def plan_ready(payload)
       log('plan ready '+payload.inspect)
       publish({'action' => 'exchange balance', 'payload' => {'exchange'=>'btce'}})
+    end
+
+    def balance_ready(payload)
+      log("balance ready #{payload}")
     end
 
   end
