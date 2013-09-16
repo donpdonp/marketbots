@@ -22,6 +22,8 @@ class WarpBubble
           case message["action"]
           when "exchange ready"
             exchange_ready(message["payload"])
+          when "plan ready"
+            exchange_ready(message["payload"])
           end
         end
       end
@@ -34,7 +36,6 @@ class WarpBubble
       exchange.time = now
       @arby.add_depth(exchange, message['depth'])
       times = @arby.exchanges.map{|r| r.time ? (now - r.time) : nil }
-      log("exchange timings #{times.inspect}")
       recent = times.all? {|t| t && t < 30}
       if recent
         log("!Plan for #{@arby.exchanges.map(&:name)}. #{@arby.asks.offers.size} asks and #{@arby.bids.offers.size} bids")
@@ -44,11 +45,17 @@ class WarpBubble
           log("plan: #{plan}")
           total = plan.reduce(0){|sum,p|sum+p[4]}
           log("#{plan[0][0].name} #{"%0.3f"%total} coins -> #{plan[0][2].name}")
+          publish({'action' => 'plan ready', 'payload' => plan})
         else
           log("Spread is #{"%0.5f" % @arby.spread}. #{@arby.asks.offers.first.exchange.name} wins. no strategy available.")
         end
       end
     end
+
+    def plan_ready(payload)
+      log('plan ready '+payload.inspect)
+    end
+
   end
 end
 
