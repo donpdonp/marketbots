@@ -31,8 +31,7 @@ class WarpBubble
         log("balance request for #{payload["currency"]}")
         balances = post('getInfo')
         publish({"action" => "balance ready", "payload" => {"exchange" => "btce",
-                                                            "amount" => balances["funds"][payload["currency"]],
-                                                            "currency" => payload["currency"]}})
+                                                            "balances" => balances["funds"]}})
       end
 
       def post(command, params = {})
