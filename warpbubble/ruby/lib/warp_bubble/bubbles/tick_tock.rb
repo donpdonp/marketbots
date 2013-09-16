@@ -2,7 +2,7 @@ class WarpBubble
   class TickTock < Base
     def go
       loop do
-        @chan_pub.publish(@@channel_name, '{"action":"time", "payload":{"time":1}}')
+        publish({"action" => "time", "payload" => {"time" => 1}})
         sleep 5
       end
     end
