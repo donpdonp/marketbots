@@ -6,7 +6,7 @@ class WarpBubble
         @chan_sub.subscribe(@@channel_name) do |on|
           on.message do |channel, json|
             message = JSON.parse(json)
-            if message['exchange'] == 'btce'
+            if message['payload'] && message['payload']['exchange'] == 'btce'
               case message["action"]
               when "exchange balance"
                 balance(message["payload"])
@@ -18,6 +18,9 @@ class WarpBubble
 
       def balance(payload)
         log("balance request")
+        publish({"action" => "balance ready", "payload" => {"exchange" => "btce",
+                                                            "amount" => 1,
+                                                            "currency" => "ltc"}})
       end
 
     end
