@@ -44,9 +44,9 @@ class WarpBubble
         good_asks = @arby.profitable_asks
         if good_asks.size > 0
           plan = @arby.plan
-          log("plan: #{plan}")
-          total = plan.reduce(0){|sum,p|sum+p[4]}
-          log("#{plan[0][0].name} #{"%0.3f"%total} coins -> #{plan[0][2].name}")
+          log("plan: #{plan.steps.size} steps. "+
+              "#{plan.steps.first.from_offer.exchange.name} #{"%0.3f"%plan.quantity} coins -> "+
+              "#{plan.steps.first.to_offer.exchange.name}")
           publish({'action' => 'plan ready', 'payload' => {'plan' => plan}})
         else
           log("Spread is #{"%0.5f" % @arby.spread}. #{@arby.asks.offers.first.exchange.name} leads. no strategy available.")
@@ -62,7 +62,7 @@ class WarpBubble
     end
 
     def balance_ready(payload)
-      log("balance ready #{payload}")
+      log("balances received for #{payload["exchange"]}")
     end
 
   end

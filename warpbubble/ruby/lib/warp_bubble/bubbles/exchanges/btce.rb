@@ -11,6 +11,7 @@ class WarpBubble
         unless @api_key && @api_secret
           log("Warning: no API Key")
         end
+        balance_refresh
       end
 
       def go
@@ -27,11 +28,15 @@ class WarpBubble
         end
       end
 
+
+      def balance_refresh
+        @balances = post('getInfo')["funds"]
+        log("balance request. #{@balances['ltc']} ltc #{@balances['btc']} btc")
+      end
+
       def balance(payload)
-        log("balance request for #{payload["currency"]}")
-        balances = post('getInfo')
         publish({"action" => "balance ready", "payload" => {"exchange" => "btce",
-                                                            "balances" => balances["funds"]}})
+                                                            "balances" => @balances}})
       end
 
       def post(command, params = {})
