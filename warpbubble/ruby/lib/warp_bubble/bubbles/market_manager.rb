@@ -40,14 +40,14 @@ class WarpBubble
       times = @arby.exchanges.map{|r| r.time ? (now - r.time) : nil }
       recent = times.all? {|t| t && t < 30}
       if recent
-        log("!Plan for #{@arby.exchanges.map(&:name)}. #{@arby.asks.offers.size} asks and #{@arby.bids.offers.size} bids")
+        log("Generating plan for #{@arby.exchanges.map(&:name)}. #{@arby.asks.offers.size} asks and #{@arby.bids.offers.size} bids")
         good_asks = @arby.profitable_asks
         if good_asks.size > 0
           plan = @arby.plan
-          log("plan: #{plan.steps.size} steps. "+
+          log("generated plan: #{plan.steps.size} steps. "+
               "#{plan.steps.first.from_offer.exchange.name} #{"%0.3f"%plan.quantity} coins -> "+
               "#{plan.steps.first.to_offer.exchange.name}")
-          publish({'action' => 'plan ready', 'payload' => {'plan' => plan}})
+          publish({'action' => 'plan ready', 'payload' => {'plan' => plan.to_simple}})
         else
           log("Spread is #{"%0.5f" % @arby.spread}. #{@arby.asks.offers.first.exchange.name} leads. no strategy available.")
         end
@@ -55,7 +55,8 @@ class WarpBubble
     end
 
     def plan_ready(payload)
-      log('plan ready '+payload.inspect)
+      plan = Heisencoin::Plan.new(payload['plan'])
+      log("plan ready. #{plan.steps.size} steps")
       @arby.exchanges.each do |exg|
         publish({'action' => 'exchange balance', 'payload' => {'exchange'=>exg.name}})
       end
