@@ -45,6 +45,7 @@ class WarpBubble
         if good_asks.size > 0
           plan = @arby.plan
           log("generated plan: #{plan.steps.size} steps. "+
+              "#{"%0.4f"%plan.profit} profit. "+
               "#{plan.steps.first.from_offer.exchange.name} #{"%0.3f"%plan.quantity} coins -> "+
               "#{plan.steps.first.to_offer.exchange.name}")
           publish({'action' => 'plan ready', 'payload' => {'plan' => plan.to_simple}})
