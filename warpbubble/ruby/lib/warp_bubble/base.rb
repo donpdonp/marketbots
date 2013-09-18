@@ -15,7 +15,9 @@ class WarpBubble
     end
 
     def log(msg)
-      puts self.class.name+": "+msg.to_s
+      short_class_name = self.class.name.split('::').drop(1).join('::')
+      time = Time.now.strftime("%H:%M")
+      puts "#{time} #{short_class_name}: #{msg.to_s}"
     end
 
     def get(key)
