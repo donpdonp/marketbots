@@ -31,7 +31,9 @@ class WarpBubble
 
       def balance_refresh
         @balances = post('getInfo')["funds"]
-        log("balance request. #{@balances['ltc']} ltc #{@balances['btc']} btc")
+        log("balance refresh. #{@balances['ltc']} ltc #{@balances['btc']} btc")
+        blnce = { type: 'Exchange#balance', balances: @balances }
+        @chan_pub.set('warpbubble:balance:btce', blnce.to_json)
       end
 
       def balance(payload)

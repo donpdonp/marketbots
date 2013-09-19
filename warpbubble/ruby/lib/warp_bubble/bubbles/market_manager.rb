@@ -57,14 +57,17 @@ class WarpBubble
 
     def plan_ready(payload)
       plan = Heisencoin::Plan.new(payload['plan'])
-      log("plan ready. #{plan.steps.size} steps")
-      @arby.exchanges.each do |exg|
-        publish({'action' => 'exchange balance', 'payload' => {'exchange'=>exg.name}})
+      from_name = plan.steps.first.from_offer.exchange.name
+      to_name = plan.steps.first.to_offer.exchange.name
+      log("plan ready. #{plan.steps.size} steps costs #{"%0.3f"%plan.cost} and moves #{"%0.3f"%plan.quantity} coins #{from_name} => #{to_name} for #{"%0.3f"%plan.profit} (#{"%0.3f"%(plan.profit/plan.cost*100)}%)")
+      from_balance = @chan_pub.get("warpbubble:balance:#{from_name}")
+      if from_balance
+        balances = JSON.parse(from_balance)
+        puts balances.inspect
+        puts "#{from_name} #{balances["object"]["btc"]} ready to fire"
+      else
+        log("missing balance for #{from_name}")
       end
-    end
-
-    def balance_ready(payload)
-      log("balances received for #{payload["exchange"]}")
     end
 
   end

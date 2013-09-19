@@ -1,13 +1,16 @@
+require 'time'
+
 class WarpBubble
   class Exchanges
     class Cryptsy < Base
 
+      @@short_name = 'cryptsy'
       @@api_url = "https://www.cryptsy.com/api"
 
       def initialize
         super
-        @api_key = @chan_pub.get('cryptsy:key')
-        @api_secret = @chan_pub.get('cryptsy:secret')
+        @api_key = @chan_pub.get("#{@@short_name}:key")
+        @api_secret = @chan_pub.get("#{@@short_name}:secret")
         unless @api_key && @api_secret
           log("Warning: no API Key")
         end
@@ -18,7 +21,7 @@ class WarpBubble
         @chan_sub.subscribe(@@channel_name) do |on|
           on.message do |channel, json|
             message = JSON.parse(json)
-            if message['payload'] && message['payload']['exchange'] == 'cryptsy'
+            if message['payload'] && message['payload']['exchange'] == @@short_name
               case message["action"]
               when "exchange balance"
                 balance(message["payload"])
@@ -32,11 +35,15 @@ class WarpBubble
         balances = post('getinfo')
         @balances = {}
         balances["balances_available"].each{|key, value| @balances[key.downcase] = value}
-        log("balance request. #{@balances['ltc']} ltc #{@balances['btc']} btc")
+        log("balance refresh. #{@balances['ltc']} ltc #{@balances['btc']} btc")
+        blnce = { type: 'Exchange#balance',
+                  time: Time.at(balances["servertimestamp"]).iso8601,
+                  object: @balances }
+        @chan_pub.set("warpbubble:balance:#{@@short_name}", blnce.to_json)
       end
 
       def balance(payload)
-        publish({"action" => "balance ready", "payload" => {"exchange" => "cryptsy",
+        publish({"action" => "balance ready", "payload" => {"exchange" => @@short_name,
                                                             "balances" => @balances
                                                             }})
       end
