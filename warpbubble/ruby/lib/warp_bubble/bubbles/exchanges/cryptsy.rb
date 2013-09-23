@@ -8,27 +8,7 @@ class WarpBubble
       @@api_url = "https://www.cryptsy.com/api"
 
       def initialize
-        super
-        @api_key = @chan_pub.get("#{@@short_name}:key")
-        @api_secret = @chan_pub.get("#{@@short_name}:secret")
-        unless @api_key && @api_secret
-          log("Warning: no API Key")
-        end
-        balance_refresh
-      end
-
-      def go
-        @chan_sub.subscribe(@@channel_name) do |on|
-          on.message do |channel, json|
-            message = JSON.parse(json)
-            if message['payload'] && message['payload']['exchange'] == @@short_name
-              case message["action"]
-              when "exchange balance"
-                balance(message["payload"])
-              end
-            end
-          end
-        end
+        super(@@short_name)
       end
 
       def balance_refresh
@@ -42,11 +22,6 @@ class WarpBubble
         @chan_pub.set("warpbubble:balance:#{@@short_name}", blnce.to_json)
       end
 
-      def balance(payload)
-        publish({"action" => "balance ready", "payload" => {"exchange" => @@short_name,
-                                                            "balances" => @balances
-                                                            }})
-      end
 
       def post(command, params = {})
         params["method"] = command

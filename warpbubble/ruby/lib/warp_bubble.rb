@@ -2,6 +2,7 @@ require 'httparty'
 require 'redis'
 
 require 'warp_bubble/base'
+require 'warp_bubble/bubbles/exchanges/base'
 
 class WarpBubble
   @@version = "0.01"

@@ -77,6 +77,9 @@ class WarpBubble
           break
         end
         log "#{purse} remains. Place order: #{step.from_offer.exchange.name} #{step.from_offer.price} x#{step.quantity} (#{"%0.5f"%step.to_offer.price})"
+        publish({:action => 'order', :payload => {:exchange => step.from_offer.exchange.name,
+                                                  :order => 'buy',
+                                                  :amount => step.quantity} })
         purse -= step.cost
       end
     end

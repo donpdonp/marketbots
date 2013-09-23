@@ -1,33 +1,13 @@
 class WarpBubble
   class Exchanges
-    class Btce < Base
+    class Btce < Exchanges::Base
 
+      @@short_name = 'btce'
       @@api_url = "https://btc-e.com/tapi"
 
       def initialize
-        super
-        @api_key = @chan_pub.get('btce:key')
-        @api_secret = @chan_pub.get('btce:secret')
-        unless @api_key && @api_secret
-          log("Warning: no API Key")
-        end
-        balance_refresh
+        super(@@short_name)
       end
-
-      def go
-        @chan_sub.subscribe(@@channel_name) do |on|
-          on.message do |channel, json|
-            message = JSON.parse(json)
-            if message['payload'] && message['payload']['exchange'] == 'btce'
-              case message["action"]
-              when "exchange balance"
-                balance(message["payload"])
-              end
-            end
-          end
-        end
-      end
-
 
       def balance_refresh
         @balances = post('getInfo')
@@ -36,11 +16,6 @@ class WarpBubble
                   time: Time.at(@balances["server_time"]).iso8601,
                   object: @balances["funds"] }
         @chan_pub.set('warpbubble:balance:btce', blnce.to_json)
-      end
-
-      def balance(payload)
-        publish({"action" => "balance ready", "payload" => {"exchange" => "btce",
-                                                            "balances" => @balances}})
       end
 
       def post(command, params = {})
