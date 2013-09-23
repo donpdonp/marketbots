@@ -59,7 +59,10 @@ class WarpBubble
       plan = Heisencoin::Plan.new(payload['plan'])
       from_name = plan.steps.first.from_offer.exchange.name
       to_name = plan.steps.first.to_offer.exchange.name
-      log("plan ready. #{plan.steps.size} steps costs #{"%0.3f"%plan.cost} and moves #{"%0.3f"%plan.quantity} coins #{from_name} => #{to_name} for #{"%0.3f"%plan.profit} (#{"%0.3f"%(plan.profit/plan.cost*100)}%)")
+      log("plan ready. #{plan.steps.size} steps costs #{"%0.3f"%plan.cost} "+
+          "and moves #{"%0.3f"%plan.quantity} coins "+
+          "#{from_name} => #{to_name} profit #{"%0.3f"%plan.profit} "+
+          "(#{"%0.3f"%(plan.profit/plan.cost*100)}%)")
       from_balance = @chan_pub.get("warpbubble:balance:#{from_name}")
       if from_balance
         balances = JSON.parse(from_balance)
@@ -71,16 +74,21 @@ class WarpBubble
     end
 
     def place_orders(plan, purse)
+      purse = 1
       plan.steps.each do |step|
         if purse <= 0
           log('out of money')
           break
         end
-        log "#{purse} remains. Place order: #{step.from_offer.exchange.name} #{step.from_offer.price} x#{step.quantity} (#{"%0.5f"%step.to_offer.price})"
+        coins_afforded = purse/step.from_offer.price
+        coins_spent = [coins_afforded, step.quantity].min
+        cost = coins_spent*step.from_offer.price
+        log "#{purse} remains. Buy offer: #{step.from_offer.exchange.name} #{step.from_offer.price} x#{step.quantity} with x#{coins_spent} #{"%0.5f"%cost}btc"
         publish({:action => 'order', :payload => {:exchange => step.from_offer.exchange.name,
                                                   :order => 'buy',
-                                                  :amount => step.quantity} })
-        purse -= step.cost
+                                                  :price => step.from_offer.price,
+                                                  :quantity => coins_spent} })
+        purse -= cost
       end
     end
 
