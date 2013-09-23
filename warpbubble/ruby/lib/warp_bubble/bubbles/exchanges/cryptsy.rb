@@ -9,6 +9,7 @@ class WarpBubble
 
       def initialize
         super(@@short_name)
+        balance_refresh
       end
 
       def balance_refresh
@@ -35,10 +36,6 @@ class WarpBubble
         end
       end
 
-      def sign(params)
-        hmac = OpenSSL::HMAC.new(@api_secret, OpenSSL::Digest::SHA512.new)
-        hmac.update(URI.encode_www_form(params)).to_s
-      end
     end
   end
 end

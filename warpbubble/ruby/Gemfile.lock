@@ -1,8 +1,8 @@
 GIT
   remote: /home/donp/code/cointhink/heisencoin
-  revision: 9553119e4d84aa222c6ad76fbd611667f2580ddb
+  revision: ea803af6f4608f9c30b706d106c2053e943e8510
   specs:
-    heisencoin (0.0.2)
+    heisencoin (0.0.4)
 
 GEM
   remote: https://rubygems.org/

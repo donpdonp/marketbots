@@ -10,7 +10,6 @@ class WarpBubble
         unless @api_key && @api_secret
           log("Warning: no API Key")
         end
-        balance_refresh
       end
 
       def go
@@ -38,6 +37,11 @@ class WarpBubble
         log "order #{payload}"
         publish({"action" => "order complete", "payload" => {"exchange" => "btce",
                                                              "balances" => @balances}})
+      end
+
+      def sign(params)
+        hmac = OpenSSL::HMAC.new(@api_secret, OpenSSL::Digest::SHA512.new)
+        hmac.update(URI.encode_www_form(params)).to_s
       end
 
     end
