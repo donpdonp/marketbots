@@ -63,10 +63,21 @@ class WarpBubble
       from_balance = @chan_pub.get("warpbubble:balance:#{from_name}")
       if from_balance
         balances = JSON.parse(from_balance)
-        puts balances.inspect
-        puts "#{from_name} #{balances["object"]["btc"]} ready to fire"
+        puts "#{from_name} #{balances["object"]["btc"]} available"
+        place_orders(plan, balances["object"]["btc"])
       else
         log("missing balance for #{from_name}")
+      end
+    end
+
+    def place_orders(plan, purse)
+      plan.steps.each do |step|
+        if purse <= 0
+          log('out of money')
+          break
+        end
+        log "#{purse} remains. Place order: #{step.from_offer.exchange.name} #{step.from_offer.price} x#{step.quantity} (#{"%0.5f"%step.to_offer.price})"
+        purse -= step.cost
       end
     end
 
