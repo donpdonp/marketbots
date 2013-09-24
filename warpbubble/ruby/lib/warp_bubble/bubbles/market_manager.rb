@@ -64,17 +64,22 @@ class WarpBubble
           balances = balance_load(exg_name)
           purse = balances["object"]["btc"]
           log "pre-plan: #{exg_name} #{purse}btc available"
-        elsif @state == "buy"
-          @state = "sell"
-          exg_name = plan.steps.first.to_offer.exchange.name
-          balances = balance_load(exg_name)
-          purse = balances["object"]["ltc"]
-          log "pre-plan: #{exg_name} #{purse}ltc available"
         else
           log "order in process. skipping this plan."
           return
         end
         place_orders(@state, plan, purse)
+        #balance_transfer
+    end
+
+    def balance_reached(payload)
+      if @state == "buy"
+        @state = "sell"
+        exg_name = plan.steps.first.to_offer.exchange.name
+        balances = balance_load(exg_name)
+        purse = balances["object"]["ltc"]
+        log "pre-plan: #{exg_name} #{purse}ltc available"
+      end
     end
 
     def balance_load(exchange_name)
