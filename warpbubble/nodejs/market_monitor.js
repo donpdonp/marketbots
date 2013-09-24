@@ -108,7 +108,7 @@ var poll_levers = {
         standard_depth = {"asks":depth.return.LTC.sellorders,
                           "bids":depth.return.LTC.buyorders}
         standard_depth.asks = standard_depth.asks.map(function(offer){
-          return [parseFloat(offer.price/2), parseFloat(offer.quantity)]
+          return [parseFloat(offer.price), parseFloat(offer.quantity)]
         })
         standard_depth.bids = standard_depth.bids.map(function(offer){
           return [parseFloat(offer.price), parseFloat(offer.quantity)]
