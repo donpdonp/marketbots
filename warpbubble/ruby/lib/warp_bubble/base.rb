@@ -22,6 +22,11 @@ class WarpBubble
 
     def get(key)
       JSON.parse(@chan_pub.get(key))
+
+    end
+    def set(key, value)
+      value = value.to_json unless value.is_a?(String)
+      @chan_pub.set(key, value)
     end
   end
 end

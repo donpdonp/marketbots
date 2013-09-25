@@ -10,7 +10,6 @@ class WarpBubble
       end
       log("setting up exchanges #{exchanges.map(&:name)}")
       @arby.add_exchanges(exchanges)
-      @state = "waiting"
     end
 
     def go
@@ -41,38 +40,45 @@ class WarpBubble
       times = @arby.exchanges.map{|r| r.time ? (now - r.time) : nil }
       recent = times.all? {|t| t && t < 30}
       if recent
-        log("Generating plan for #{@arby.exchanges.map(&:name)}. #{@arby.asks.offers.size} asks and #{@arby.bids.offers.size} bids")
-        good_asks = @arby.profitable_asks
-        if good_asks.size > 0
-          plan = @arby.plan
-          log("generated plan: #{plan.steps.size} steps. "+
-              "#{"%0.4f"%plan.profit} profit. "+
-              "#{plan.steps.first.from_offer.exchange.name} #{"%0.3f"%plan.quantity} coins -> "+
-              "#{plan.steps.first.to_offer.exchange.name}")
-          publish({'action' => 'plan ready', 'payload' => {'plan' => plan.to_simple}})
+        if @chan_pub.exists('warpbubble:plan')
+          log('existing plan. skipping plan generation')
         else
-          log("Spread is #{"%0.5f" % @arby.spread}. #{@arby.asks.offers.first.exchange.name} leads. no strategy available.")
+          log("Generating plan for #{@arby.exchanges.map(&:name)}. "+
+              "#{@arby.asks.offers.size} asks and #{@arby.bids.offers.size} bids")
+          good_asks = @arby.profitable_asks
+          if good_asks.size > 0
+            plan = @arby.plan
+            set('warpbubble:plan', plan.to_simple)
+            log("generated plan: #{plan.steps.size} steps. "+
+                "#{"%0.4f"%plan.profit} profit. "+
+                "#{plan.steps.first.from_offer.exchange.name} #{"%0.3f"%plan.quantity} coins -> "+
+                "#{plan.steps.first.to_offer.exchange.name}")
+            publish({'action' => 'plan ready', 'payload' => {}})
+          else
+            log("Spread is #{"%0.5f" % @arby.spread}. #{@arby.asks.offers.first.exchange.name} leads. no strategy available.")
+          end
         end
       end
     end
 
     def plan_ready(payload)
-      plan = Heisencoin::Plan.new(payload['plan'])
-        if @state == "waiting"
-          @state = "buy"
+      plan = Heisencoin::Plan.new(get('warpbubble:plan'))
+        if plan.state == "planning"
+          plan.state = "buying"
           exg_name = plan.steps.first.from_offer.exchange.name
           balances = balance_load(exg_name)
           purse = balances["object"]["btc"]
           log "pre-plan: #{exg_name} #{purse}btc available"
+          place_orders(plan, purse)
+          plan.state = "bought"
+          set('warpbubble:plan', plan.to_simple)
         else
-          log "order in process. skipping this plan."
+          log "plan in #{plan.state}. skipping this plan."
           return
         end
-        place_orders(@state, plan, purse)
-        #balance_transfer
     end
 
-    def balance_reached(payload)
+    def balance_ready(payload)
       if @state == "buy"
         @state = "sell"
         exg_name = plan.steps.first.to_offer.exchange.name
@@ -91,24 +97,35 @@ class WarpBubble
       end
     end
 
-    def place_orders(state, plan, purse)
+    def place_orders(plan, purse)
+      if plan.state == 'buying'
+        state = 'buy'
+      elsif plan.state == 'selling'
+        state = 'sell'
+      else
+        log "wrong state to place orders: #{plan.state}"
+        return
+      end
+      expense = 0.0
       plan.steps.each do |step|
-        if purse <= 0
-          log('out of money')
+        remaining = purse - expense
+        if remaining <= 0.00001
+          log("out of money.")
           break
         end
         offer = step.from_offer if state == 'buy'
         offer = step.to_offer if state == 'sell'
-        coins_afforded = purse/offer.price
+        coins_afforded = remaining/offer.price
         coins_spent = [coins_afforded, step.quantity].min
         cost = coins_spent*offer.price
-        log "#{purse} remains. #{state} offer: #{offer.exchange.name} #{offer.price} x#{step.quantity} with x#{coins_spent} #{"%0.5f"%cost}btc"
+        log "#{remaining} remains. #{state} offer: #{offer.exchange.name} #{offer.price} x#{step.quantity} with x#{coins_spent} #{"%0.5f"%cost}btc"
         publish({:action => 'order', :payload => {:exchange => offer.exchange.name,
                                                   :order => state,
                                                   :price => offer.price,
                                                   :quantity => coins_spent} })
-        purse -= cost
+        expense += cost
       end
+      log("orders finished. expense #{expense}")
     end
 
   end
