@@ -20,8 +20,8 @@ class WarpBubble
         on.message do |channel, json|
           message = JSON.parse(json)
           case message["action"]
-          when "exchange ready"
-            exchange_ready(message["payload"])
+          when "depth ready"
+            depth_ready(message["payload"])
           when "plan ready"
             plan_ready(message["payload"])
           when "balance ready"
@@ -31,7 +31,7 @@ class WarpBubble
       end
     end
 
-    def exchange_ready(message)
+    def depth_ready(message)
       exchange = @arby.exchange(message['name'])
       puts "!! exchange #{message['name']} not found " unless exchange
       now = Time.now
@@ -70,10 +70,9 @@ class WarpBubble
           purse = 0.15 #balances["object"]["btc"]
           log "pre-plan: #{exg_name} #{purse}btc available"
           coins = place_orders(plan, purse)
+          plan.purse = coins
           plan.state = "bought"
           set('warpbubble:plan', plan.to_simple)
-          plan.state = "selling"
-          place_orders(plan, coins)
         else
           log "plan in #{plan.state}. skipping this plan."
           return
@@ -81,12 +80,20 @@ class WarpBubble
     end
 
     def balance_ready(payload)
-      if @state == "buy"
-        @state = "sell"
+      plan = Heisencoin::Plan.new(get('warpbubble:plan'))
+      if plan.state == "bought"
+        plan.state = "selling"
         exg_name = plan.steps.first.to_offer.exchange.name
         balances = balance_load(exg_name)
-        purse = balances["object"]["ltc"]
-        log "pre-plan: #{exg_name} #{purse}ltc available"
+        balance = balances["object"]["ltc"]
+        log "post-plan: #{exg_name} #{purse}ltc available. plan purse #{plan.purse}"
+        if balance > plan.purse
+          new_purse = place_orders(plan, plan.purse)
+          fee = plan.steps.first.from_offer.exchange.fee+plan.steps.first.from_offer.exchange.fee
+          log "post-plan: #{new_purse - purse}btc left over - #{fee}%fee = #{(new_purse-purse)*(1-fee)}"
+          plan.state = "sold"
+          set('warpbubble:plan', plan.to_simple)
+        end
       end
     end
 
@@ -131,7 +138,8 @@ class WarpBubble
         acquired += coins_spent
       end
       log("#{state} orders finished. totals #{expense}btc #{acquired}ltc")
-      acquired
+      return acquired if state == 'buy'
+      return expense if state == 'sell'
     end
 
   end
