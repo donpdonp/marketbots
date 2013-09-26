@@ -68,9 +68,8 @@ class WarpBubble
           exg_name = plan.steps.first.from_offer.exchange.name
           balances = balance_load(exg_name)
           purse = 0.15 #balances["object"]["btc"]
-          log "pre-plan: #{exg_name} #{purse}btc available"
-          coins = place_orders(plan, purse)
-          plan.purse = coins
+          log "pre-plan: #{exg_name} #{purse}btc available. plan cost #{plan.cost}"
+          place_orders(plan, purse)
           plan.state = "bought"
           set('warpbubble:plan', plan.to_simple)
         else
@@ -85,15 +84,17 @@ class WarpBubble
         plan.state = "selling"
         exg_name = plan.steps.first.to_offer.exchange.name
         balances = balance_load(exg_name)
-        balance = balances["object"]["ltc"]
-        log "post-plan: #{exg_name} #{purse}ltc available. plan purse #{plan.purse}"
+        balance = 9#balances["object"]["ltc"]
+        log "post-plan: #{exg_name} #{balance}ltc available. plan purse #{plan.purse}"
         if balance > plan.purse
-          new_purse = place_orders(plan, plan.purse)
+          place_orders(plan, plan.purse)
           fee = plan.steps.first.from_offer.exchange.fee+plan.steps.first.from_offer.exchange.fee
-          log "post-plan: #{new_purse - purse}btc left over - #{fee}%fee = #{(new_purse-purse)*(1-fee)}"
+          log "post-plan: #{plan.cost-plan.spent}btc left over - #{fee}%fee = #{(plan.cost-plan.spent)*(1-fee)}"
           plan.state = "sold"
           set('warpbubble:plan', plan.to_simple)
         end
+      else
+        log "plan in #{plan.state}. skipping this balance."
       end
     end
 
@@ -118,7 +119,8 @@ class WarpBubble
       expense = 0.0
       acquired = 0
       plan.steps.each do |step|
-        remaining = purse - expense
+        remaining = purse - expense if state == 'buy'
+        remaining = purse - acquired if state == 'sell'
         if remaining <= 0.00001
           log("out of money.")
           break
@@ -137,9 +139,15 @@ class WarpBubble
         expense += cost
         acquired += coins_spent
       end
-      log("#{state} orders finished. totals #{expense}btc #{acquired}ltc")
-      return acquired if state == 'buy'
-      return expense if state == 'sell'
+      if state == 'buy'
+        plan.purse = acquired
+        plan.spent = expense
+      end
+      if state == 'sell'
+        plan.purse = expense
+        plan.spent = acquired
+      end
+      log("#{state} orders finished. totals #{expense}btc #{acquired}ltc. plan.purse = #{plan.purse}. plan.spent = #{plan.spent}")
     end
 
   end

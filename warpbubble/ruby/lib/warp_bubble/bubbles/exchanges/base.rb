@@ -34,7 +34,7 @@ class WarpBubble
       end
 
       def order(payload)
-        log "order #{payload}"
+        #log "order #{payload}"
         publish({"action" => "order complete", "payload" => {"exchange" => @short_name,
                                                              "balances" => @balances}})
       end
