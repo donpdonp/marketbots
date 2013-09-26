@@ -89,7 +89,7 @@ class WarpBubble
         if balance > plan.purse
           place_orders(plan, plan.purse)
           fee = plan.steps.first.from_offer.exchange.fee+plan.steps.first.from_offer.exchange.fee
-          log "post-plan: #{plan.cost-plan.spent}btc left over - #{fee}%fee = #{(plan.cost-plan.spent)*(1-fee)}"
+          log "post-plan: #{plan.purse-plan.spent}btc left over - #{fee}%fee = #{(plan.purse-plan.spent)*(1-fee)}"
           plan.state = "sold"
           set('warpbubble:plan', plan.to_simple)
         end
@@ -145,7 +145,6 @@ class WarpBubble
       end
       if state == 'sell'
         plan.purse = expense
-        plan.spent = acquired
       end
       log("#{state} orders finished. totals #{expense}btc #{acquired}ltc. plan.purse = #{plan.purse}. plan.spent = #{plan.spent}")
     end
