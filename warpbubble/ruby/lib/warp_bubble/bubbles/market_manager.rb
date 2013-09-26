@@ -67,11 +67,13 @@ class WarpBubble
           plan.state = "buying"
           exg_name = plan.steps.first.from_offer.exchange.name
           balances = balance_load(exg_name)
-          purse = balances["object"]["btc"]
+          purse = 0.15 #balances["object"]["btc"]
           log "pre-plan: #{exg_name} #{purse}btc available"
-          place_orders(plan, purse)
+          coins = place_orders(plan, purse)
           plan.state = "bought"
           set('warpbubble:plan', plan.to_simple)
+          plan.state = "selling"
+          place_orders(plan, coins)
         else
           log "plan in #{plan.state}. skipping this plan."
           return
@@ -107,6 +109,7 @@ class WarpBubble
         return
       end
       expense = 0.0
+      acquired = 0
       plan.steps.each do |step|
         remaining = purse - expense
         if remaining <= 0.00001
@@ -115,17 +118,20 @@ class WarpBubble
         end
         offer = step.from_offer if state == 'buy'
         offer = step.to_offer if state == 'sell'
-        coins_afforded = remaining/offer.price
+        coins_afforded = remaining/offer.price if state == 'buy'
+        coins_afforded = remaining if state == 'sell'
         coins_spent = [coins_afforded, step.quantity].min
         cost = coins_spent*offer.price
-        log "#{remaining} remains. #{state} offer: #{offer.exchange.name} #{offer.price} x#{step.quantity} with x#{coins_spent} #{"%0.5f"%cost}btc"
+        log "#{remaining} remains. #{state} offer: #{offer.exchange.name} #{offer.price} x#{step.quantity}. consuming x#{coins_spent} #{"%0.5f"%cost}btc"
         publish({:action => 'order', :payload => {:exchange => offer.exchange.name,
                                                   :order => state,
                                                   :price => offer.price,
                                                   :quantity => coins_spent} })
         expense += cost
+        acquired += coins_spent
       end
-      log("orders finished. expense #{expense}")
+      log("#{state} orders finished. totals #{expense}btc #{acquired}ltc")
+      acquired
     end
 
   end
