@@ -57,7 +57,7 @@ function time(packet){
             console.log(exchange.name+" "+exchange.time+
                         " ask count "+depth.asks.length+
                         " bid count "+depth.bids.length)
-            publish({"action":"exchange ready", "payload": {"name":exchange.name,
+            publish({"action":"depth ready", "payload": {"name":exchange.name,
                                                             "depth":depth,
                                                             "at":exchange.time}})
           } else {
