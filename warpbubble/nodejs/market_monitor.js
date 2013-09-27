@@ -1,4 +1,3 @@
-var nanomsg = require('nanomsg')
 var redis = require('redis').createClient(),
     redis_sub = require('redis').createClient()
 var request = require('request')
