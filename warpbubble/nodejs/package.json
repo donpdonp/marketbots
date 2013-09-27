@@ -1,4 +1,4 @@
-{ "dependencies": {"nanomsg":"*",
+{ "dependencies": {
                    "forever":"*",
                    "redis":"*",
                    "request":"*" } }
