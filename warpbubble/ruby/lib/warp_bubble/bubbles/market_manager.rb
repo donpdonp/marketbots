@@ -48,12 +48,16 @@ class WarpBubble
           good_asks = @arby.profitable_asks
           if good_asks.size > 0
             plan = @arby.plan
-            set('warpbubble:plan', plan.to_simple)
             log("generated plan: #{plan.steps.size} steps. "+
                 "#{"%0.4f"%plan.profit} profit. "+
                 "#{plan.steps.first.from_offer.exchange.name} #{"%0.3f"%plan.quantity} coins -> "+
                 "#{plan.steps.first.to_offer.exchange.name}")
-            publish({'action' => 'plan ready', 'payload' => {}})
+            if plan.profit >= 0.01
+              set('warpbubble:plan', plan.to_simple)
+              publish({'action' => 'plan ready', 'payload' => {}})
+            else
+              log 'insuficient profit. skipping plan.'
+            end
           else
             log("Spread is #{"%0.5f" % @arby.spread}. #{@arby.asks.offers.first.exchange.name} leads. no strategy available.")
           end
