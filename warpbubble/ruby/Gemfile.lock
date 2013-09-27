@@ -1,12 +1,7 @@
-GIT
-  remote: /home/donp/code/cointhink/heisencoin
-  revision: ea803af6f4608f9c30b706d106c2053e943e8510
-  specs:
-    heisencoin (0.0.4)
-
 GEM
   remote: https://rubygems.org/
   specs:
+    heisencoin (0.0.5)
     httparty (0.11.0)
       multi_json (~> 1.0)
       multi_xml (>= 0.5.2)
@@ -19,7 +14,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  heisencoin!
+  heisencoin
   httparty
   redis
   slop
