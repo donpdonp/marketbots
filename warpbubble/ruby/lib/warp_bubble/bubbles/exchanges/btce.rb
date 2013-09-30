@@ -20,10 +20,11 @@ class WarpBubble
       end
 
       def order(payload)
+        # sensitive to number of decimals
         order_detail = {'pair' => 'ltc_btc',
                         'type' => payload['order'],
-                        'rate' => payload['price'],
-                        'quantity' => payload['quantity']}
+                        'rate' => trim_float(payload['price'],8),
+                        'amount' => trim_float(payload['quantity'],8) }
         log "ORDER GO #{order_detail}"
         post('Trade', order_detail)
         super
@@ -34,10 +35,9 @@ class WarpBubble
         params["nonce"] = Time.now.to_i.to_s
         headers = {'Key' => @api_key, 'Sign' => sign(params)}
         result = HTTParty.post @@api_url, {:body => params, :headers => headers, :format => :json}
+        log "API "+result.response.body
         if result.parsed_response["success"] == 1
           result.parsed_response["return"]
-        else
-          log "API error "+result.response
         end
       end
 

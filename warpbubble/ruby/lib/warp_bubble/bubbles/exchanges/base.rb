@@ -43,6 +43,10 @@ class WarpBubble
         hmac.update(URI.encode_www_form(params)).to_s
       end
 
+      def trim_float(float, count)
+        int, dec = float.to_s.split('.')
+        int.to_i+("0."+dec[0,count]).to_f
+      end
     end
   end
 end
