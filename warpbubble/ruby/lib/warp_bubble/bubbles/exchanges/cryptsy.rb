@@ -23,6 +23,15 @@ class WarpBubble
         @chan_pub.set("warpbubble:balance:#{@@short_name}", blnce.to_json)
       end
 
+      def order(payload)
+        order_detail = {'marketid' => 3, #LTC/BTC
+                        'ordertype' => payload['order'],
+                        'price' => payload['price'],
+                        'quantity' => payload['quantity']}
+        log "ORDER GO #{order_detail}"
+        post('createorder', order_detail)
+        super
+      end
 
       def post(command, params = {})
         params["method"] = command

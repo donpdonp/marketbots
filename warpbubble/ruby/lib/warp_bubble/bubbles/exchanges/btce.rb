@@ -19,6 +19,16 @@ class WarpBubble
         @chan_pub.set('warpbubble:balance:btce', blnce.to_json)
       end
 
+      def order(payload)
+        order_detail = {'pair' => 'ltc_btc',
+                        'type' => payload['order'],
+                        'rate' => payload['price'],
+                        'quantity' => payload['quantity']}
+        log "ORDER GO #{order_detail}"
+        post('createorder', order_detail)
+        super
+      end
+
       def post(command, params = {})
         params["method"] = command
         params["nonce"] = Time.now.to_i.to_s
