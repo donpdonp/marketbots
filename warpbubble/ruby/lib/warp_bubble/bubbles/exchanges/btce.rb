@@ -32,7 +32,10 @@ class WarpBubble
 
       def post(command, params = {})
         params["method"] = command
-        params["nonce"] = Time.now.to_i.to_s
+        # btc-e nonce capped at unixtime.
+        nonce = @chan_pub.get("#{@@short_name}:nonce").to_i+1
+        @chan_pub.set("#{@@short_name}:nonce", nonce)
+        params["nonce"] = nonce
         headers = {'Key' => @api_key, 'Sign' => sign(params)}
         result = HTTParty.post @@api_url, {:body => params, :headers => headers, :format => :json}
         log "API "+result.response.body
