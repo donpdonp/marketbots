@@ -5,7 +5,7 @@ require 'warp_bubble/base'
 require 'warp_bubble/bubbles/exchanges/base'
 
 class WarpBubble
-  @@version = "0.01"
+  @@version = "0.0.2"
   def self.version; @@version; end
 
   @@services = []

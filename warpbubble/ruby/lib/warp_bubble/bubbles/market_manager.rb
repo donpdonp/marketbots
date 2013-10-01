@@ -43,7 +43,7 @@ class WarpBubble
         if @chan_pub.exists('warpbubble:plan')
           log('existing plan. skipping plan generation')
         else
-          log("Generating plan for #{@arby.exchanges.map{|e| [e.name,e.fee]}}. "+
+          log("Generating plan for #{@arby.exchanges.map{|e| "#{e.name} #{e.fee*100}%"}.join(' ')}. "+
               "#{@arby.asks.offers.size} asks and #{@arby.bids.offers.size} bids")
           plan = @arby.plan
           if plan.steps.size > 0
@@ -68,11 +68,12 @@ class WarpBubble
       plan = Heisencoin::Plan.new(get('warpbubble:plan'))
         if plan.state == "planning"
           plan.state = "buying"
-          exg_name = plan.steps.first.from_offer.exchange.name
-          balances = balance_load(exg_name)
+          exg = plan.steps.first.from_offer.exchange
+          balances = balance_load(exg.name)
           purse = balances["object"]["btc"]
-          log "pre-plan: #{exg_name} #{purse}btc available. plan cost #{plan.cost}"
-          place_orders(plan, purse)
+          purse_after_fee = purse*(1-exg.fee)
+          log "pre-plan: #{exg.name} #{purse}btc available. #{purse_after_fee} after fee. plan cost #{plan.cost}"
+          place_orders(plan, purse_after_fee)
           plan.state = "bought"
           set('warpbubble:plan', plan.to_simple)
         else
@@ -85,16 +86,19 @@ class WarpBubble
       plan = Heisencoin::Plan.new(get('warpbubble:plan'))
       if plan.state == "bought"
         plan.state = "selling"
-        exg_name = plan.steps.first.to_offer.exchange.name
-        balances = balance_load(exg_name)
+        exg = plan.steps.first.to_offer.exchange
+        balances = balance_load(exg.name)
         balance = balances["object"]["ltc"]
-        log "post-plan: #{exg_name} #{balance}ltc available. plan purse #{plan.purse}"
+        balance_after_fee = balance*(1-exg.fee)
+        log "post-plan: #{exg.name} #{balance}ltc available. #{balance_after_fee} after fee. plan purse #{plan.purse}"
         if balance > plan.purse
           place_orders(plan, plan.purse)
-          fee = plan.steps.first.from_offer.exchange.fee+plan.steps.first.from_offer.exchange.fee
+          fee = plan.steps.first.from_offer.exchange.fee+plan.steps.first.to_offer.exchange.fee
           log "post-plan profit #{plan.purse-plan.spent}btc - #{fee}%fee = #{(plan.purse-plan.spent)*(1-fee)}btc"
           plan.state = "sold"
           set('warpbubble:plan', plan.to_simple)
+        else
+          log "post-plan: balance of #{balance} is not sufficient for plan purse of #{plan.purse}. waiting for deposit."
         end
       else
         log "plan in #{plan.state}. skipping this balance."
