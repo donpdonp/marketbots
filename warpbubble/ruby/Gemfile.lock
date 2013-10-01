@@ -1,7 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    heisencoin (0.0.5)
+    heisencoin (0.0.6)
     httparty (0.11.0)
       multi_json (~> 1.0)
       multi_xml (>= 0.5.2)
@@ -14,7 +14,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  heisencoin
+  heisencoin (~> 0.0.6)
   httparty
   redis
   slop
