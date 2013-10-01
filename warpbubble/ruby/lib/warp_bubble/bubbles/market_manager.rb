@@ -72,7 +72,7 @@ class WarpBubble
           balances = balance_load(exg.name)
           purse = balances["object"]["btc"]
           purse_after_fee = purse*(1-exg.fee)
-          log "pre-plan: #{exg.name} #{purse}btc available. #{purse_after_fee} after fee. plan cost #{plan.cost}"
+          log "pre-plan: #{exg.name} #{"%0.8f"%purse}btc available. #{"%0.8f"%purse_after_fee} after fee. plan cost #{"%0.8f"%plan.cost}"
           place_orders(plan, purse_after_fee)
           plan.state = "bought"
           set('warpbubble:plan', plan.to_simple)
@@ -90,7 +90,7 @@ class WarpBubble
         balances = balance_load(exg.name)
         balance = balances["object"]["ltc"]
         balance_after_fee = balance*(1-exg.fee)
-        log "post-plan: #{exg.name} #{balance}ltc available. #{balance_after_fee} after fee. plan purse #{plan.purse}"
+        log "post-plan: #{exg.name} #{"%0.8f"%balance}ltc available. #{"%0.8f"%balance_after_fee} after fee. plan purse #{"%0.8f"%plan.purse}"
         if balance > plan.purse
           place_orders(plan, plan.purse)
           fee = plan.steps.first.from_offer.exchange.fee+plan.steps.first.to_offer.exchange.fee
@@ -138,7 +138,7 @@ class WarpBubble
         coins_afforded = remaining if state == 'sell'
         coins_spent = [coins_afforded, step.quantity].min
         cost = coins_spent*offer.price
-        log "#{remaining} remains. #{state} offer: #{offer.exchange.name} #{offer.price} x#{step.quantity}. consuming x#{coins_spent} = #{"%0.5f"%cost}btc"
+        log "#{"%0.8f"%remaining} remains. #{state} offer: #{offer.exchange.name} #{offer.price} x#{step.quantity}. consuming x#{coins_spent} = #{"%0.5f"%cost}btc"
         publish({:action => 'order', :payload => {:exchange => offer.exchange.name,
                                                   :order => state,
                                                   :price => offer.price,

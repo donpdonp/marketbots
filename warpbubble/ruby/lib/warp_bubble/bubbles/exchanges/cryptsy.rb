@@ -16,7 +16,7 @@ class WarpBubble
         balances = post('getinfo')
         @balances = {}
         balances["balances_available"].each{|key, value| @balances[key.downcase] = value.to_f }
-        log("balance refresh. #{@balances['ltc']} ltc #{@balances['btc']} btc. #{balances["openordercount"]} open orders")
+        log("balance refresh. #{"%0.8f"% @balances['ltc']} ltc #{"%0.8f"% @balances['btc']} btc. #{balances["openordercount"]} open orders")
         blnce = { type: 'Exchange#balance',
                   time: Time.at(balances["servertimestamp"]).iso8601,
                   object: @balances }
