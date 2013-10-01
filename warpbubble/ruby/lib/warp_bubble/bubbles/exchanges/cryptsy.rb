@@ -40,6 +40,8 @@ class WarpBubble
         result = HTTParty.post @@api_url, {:body => params, :headers => headers, :format => :json}
         if result.parsed_response["success"] == "1"
           result.parsed_response["return"]
+        else
+          log result.parsed_response.inspect
         end
       end
 

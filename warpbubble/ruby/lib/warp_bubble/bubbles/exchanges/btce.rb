@@ -47,6 +47,8 @@ class WarpBubble
             params["nonce"] = match[1].to_i+1
             log "nonce readjusted to #{params["nonce"]} and retrying."
             post(command, params) #do it again
+          else
+            log result.parsed_response.inspect
           end
         end
       end
