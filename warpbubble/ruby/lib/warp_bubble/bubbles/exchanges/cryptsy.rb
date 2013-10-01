@@ -45,6 +45,40 @@ class WarpBubble
         end
       end
 
+      def transfer(currency, amount, address)
+        require "selenium-webdriver"
+        driver = Selenium::WebDriver.for(:remote, :url => "http://localhost:9134")
+        log "logging in with #{@chan_pub.get("#{@@short_name}:username")}"
+        driver.navigate.to "https://www.cryptsy.com/users/login"
+        element = driver.find_element(:id, 'UserUsername')
+        element.send_keys @chan_pub.get("#{@@short_name}:username")
+        element = driver.find_element(:id, 'UserPassword')
+        element.send_keys @chan_pub.get("#{@@short_name}:password")
+        element.submit
+        puts driver.title
+        # wait for a specific element to show up
+        wait = Selenium::WebDriver::Wait.new(:timeout => 10) # seconds
+        wait.until { driver.find_element(:class => "messages") }
+        element = driver.find_element(:class, 'messages')
+        if element.text == "You have been successfully logged in"
+          log 'Login Success!'
+          marketid = "2" if currency == 'ltc'
+          marketid = "3" if currency == 'btc'
+          driver.navigate.to "https://www.cryptsy.com/users/makewithdrawal/3"
+          puts driver.title
+          element = driver.find_element(:id, 'WithdrawalWdamount')
+          element.send_keys amount.to_s
+          element = driver.find_element(:id, 'WithdrawalAddress')
+          element.send_keys address
+          element = driver.find_element(:id, 'WithdrawalExistingPassword')
+          element.send_keys @chan_pub.get("#{@@short_name}:password")
+          element.submit
+          puts driver.title
+        else
+          log element.text
+        end
+        driver.quit
+      end
     end
   end
 end

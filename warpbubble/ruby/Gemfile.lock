@@ -1,6 +1,9 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    childprocess (0.3.9)
+      ffi (~> 1.0, >= 1.0.11)
+    ffi (1.9.0)
     heisencoin (0.0.6)
     httparty (0.11.0)
       multi_json (~> 1.0)
@@ -8,7 +11,14 @@ GEM
     multi_json (1.8.0)
     multi_xml (0.5.5)
     redis (3.0.4)
+    rubyzip (0.9.9)
+    selenium-webdriver (2.35.1)
+      childprocess (>= 0.2.5)
+      multi_json (~> 1.0)
+      rubyzip (< 1.0.0)
+      websocket (~> 1.0.4)
     slop (3.4.6)
+    websocket (1.0.7)
 
 PLATFORMS
   ruby
@@ -17,4 +27,5 @@ DEPENDENCIES
   heisencoin (~> 0.0.6)
   httparty
   redis
+  selenium-webdriver
   slop

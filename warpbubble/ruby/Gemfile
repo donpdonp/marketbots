@@ -4,3 +4,4 @@ gem 'slop'
 gem 'httparty'
 gem 'redis'
 gem 'heisencoin', "~>0.0.6"
+gem 'selenium-webdriver'
