@@ -33,13 +33,20 @@ class WarpBubble
       def post(command, params = {})
         params["method"] = command
         # btc-e nonce capped at unixtime.
-        nonce = @chan_pub.get("#{@@short_name}:nonce").to_i+1
-        @chan_pub.set("#{@@short_name}:nonce", nonce)
+        nonce = params["nonce"] || @chan_pub.get("#{@@short_name}:nonce").to_i
+        @chan_pub.set("#{@@short_name}:nonce", nonce+1)
         params["nonce"] = nonce
         headers = {'Key' => @api_key, 'Sign' => sign(params)}
         result = HTTParty.post @@api_url, {:body => params, :headers => headers, :format => :json}
         if result.parsed_response["success"] == 1
           result.parsed_response["return"]
+        else
+          # more noncesense
+          match = /invalid nonce.*on key:(\d+)/.match(result.parsed_response["error"])
+          if match
+            params["nonce"] = match[1].to_i+1
+            post(command, params) #do it again
+          end
         end
       end
 
