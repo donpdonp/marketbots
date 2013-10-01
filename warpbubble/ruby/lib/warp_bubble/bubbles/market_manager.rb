@@ -43,11 +43,10 @@ class WarpBubble
         if @chan_pub.exists('warpbubble:plan')
           log('existing plan. skipping plan generation')
         else
-          log("Generating plan for #{@arby.exchanges.map(&:name)}. "+
+          log("Generating plan for #{@arby.exchanges.map{|e| [e.name,e.fee]}}. "+
               "#{@arby.asks.offers.size} asks and #{@arby.bids.offers.size} bids")
-          good_asks = @arby.profitable_asks
-          if good_asks.size > 0
-            plan = @arby.plan
+          plan = @arby.plan
+          if plan.steps.size > 0
             log("generated plan: #{plan.steps.size} steps. "+
                 "#{"%0.4f"%plan.profit} profit. "+
                 "#{plan.steps.first.from_offer.exchange.name} #{"%0.3f"%plan.quantity} coins -> "+
