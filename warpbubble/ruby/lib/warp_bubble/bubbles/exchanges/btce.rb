@@ -45,6 +45,7 @@ class WarpBubble
           match = /invalid nonce.*on key:(\d+)/.match(result.parsed_response["error"])
           if match
             params["nonce"] = match[1].to_i+1
+            log "nonce readjusted to #{params["nonce"]} and retrying."
             post(command, params) #do it again
           end
         end
