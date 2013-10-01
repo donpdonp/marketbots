@@ -1,4 +1,6 @@
 { "dependencies": {
                    "forever":"*",
                    "redis":"*",
-                   "request":"*" } }
+                   "request":"*",
+                   "phantomjs":"1.9"
+                  } }
