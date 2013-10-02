@@ -53,6 +53,79 @@ class WarpBubble
         end
       end
 
+      def transfer(currency, amount, address)
+        require "selenium-webdriver"
+        driver = Selenium::WebDriver.for(:remote, :url => "http://localhost:9134")
+        email = @chan_pub.get("#{@@short_name}:username")
+        username = email.split('@').first
+        password = @chan_pub.get("#{@@short_name}:password")
+        logged_in = false
+        log "https://btc-e.com #{username}"
+        driver.navigate.to "https://btc-e.com"
+        elements = driver.find_elements(:class, 'profile')
+        if elements.size == 1 && elements.first.text.split.first == username
+          log 'Already logged in!'
+          logged_in = true
+        else
+          log "logging in with #{email}"
+          element = driver.find_element(:id, 'email')
+          element.send_keys email
+          element = driver.find_element(:id, 'password')
+          element.send_keys password
+          element.submit
+          log driver.title
+          wait = Selenium::WebDriver::Wait.new(:timeout => 10) # seconds
+          wait.until { driver.find_element(:class => "profile") }
+          element = driver.find_element(:class, 'profile')
+          if element.text.split.first == username
+            log 'Login Success!'
+            logged_in = true
+          else
+            log "Login fail: #{element.text.split.first}"
+          end
+        end
+
+        if logged_in
+          profile = driver.find_elements(:css, "div.profile a").select{|b| b.attribute("href") == "https://btc-e.com/profile#funds"}.first
+          if profile
+            profile.click
+            log driver.title
+            market_id = 1 if currency == 'btc'
+            market_id = 8 if currency == 'ltc'
+            market_url = "https://btc-e.com/profile#funds/withdraw_coin/#{market_id}"
+            buttons = driver.
+                        find_elements(:css, "a").
+                            select{|b|
+                              b.attribute("href") == market_url}
+            if buttons.size == 1
+              xfer_button = buttons.first
+              xfer_button.click
+              log "#{currency} withdrawal button pushed"
+              wait = Selenium::WebDriver::Wait.new(:timeout => 10) # seconds
+              wait.until { driver.find_element(:css => 'div#billing h1') }
+              element = driver.find_element(:css, 'div#billing h1')
+              if element.text == "Withdrawal #{currency.upcase}"
+                log 'withdrawal form found'
+                element = driver.find_element(:id, 'address')
+                element.send_keys address
+                element = driver.find_element(:id, 'sum')
+                element.send_keys amount.to_s
+                withdrawal_buttons = driver.find_elements(:css, 'a').select{|b| b.attribute('onClick') == "withdraw_coin(#{market_id});"}
+                if withdrawal_buttons.size == 1
+                  log "#{amount}#{currency} withdrawl click"
+                  withdrawal_buttons.first.click
+                end
+              end
+            else
+              log 'transfer button not found'
+            end
+          else
+            log 'No profile button found'
+          end
+        end
+        driver.close
+      end
+
     end
   end
 end
