@@ -1,6 +1,10 @@
+require "selenium-webdriver"
+
 class WarpBubble
   class Exchanges
     class Base < WarpBubble::Base
+
+      @@driver = Selenium::WebDriver.for(:remote, :url => "http://localhost:9134")
 
       def initialize(short_name)
         super()
@@ -50,11 +54,15 @@ class WarpBubble
         int.to_i+("0."+dec[0,count]).to_f
       end
 
+      def web_driver
+        @@driver
+      end
+
       def mailinator(username, title_words, link_words)
         resp = HTTParty.get("http://www.mailinator.com/feed?to=#{username}", {:format => :xml})
         confirm_email = resp.parsed_response["RDF"]["item"].select{|i| i["title"].match(title_words)}.last
-        @driver.navigate.to(confirm_email["rdf:about"])
-        @driver.find_elements(:css, 'div.mailview a').reject do |link|
+        @@driver.navigate.to(confirm_email["rdf:about"])
+        @@driver.find_elements(:css, 'div.mailview a').reject do |link|
           link.attribute('href').match(link_words)
         end
       end

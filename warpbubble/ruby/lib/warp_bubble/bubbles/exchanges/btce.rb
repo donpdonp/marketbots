@@ -1,5 +1,3 @@
-require "selenium-webdriver"
-
 class WarpBubble
   class Exchanges
     class Btce < Exchanges::Base
@@ -9,7 +7,6 @@ class WarpBubble
 
       def initialize
         super(@@short_name)
-        @driver = Selenium::WebDriver.for(:remote, :url => "http://localhost:9134")
         balance_refresh
       end
 
@@ -62,22 +59,22 @@ class WarpBubble
         password = @chan_pub.get("#{@@short_name}:password")
         logged_in = false
         log "https://btc-e.com #{username}"
-        @driver.navigate.to "https://btc-e.com"
-        elements = @driver.find_elements(:class, 'profile')
+        web_driver.navigate.to "https://btc-e.com"
+        elements = web_driver.find_elements(:class, 'profile')
         if elements.size == 1 && elements.first.text.split.first == username
           log 'Already logged in!'
           logged_in = true
         else
           log "logging in with #{email}"
-          element = @driver.find_element(:id, 'email')
+          element = web_driver.find_element(:id, 'email')
           element.send_keys email
-          element = @driver.find_element(:id, 'password')
+          element = web_driver.find_element(:id, 'password')
           element.send_keys password
           element.submit
-          log @driver.title
+          log web_driver.title
           wait = Selenium::WebDriver::Wait.new(:timeout => 10) # seconds
-          wait.until { @driver.find_element(:class => "profile") }
-          element = @driver.find_element(:class, 'profile')
+          wait.until { web_driver.find_element(:class => "profile") }
+          element = web_driver.find_element(:class, 'profile')
           if element.text.split.first == username
             log 'Login Success!'
             logged_in = true
@@ -91,14 +88,14 @@ class WarpBubble
       def transfer(currency, amount, address)
         logged_in = login
         if logged_in
-          profile = @driver.find_elements(:css, "div.profile a").select{|b| b.attribute("href") == "https://btc-e.com/profile#funds"}.first
+          profile = web_driver.find_elements(:css, "div.profile a").select{|b| b.attribute("href") == "https://btc-e.com/profile#funds"}.first
           if profile
             profile.click
-            log @driver.title
+            log web_driver.title
             market_id = 1 if currency == 'btc'
             market_id = 8 if currency == 'ltc'
             market_url = "https://btc-e.com/profile#funds/withdraw_coin/#{market_id}"
-            buttons = @driver.
+            buttons = web_driver.
                         find_elements(:css, "a").
                             select{|b|
                               b.attribute("href") == market_url}
@@ -107,15 +104,15 @@ class WarpBubble
               xfer_button.click
               log "#{currency} withdrawal button pushed"
               wait = Selenium::WebDriver::Wait.new(:timeout => 10) # seconds
-              wait.until { @driver.find_element(:css => 'div#billing h1') }
-              element = @driver.find_element(:css, 'div#billing h1')
+              wait.until { web_driver.find_element(:css => 'div#billing h1') }
+              element = web_driver.find_element(:css, 'div#billing h1')
               if element.text == "Withdrawal #{currency.upcase}"
                 log 'withdrawal form found'
-                element = @driver.find_element(:id, 'address')
+                element = web_driver.find_element(:id, 'address')
                 element.send_keys address
-                element = @driver.find_element(:id, 'sum')
+                element = web_driver.find_element(:id, 'sum')
                 element.send_keys amount.to_s
-                withdrawal_buttons = @driver.find_elements(:css, 'a').select{|b| b.attribute('onClick') == "withdraw_coin(#{market_id});"}
+                withdrawal_buttons = web_driver.find_elements(:css, 'a').select{|b| b.attribute('onClick') == "withdraw_coin(#{market_id});"}
                 if withdrawal_buttons.size == 1
                   log "#{amount}#{currency} withdrawl click"
                   withdrawal_buttons.first.click
@@ -128,7 +125,7 @@ class WarpBubble
             log 'No profile button found'
           end
         end
-        @driver.close
+        web_driver.close
       end
 
       def email_confirm(payload)
@@ -140,7 +137,7 @@ class WarpBubble
           confirm_url = links.first.attribute('href')
           if login
             log 'confirming'
-            @driver.navigate.to(confirm_url)
+            web_driver.navigate.to(confirm_url)
           end
         else
           log 'email confirm not found'
