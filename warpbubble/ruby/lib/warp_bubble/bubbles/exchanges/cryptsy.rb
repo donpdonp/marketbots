@@ -9,6 +9,7 @@ class WarpBubble
 
       def initialize
         super(@@short_name)
+        @driver = Selenium::WebDriver.for(:remote, :url => "http://localhost:9134")
         balance_refresh
       end
 
