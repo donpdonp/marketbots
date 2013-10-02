@@ -22,6 +22,8 @@ class WarpBubble
                 balance(message["payload"])
               when "order"
                 order(message["payload"])
+              when "email check"
+                email_confirm(message["payload"])
               end
             end
           end
@@ -47,6 +49,16 @@ class WarpBubble
         int, dec = float.to_s.split('.')
         int.to_i+("0."+dec[0,count]).to_f
       end
+
+      def mailinator(username, title_words, link_words)
+        resp = HTTParty.get("http://www.mailinator.com/feed?to=#{username}", {:format => :xml})
+        confirm_email = resp.parsed_response["RDF"]["item"].select{|i| i["title"].match(title_words)}.last
+        @driver.navigate.to(confirm_email["rdf:about"])
+        @driver.find_elements(:css, 'div.mailview a').reject do |link|
+          link.attribute('href').match(link_words)
+        end
+      end
+
     end
   end
 end

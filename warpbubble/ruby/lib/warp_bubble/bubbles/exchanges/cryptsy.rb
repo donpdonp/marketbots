@@ -82,6 +82,16 @@ class WarpBubble
         end
         driver.quit
       end
+
+      def email_confirm(payload)
+        email = @chan_pub.get("#{@@short_name}:username")
+        username = email.split('@').first
+        links = mailinator(username, /Withdraw confirmation/, /cancel/)
+        if links.size == 1
+          log 'email confirm link found'
+        end
+      end
+
     end
   end
 end

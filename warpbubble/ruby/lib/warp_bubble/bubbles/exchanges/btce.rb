@@ -12,7 +12,6 @@ class WarpBubble
         @driver = Selenium::WebDriver.for(:remote, :url => "http://localhost:9134")
 
         balance_refresh
-        email_confirm
       end
 
       def balance_refresh
@@ -133,13 +132,10 @@ class WarpBubble
         @driver.close
       end
 
-      def email_confirm
+      def email_confirm(payload)
         email = @chan_pub.get("#{@@short_name}:username")
         username = email.split('@').first
-        resp = HTTParty.get("http://www.mailinator.com/feed?to=#{username}", {:format => :xml})
-        confirm_email = resp.parsed_response["RDF"]["item"].select{|i| i["title"].match(/Withdraw confirmation/)}.last
-        @driver.navigate.to(confirm_email["rdf:about"])
-        links = @driver.find_elements(:css, 'div.mailview a').reject{|link|link.attribute('href').match(/cancel/)}
+        links = mailinator(username, /Withdraw confirmation/, /cancel/)
         if links.size == 1
           log 'email confirm link found'
           confirm_url = links.first.attribute('href')
