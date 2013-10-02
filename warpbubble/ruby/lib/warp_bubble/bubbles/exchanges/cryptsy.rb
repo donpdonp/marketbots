@@ -64,15 +64,18 @@ class WarpBubble
           log 'Login Success!'
           marketid = "2" if currency == 'ltc'
           marketid = "3" if currency == 'btc'
-          driver.navigate.to "https://www.cryptsy.com/users/makewithdrawal/3"
-          puts driver.title
-          element = driver.find_element(:id, 'WithdrawalWdamount')
-          element.send_keys amount.to_s
+          driver.navigate.to "https://www.cryptsy.com/users/makewithdrawal/#{marketid}"
+          driver.save_screenshot('market1.png')
           element = driver.find_element(:id, 'WithdrawalAddress')
           element.send_keys address
           element = driver.find_element(:id, 'WithdrawalExistingPassword')
           element.send_keys @chan_pub.get("#{@@short_name}:password")
+          element = driver.find_element(:id, 'WithdrawalWdamount')
+          log "amount #{amount.to_s}"
+          element.send_keys ("\b"*10)+amount.to_s
+          driver.save_screenshot('market2.png')
           element.submit
+          driver.save_screenshot('market3.png')
           puts driver.title
         else
           log element.text
