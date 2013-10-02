@@ -59,11 +59,18 @@ class WarpBubble
       end
 
       def mailinator(username, title_words, link_words)
-        resp = HTTParty.get("http://www.mailinator.com/feed?to=#{username}", {:format => :xml})
-        confirm_email = resp.parsed_response["RDF"]["item"].select{|i| i["title"].match(title_words)}.last
-        @@driver.navigate.to(confirm_email["rdf:about"])
-        @@driver.find_elements(:css, 'div.mailview a').reject do |link|
-          link.attribute('href').match(link_words)
+        url = "http://www.mailinator.com/feed?to=#{username}"
+        resp = HTTParty.get(url, {:format => :xml})
+        items = resp.parsed_response["RDF"]["item"]
+        if items
+          confirm_email = items.select{|i| i["title"].match(title_words)}.last
+          @@driver.navigate.to(confirm_email["rdf:about"])
+          @@driver.find_elements(:css, 'div.mailview a').reject do |link|
+            link.attribute('href').match(link_words)
+          end
+        else
+          log "no mail for #{url}"
+          []
         end
       end
 
