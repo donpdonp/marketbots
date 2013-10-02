@@ -143,6 +143,8 @@ class WarpBubble
             log 'confirming'
             @driver.navigate.to(confirm_url)
           end
+        else
+          log 'email confirm not found'
         end
       end
 
