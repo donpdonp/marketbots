@@ -7,6 +7,7 @@ class WarpBubble
     def initialize
       @chan_sub = Redis.new
       @chan_pub = Redis.new
+      @irc_channel = @chan_pub.get('warpbubble:ircchannel')
     end
 
     def publish(payload)
@@ -22,11 +23,17 @@ class WarpBubble
 
     def get(key)
       JSON.parse(@chan_pub.get(key))
-
     end
+
     def set(key, value)
       value = value.to_json unless value.is_a?(String)
       @chan_pub.set(key, value)
+    end
+
+    def irc_say(msg)
+      if @irc_channel
+        @chan_pub.publish('say', {"command"=>"say","target"=>@irc_channel,"message"=>msg}.to_json)
+      end
     end
   end
 end

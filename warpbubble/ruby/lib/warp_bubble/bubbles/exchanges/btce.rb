@@ -16,6 +16,7 @@ class WarpBubble
         blnce = { type: 'Exchange#balance',
                   time: Time.at(@balances["server_time"]).iso8601,
                   object: @balances["funds"] }
+        irc_say("#{@@short_name}")
         @chan_pub.set('warpbubble:balance:btce', blnce.to_json)
       end
 

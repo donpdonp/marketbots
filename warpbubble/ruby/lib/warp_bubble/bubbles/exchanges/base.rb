@@ -4,7 +4,7 @@ class WarpBubble
   class Exchanges
     class Base < WarpBubble::Base
 
-      @@driver = Selenium::WebDriver.for(:remote, :url => "http://localhost:9134")
+      @@driver = Selenium::WebDriver.for(:remote, :url => "http://localhost:8910")
 
       def initialize(short_name)
         super()
@@ -26,6 +26,8 @@ class WarpBubble
                 balance(message["payload"])
               when "order"
                 order(message["payload"])
+              when "transfer"
+                transfer(message["payload"])
               when "email check"
                 email_confirm(message["payload"])
               end
