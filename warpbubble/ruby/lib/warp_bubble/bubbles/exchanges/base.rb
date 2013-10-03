@@ -25,7 +25,8 @@ class WarpBubble
               when "exchange balance"
                 balance(message["payload"])
               when "order"
-                order(message["payload"])
+                log "Order Disabled #{message["payload"]}"
+                #order(message["payload"])
               when "transfer"
                 transfer(message["payload"])
               when "email check"

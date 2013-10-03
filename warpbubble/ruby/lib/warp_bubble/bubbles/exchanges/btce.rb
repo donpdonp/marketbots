@@ -12,11 +12,13 @@ class WarpBubble
 
       def balance_refresh
         @balances = post('getInfo')
-        log("balance refresh. #{"%0.8f"% @balances['funds']['ltc']} ltc #{"%0.8f"% @balances['funds']['btc']} btc. #{@balances["open_orders"]} open orders")
+        msg = "balance refresh. #{"%0.8f"% @balances['funds']['ltc']}ltc "+
+              "#{"%0.8f"% @balances['funds']['btc']}btc. "+
+              "#{@balances["open_orders"]} open orders"
+        log(msg)
         blnce = { type: 'Exchange#balance',
                   time: Time.at(@balances["server_time"]).iso8601,
                   object: @balances["funds"] }
-        irc_say("#{@@short_name}")
         @chan_pub.set('warpbubble:balance:btce', blnce.to_json)
       end
 
