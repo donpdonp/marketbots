@@ -31,6 +31,10 @@ class WarpBubble
       @chan_pub.set(key, value)
     end
 
+    def del(key)
+      @chan_pub.del(key)
+    end
+
     def irc_say(msg)
       if @irc_channel
         @chan_pub.publish('say', {"command"=>"say","target"=>@irc_channel,"message"=>msg}.to_json)

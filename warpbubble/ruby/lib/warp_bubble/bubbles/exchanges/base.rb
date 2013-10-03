@@ -9,6 +9,7 @@ class WarpBubble
       def initialize(short_name)
         super()
         @short_name = short_name
+        del("warpbubble:balance:#{short_name}")
         @api_key = @chan_pub.get("#{short_name}:key")
         @api_secret = @chan_pub.get("#{short_name}:secret")
         unless @api_key && @api_secret

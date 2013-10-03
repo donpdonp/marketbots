@@ -70,12 +70,16 @@ class WarpBubble
           plan.state = "buying"
           exg = plan.steps.first.from_offer.exchange
           balances = balance_load(exg.name)
-          purse = balances["object"]["btc"]
-          purse_after_fee = purse*(1-exg.fee)
-          log "pre-plan: #{exg.name} #{"%0.8f"%purse}btc available. #{"%0.8f"%purse_after_fee} after fee. plan cost #{"%0.8f"%plan.cost}"
-          place_orders(plan, purse_after_fee)
-          plan.state = "bought"
-          set('warpbubble:plan', plan.to_simple)
+          if balances
+            purse = balances["object"]["btc"]
+            purse_after_fee = purse*(1-exg.fee)
+            log "pre-plan: #{exg.name} #{"%0.8f"%purse}btc available. #{"%0.8f"%purse_after_fee} after fee. plan cost #{"%0.8f"%plan.cost}"
+            place_orders(plan, purse_after_fee)
+            plan.state = "bought"
+            set('warpbubble:plan', plan.to_simple)
+          else
+            log "missing balances report for #{exg.name}"
+          end
         else
           log "plan in #{plan.state}. skipping this plan."
           return
