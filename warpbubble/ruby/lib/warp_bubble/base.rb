@@ -8,6 +8,7 @@ class WarpBubble
       @chan_sub = Redis.new
       @chan_pub = Redis.new
       @irc_channel = @chan_pub.get('warpbubble:ircchannel')
+      log "IRC #{@irc_channel}"
     end
 
     def publish(payload)

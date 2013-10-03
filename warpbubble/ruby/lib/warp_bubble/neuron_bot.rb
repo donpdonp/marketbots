@@ -1,0 +1,15 @@
+class WarpBubble
+  class NeuronBot
+    def initialize(wb)
+      @wb = wb
+    end
+
+    def dispatch(payload)
+      if payload["type"] == 'emessage'
+        if payload["message"].match(/^balance/)
+          @wb.publish({"action" => "balance refresh", "payload" => {"exchange" => "*"}})
+        end
+      end
+    end
+  end
+end

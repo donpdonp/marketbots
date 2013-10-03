@@ -2,6 +2,7 @@ require 'httparty'
 require 'redis'
 
 require 'warp_bubble/base'
+require 'warp_bubble/neuron_bot'
 require 'warp_bubble/bubbles/exchanges/base'
 
 class WarpBubble
@@ -20,18 +21,31 @@ class WarpBubble
 
   def initialize
     Thread.new do
-      listen
+      warp_bubble_listen
+    end
+
+    @neuronbot = NeuronBot.new(self)
+    Thread.new do
+      neuronbot_listen
     end
   end
 
-  def listen
+  def warp_bubble_listen
     Redis.new.subscribe(@@channel_name) do |on|
       on.subscribe do |channel, count|
       end
 
       on.message do |channel, json|
         message = JSON.parse(json)
-        #puts "WarpBubble: "+message.inspect
+      end
+    end
+  end
+
+  def neuronbot_listen
+    Redis.new.subscribe('lines') do |on|
+      on.message do |channel, json|
+        message = JSON.parse(json)
+        @neuronbot.dispatch(message)
       end
     end
   end

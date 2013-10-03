@@ -25,7 +25,8 @@ class WarpBubble
 
           on.message do |channel, json|
             message = JSON.parse(json)
-            if message['payload'] && message['payload']['exchange'] == @short_name
+            if message['payload'] && (message['payload']['exchange'] == @short_name ||
+                                      message['payload']['exchange'] == "*")
               case message["action"]
               when "exchange balance"
                 balance(message["payload"])
