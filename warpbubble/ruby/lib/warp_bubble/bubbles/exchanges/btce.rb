@@ -7,13 +7,12 @@ class WarpBubble
 
       def initialize
         super(@@short_name)
-        balance_refresh
       end
 
-      def balance_refresh
+      def balance_refresh(payload)
         @balances = post('getInfo')
-        msg = "balance refresh. #{"%0.8f"% @balances['funds']['ltc']}ltc "+
-              "#{"%0.8f"% @balances['funds']['btc']}btc. "+
+        msg = "balance refresh. #{"%0.8f"% @balances['funds']['ltc']} ltc. "+
+              "#{"%0.8f"% @balances['funds']['btc']} btc. "+
               "#{@balances["open_orders"]} open orders"
         log(msg)
         blnce = { type: 'Exchange#balance',

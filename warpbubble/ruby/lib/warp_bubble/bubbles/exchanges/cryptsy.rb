@@ -9,14 +9,16 @@ class WarpBubble
 
       def initialize
         super(@@short_name)
-        balance_refresh
       end
 
-      def balance_refresh
+      def balance_refresh(payload)
         balances = post('getinfo')
         @balances = {}
         balances["balances_available"].each{|key, value| @balances[key.downcase] = value.to_f }
-        log("balance refresh. #{"%0.8f"% @balances['ltc']} ltc #{"%0.8f"% @balances['btc']} btc. #{balances["openordercount"]} open orders")
+        msg = "balance refresh. #{"%0.8f"% @balances['ltc']} ltc. "+
+              "#{"%0.8f"% @balances['btc']} btc. "+
+              "#{balances["openordercount"]} open orders"
+        log(msg)
         blnce = { type: 'Exchange#balance',
                   time: Time.at(balances["servertimestamp"]).iso8601,
                   object: @balances }

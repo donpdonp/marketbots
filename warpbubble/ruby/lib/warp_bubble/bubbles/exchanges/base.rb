@@ -19,12 +19,18 @@ class WarpBubble
 
       def go
         @chan_sub.subscribe(@@channel_name) do |on|
+          on.subscribe do |channel, count|
+            publish({"action" => "exchange ready", "payload" => {"exchange" => @short_name}})
+          end
+
           on.message do |channel, json|
             message = JSON.parse(json)
             if message['payload'] && message['payload']['exchange'] == @short_name
               case message["action"]
               when "exchange balance"
                 balance(message["payload"])
+              when "balance refresh", "exchange ready"
+                balance_refresh(message["payload"])
               when "order"
                 log "Order Disabled #{message["payload"]}"
                 #order(message["payload"])
