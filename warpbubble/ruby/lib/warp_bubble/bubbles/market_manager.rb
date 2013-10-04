@@ -24,6 +24,8 @@ class WarpBubble
             depth_ready(message["payload"])
           when "plan ready"
             plan_ready(message["payload"])
+          when "plan drop"
+            plan_drop(message["payload"])
           when "balance ready"
             balance_ready(message["payload"])
           end
@@ -63,6 +65,11 @@ class WarpBubble
           end
         end
       end
+    end
+
+    def plan_drop(payload)
+      @chan_pub.del('warpbubble:plan')
+      log 'plan dropped'
     end
 
     def plan_ready(payload)
