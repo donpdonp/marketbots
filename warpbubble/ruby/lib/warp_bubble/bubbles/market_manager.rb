@@ -41,7 +41,7 @@ class WarpBubble
       recent = times.all? {|t| t && t < 30}
       if recent
         if @chan_pub.exists('warpbubble:plan')
-          log('existing plan. skipping plan generation')
+          log("existing plan in #{plan.state}. skipping plan generation")
         else
           log("Generating plan for #{@arby.exchanges.map{|e| "#{e.name} #{e.fee*100}%"}.join(' ')}. "+
               "#{@arby.asks.offers.size} asks and #{@arby.bids.offers.size} bids")
