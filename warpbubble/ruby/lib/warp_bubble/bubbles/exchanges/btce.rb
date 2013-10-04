@@ -87,7 +87,11 @@ class WarpBubble
         logged_in
       end
 
-      def transfer(currency, amount, address)
+      def transfer(payload)
+        currency = payload["currency"]
+        amount = payload["amount"]
+        address = payload["address"]
+        log "transfer #{amount} #{currency} to #{address}"
         logged_in = login
         if logged_in
           profile = web_driver.find_elements(:css, "div.profile a").select{|b| b.attribute("href") == "https://btc-e.com/profile#funds"}.first
@@ -109,7 +113,7 @@ class WarpBubble
               wait.until { web_driver.find_element(:css => 'div#billing h1') }
               element = web_driver.find_element(:css, 'div#billing h1')
               if element.text == "Withdrawal #{currency.upcase}"
-                log 'withdrawal form found'
+                log 'withdrawal form found.'
                 element = web_driver.find_element(:id, 'address')
                 element.send_keys address
                 element = web_driver.find_element(:id, 'sum')

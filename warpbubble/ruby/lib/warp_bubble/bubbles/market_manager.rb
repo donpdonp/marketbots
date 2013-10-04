@@ -89,6 +89,17 @@ class WarpBubble
     def balance_ready(payload)
       plan = Heisencoin::Plan.new(get('warpbubble:plan'))
       if plan.state == "bought"
+        plan.state = "moving"
+        from_exg = plan.steps.first.to_offer.exchange
+        to_exg = plan.steps.first.to_offer.exchange
+        log "move: #{plan.purse}ltc #{from_exg.name} => #{to_exg.name}"
+        publish({'action' => 'transfer', 'payload' => {"exchange" => from_exg.name,
+                                                       "amount" => plan.purse,
+                                                       "currency" => 'ltc',
+                                                       "address" => "0"}})
+        plan.state = "moved"
+        set('warpbubble:plan', plan.to_simple)
+      elsif plan.state == "moved"
         plan.state = "selling"
         exg = plan.steps.first.to_offer.exchange
         balances = balance_load(exg.name)
