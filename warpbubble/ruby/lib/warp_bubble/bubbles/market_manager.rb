@@ -103,7 +103,7 @@ class WarpBubble
           plan.state = "moved"
           set('warpbubble:plan', plan.to_simple)
         else
-          log "#{exg.name} balance of #{balances["object"]["ltc"]} is not purse #{plan.purse}"
+          log "#{from_exg.name} balance of #{balances["object"]["ltc"]} is not purse #{plan.purse}"
         end
       elsif plan.state == "moved"
         plan.state = "selling"
@@ -131,7 +131,7 @@ class WarpBubble
       if json
         JSON.parse(json)
       else
-        log "ERROR missing balance"
+        log "ERROR missing balance for #{exchange_name}"
       end
     end
 
