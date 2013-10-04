@@ -42,7 +42,7 @@ class WarpBubble
       if recent
         if @chan_pub.exists('warpbubble:plan')
           plan = Heisencoin::Plan.new(get('warpbubble:plan'))
-          log("existing plan in #{plan.state}. skipping plan generation")
+          log("existing plan #{plan.state}/#{plan.purse}. skipping plan generation")
         else
           log("Generating plan for #{@arby.exchanges.map{|e| "#{e.name} #{e.fee*100}%"}.join(' ')}. "+
               "#{@arby.asks.offers.size} asks and #{@arby.bids.offers.size} bids")
@@ -92,14 +92,19 @@ class WarpBubble
       if plan.state == "bought"
         plan.state = "moving"
         from_exg = plan.steps.first.to_offer.exchange
-        to_exg = plan.steps.first.to_offer.exchange
-        log "move: #{plan.purse}ltc #{from_exg.name} => #{to_exg.name}"
-        publish({'action' => 'transfer', 'payload' => {"exchange" => from_exg.name,
-                                                       "amount" => plan.purse,
-                                                       "currency" => 'ltc',
-                                                       "address" => "0"}})
-        plan.state = "moved"
-        set('warpbubble:plan', plan.to_simple)
+        balances = balance_load(exg.name)
+        if balances["object"]["ltc"] >= plan.purse
+          to_exg = plan.steps.first.to_offer.exchange
+          log "move: #{plan.purse}ltc #{from_exg.name} => #{to_exg.name}"
+          publish({'action' => 'transfer', 'payload' => {"exchange" => from_exg.name,
+                                                         "amount" => plan.purse,
+                                                         "currency" => 'ltc',
+                                                         "address" => "0"}})
+          plan.state = "moved"
+          set('warpbubble:plan', plan.to_simple)
+        else
+          log "#{exg.name} balance of #{balances["object"]["ltc"]} is not purse #{plan.purse}"
+        end
       elsif plan.state == "moved"
         plan.state = "selling"
         exg = plan.steps.first.to_offer.exchange
