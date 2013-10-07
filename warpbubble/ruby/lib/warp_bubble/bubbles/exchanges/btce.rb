@@ -39,7 +39,6 @@ class WarpBubble
           log "Cancelling order #{detail['pair']} x#{detail['amount']}"
           post('CancelOrder', {'order_id' => id})
         end
-        super
       end
 
       def post(command, params = {})

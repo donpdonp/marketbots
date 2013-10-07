@@ -39,7 +39,6 @@ class WarpBubble
         log "Order Drop!"
         cancels = post('cancelallorders')
         log "Cancelled #{cancels}"
-        super
       end
 
       def post(command, params = {})
