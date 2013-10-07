@@ -37,7 +37,8 @@ class WarpBubble
 
       def order_drop(payload)
         log "Order Drop!"
-        post('cancelallorders', order_detail)
+        cancels = post('cancelallorders', order_detail)
+        log "Cancelled #{cancels}"
         super
       end
 
