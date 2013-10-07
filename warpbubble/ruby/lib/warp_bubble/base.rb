@@ -21,6 +21,7 @@ class WarpBubble
       time = Time.now.strftime("%H:%M")
       puts "#{time} #{short_class_name}: #{msg.to_s}"
       irc_say "#{short_class_name}: #{msg.to_s}"
+      nil
     end
 
     def get(key)
