@@ -33,8 +33,7 @@ class WarpBubble
               when "balance refresh", "exchange ready"
                 balance_refresh(message["payload"])
               when "order"
-                log "Order Disabled #{message["payload"]}"
-                #order(message["payload"])
+                order(message["payload"])
               when "transfer"
                 transfer(message["payload"])
               when "email check"
