@@ -37,7 +37,7 @@ class WarpBubble
         orders = post('ActiveOrders')
         orders.each do |id, detail|
           log "Cancelling order #{detail['pair']} x#{detail['amount']}"
-          post('CancelOrder', {'order_id': id})
+          post('CancelOrder', {'order_id' => id})
         end
         super
       end
