@@ -34,6 +34,8 @@ class WarpBubble
                 balance_refresh(message["payload"])
               when "order"
                 order(message["payload"])
+              when "order drop"
+                order_drop(message["payload"])
               when "transfer"
                 transfer(message["payload"])
               when "email check"

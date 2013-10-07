@@ -32,6 +32,16 @@ class WarpBubble
         super
       end
 
+      def order_drop(payload)
+        log "Order Drop!"
+        orders = post('ActiveOrders')
+        orders.each do |id, detail|
+          log "Cancelling order #{detail['pair']} x#{detail['amount']}"
+          post('CancelOrder', {'order_id': id})
+        end
+        super
+      end
+
       def post(command, params = {})
         params["method"] = command
         # btc-e nonce capped at unixtime.

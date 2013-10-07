@@ -35,6 +35,12 @@ class WarpBubble
         super
       end
 
+      def order_drop(payload)
+        log "Order Drop!"
+        post('cancelallorders', order_detail)
+        super
+      end
+
       def post(command, params = {})
         params["method"] = command
         params["nonce"] = Time.now.to_i.to_s
