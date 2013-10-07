@@ -13,7 +13,7 @@ class WarpBubble
         elsif match = payload["message"].match(/^drop plan/)
           @wb.publish({"action" => "plan drop", "payload" => {}})
         elsif match = payload["message"].match(/^(\w+)\s+(\w+)\s+(\w+)/)
-          @wb.publish({"action" => "#{match[1]} #{match[2]}", "payload" => {"exchange" => match[2]}})
+          @wb.publish({"action" => "#{match[2]} #{match[3]}", "payload" => {"exchange" => match[1]}})
         end
       end
     end
