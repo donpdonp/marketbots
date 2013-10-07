@@ -56,7 +56,7 @@ class WarpBubble
     publish({"action" => "warp_bubble setup"})
 
     until WarpBubble.services.any? {|svc| svc["thread"].status.nil?}
-      WarpBubble.services.each{|svc| svc["thread"].join(1)}
+      WarpBubble.services.each{|svc| svc["thread"].join(0.5)}
     end
   end
 
