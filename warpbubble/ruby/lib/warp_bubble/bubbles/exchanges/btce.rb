@@ -35,7 +35,7 @@ class WarpBubble
       def order_drop(payload)
         log "Order Drop!"
         orders = post('ActiveOrders')
-        orders.each do |id, detail|
+        orders && orders.each do |id, detail|
           log "Cancelling order #{detail['pair']} x#{detail['amount']}"
           post('CancelOrder', {'order_id' => id})
         end
@@ -49,6 +49,7 @@ class WarpBubble
         params["nonce"] = nonce
         headers = {'Key' => @api_key, 'Sign' => sign(params)}
         result = HTTParty.post @@api_url, {:body => params, :headers => headers, :format => :json}
+        log result.parsed_response
         if result.parsed_response["success"] == 1
           result.parsed_response["return"]
         else
@@ -59,7 +60,7 @@ class WarpBubble
             log "nonce readjusted to #{params["nonce"]} and retrying."
             post(command, params) #do it again
           else
-            log result.parsed_response.inspect
+            log result.parsed_response
           end
         end
       end
