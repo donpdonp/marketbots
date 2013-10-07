@@ -42,5 +42,13 @@ class WarpBubble
         @chan_pub.publish('say', {"command"=>"say","target"=>@irc_channel,"message"=>msg}.to_json)
       end
     end
+
+    def nma(msg)
+      @chan_pub.publish('lines', {'type'=>'notifymyandroid',
+                                  'application'=>'warpbubble',
+                                  'message'=>msg
+                                 }.to_json)
+    end
+
   end
 end

@@ -82,6 +82,7 @@ class WarpBubble
             purse = balances["object"]["btc"]
             purse_after_fee = purse*(1-exg.fee)
             log "pre-plan: #{exg.name} #{"%0.8f"%purse}btc available. #{"%0.8f"%purse_after_fee} after fee. plan cost #{"%0.8f"%plan.cost}"
+            nma("Buying. #{exg.name} #{"%0.8f"%purse}btc available. plan cost #{"%0.8f"%plan.cost}")
             place_orders(plan, purse_after_fee)
             plan.state = "bought"
             set('warpbubble:plan', plan.to_simple)
