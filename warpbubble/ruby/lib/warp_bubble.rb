@@ -24,9 +24,12 @@ class WarpBubble
       warp_bubble_listen
     end
 
-    @neuronbot = NeuronBot.new(self)
-    Thread.new do
-      neuronbot_listen
+    if irc_channel = @@redis.get('warpbubble:ircchannel')
+      puts "Warpbubble: IRC #{irc_channel}"
+      @neuronbot = NeuronBot.new(self)
+      Thread.new do
+        neuronbot_listen
+      end
     end
   end
 
