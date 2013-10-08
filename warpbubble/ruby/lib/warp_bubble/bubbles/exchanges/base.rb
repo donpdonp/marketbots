@@ -75,6 +75,7 @@ class WarpBubble
         resp = HTTParty.get(url, {:format => :xml})
         items = resp.parsed_response["RDF"]["item"]
         if items
+          items = [items] unless items.is_a?(Array)
           confirm_email = items.select{|i| i["title"].match(title_words)}.last
           @@driver.navigate.to(confirm_email["rdf:about"])
           @@driver.find_elements(:css, 'div.mailview a').reject do |link|
