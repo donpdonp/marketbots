@@ -98,7 +98,7 @@ class WarpBubble
 
       def transfer(payload)
         currency = payload["currency"]
-        amount = payload["amount"]
+        amount = trim_float(payload["amount"],8)
         address = payload["address"]
         log "transfer #{amount} #{currency} to #{address}"
         logged_in = login
