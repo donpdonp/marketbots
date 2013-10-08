@@ -1,6 +1,7 @@
 var redis = require('redis').createClient(),
     redis_sub = require('redis').createClient()
 var request = require('request')
+var xml = require('xml2js').parseString;
 
 var db = require('./db.js')
 db.setup(redis)
@@ -94,6 +95,26 @@ function poll(exchange, cb){
 }
 
 var poll_levers = {
+  mcxnow: function(cb){
+    var url = "https://mcxnow.com/orders?cur=LTC"
+    request({url:url, timeout:5000}, function (error, response, body) {
+      var data;
+      var standard_depth;
+      if(error){
+      } else {
+        xml(body, function (err, result) {
+          standard_depth = {}
+          standard_depth.asks = result.doc.sell[0].o.map(function(offer){
+            return [parseFloat(offer.p[0]), parseFloat(offer.c1[0])]
+          })
+          standard_depth.bids = result.doc.buy[0].o.map(function(offer){
+            return [parseFloat(offer.p[0]), parseFloat(offer.c1[0])]
+          })
+        })
+      }
+      cb(standard_depth)
+    })
+  },
   btce: function(cb){
     var url = "https://btc-e.com/api/2/ltc_btc/depth"
     var depth = json_get(url, cb)
