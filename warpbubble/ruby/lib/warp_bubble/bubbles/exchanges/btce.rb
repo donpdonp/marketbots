@@ -18,7 +18,7 @@ class WarpBubble
         blnce = { type: 'Exchange#balance',
                   time: Time.at(@balances["server_time"]).iso8601,
                   object: @balances["funds"] }
-        @chan_pub.set('warpbubble:balance:btce', blnce.to_json)
+        @chan_pub.set("warpbubble:balance:#{@@short_name}", blnce.to_json)
       end
 
       def order(payload)
