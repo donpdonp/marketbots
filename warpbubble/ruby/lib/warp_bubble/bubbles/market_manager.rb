@@ -46,13 +46,13 @@ class WarpBubble
             "#{@arby.asks.offers.size} asks and #{@arby.bids.offers.size} bids")
         plan = @arby.plan
         if plan.steps.size > 0
-          log("generated plan: #{plan.steps.size} steps. "+
+          log("Plan: #{plan.steps.size} steps. "+
               "#{"%0.4f"%plan.profit} profit. "+
               "#{plan.steps.first.from_offer.exchange.name} #{"%0.3f"%plan.quantity} coins -> "+
               "#{plan.steps.first.to_offer.exchange.name}")
           if @chan_pub.exists('warpbubble:plan')
             plan = Heisencoin::Plan.new(get('warpbubble:plan'))
-            log("existing plan #{plan.state}/#{plan.purse}. skipping plan generation")
+            log("Existing plan in #{plan.state}/#{plan.purse}. Skipping plan execution.")
           else
             if plan.profit >= 0.01
               set('warpbubble:plan', plan.to_simple)
@@ -81,7 +81,7 @@ class WarpBubble
           if balances
             purse = balances["object"]["btc"]
             purse_after_fee = purse*(1-exg.fee)
-            log "pre-plan: #{exg.name} #{"%0.8f"%purse}btc available. #{"%0.8f"%purse_after_fee} after fee. plan cost #{"%0.8f"%plan.cost}"
+            log "plan ready: #{exg.name} #{"%0.8f"%purse}btc available. #{"%0.8f"%purse_after_fee} after fee. plan cost #{"%0.8f"%plan.cost}"
             nma("Buying. #{exg.name} #{"%0.8f"%purse}btc available. plan cost #{"%0.8f"%plan.cost}")
             place_orders(plan, purse_after_fee)
             plan.state = "bought"
