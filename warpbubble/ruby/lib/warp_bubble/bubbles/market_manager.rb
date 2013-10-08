@@ -42,27 +42,27 @@ class WarpBubble
       times = @arby.exchanges.map{|r| r.time ? (now - r.time) : nil }
       recent = times.all? {|t| t && t < 30}
       if recent
-        if @chan_pub.exists('warpbubble:plan')
-          plan = Heisencoin::Plan.new(get('warpbubble:plan'))
-          log("existing plan #{plan.state}/#{plan.purse}. skipping plan generation")
-        else
-          log("Generating plan for #{@arby.exchanges.map{|e| "#{e.name} #{e.fee*100}%"}.join(' ')}. "+
-              "#{@arby.asks.offers.size} asks and #{@arby.bids.offers.size} bids")
-          plan = @arby.plan
-          if plan.steps.size > 0
-            log("generated plan: #{plan.steps.size} steps. "+
-                "#{"%0.4f"%plan.profit} profit. "+
-                "#{plan.steps.first.from_offer.exchange.name} #{"%0.3f"%plan.quantity} coins -> "+
-                "#{plan.steps.first.to_offer.exchange.name}")
+        log("Generating plan for #{@arby.exchanges.map{|e| "#{e.name} #{e.fee*100}%"}.join(' ')}. "+
+            "#{@arby.asks.offers.size} asks and #{@arby.bids.offers.size} bids")
+        plan = @arby.plan
+        if plan.steps.size > 0
+          log("generated plan: #{plan.steps.size} steps. "+
+              "#{"%0.4f"%plan.profit} profit. "+
+              "#{plan.steps.first.from_offer.exchange.name} #{"%0.3f"%plan.quantity} coins -> "+
+              "#{plan.steps.first.to_offer.exchange.name}")
+          if @chan_pub.exists('warpbubble:plan')
+            plan = Heisencoin::Plan.new(get('warpbubble:plan'))
+            log("existing plan #{plan.state}/#{plan.purse}. skipping plan generation")
+          else
             if plan.profit >= 0.01
               set('warpbubble:plan', plan.to_simple)
               publish({'action' => 'plan ready', 'payload' => {}})
             else
               log 'insuficient profit. skipping plan.'
             end
-          else
-            log("Spread is #{"%0.5f" % @arby.spread}. #{@arby.asks.offers.first.exchange.name} leads. no strategy available.")
           end
+        else
+          log("Spread is #{"%0.5f" % @arby.spread}. #{@arby.asks.offers.first.exchange.name} leads. no strategy available.")
         end
       end
     end
