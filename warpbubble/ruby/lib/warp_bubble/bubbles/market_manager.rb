@@ -62,7 +62,12 @@ class WarpBubble
             end
           end
         else
-          log("Spread is #{"%0.5f" % @arby.spread}. #{@arby.asks.offers.first.exchange.name} leads. no strategy available.")
+          var msg = "Spread is #{"%0.5f" % @arby.spread}. #{@arby.asks.offers.first.exchange.name} leads. no strategy available."
+          if @chan_pub.exists('warpbubble:plan')
+            plan = Heisencoin::Plan.new(get('warpbubble:plan'))
+            msg += "Existing plan in #{plan.state}/#{plan.purse}. "
+          end
+          log(msg)
         end
       end
     end
