@@ -140,7 +140,6 @@ class WarpBubble
             log 'No profile button found'
           end
         end
-        web_driver.close
       end
 
       def email_confirm(payload)
