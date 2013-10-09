@@ -80,7 +80,7 @@ class WarpBubble
           if confirm_email
             log "confirm email found. loading"
             @@driver.navigate.to(confirm_email["rdf:about"])
-            @@driver.find_elements(:css, 'div.mailview a').reject do |link|
+            @@driver.find_elements(:css, 'div.mailview a').select do |link|
               link.attribute('href').match(link_words)
             end
           else
