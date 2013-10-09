@@ -45,11 +45,15 @@ class WarpBubble
         params["method"] = command
         params["nonce"] = Time.now.to_i.to_s
         headers = {'Key' => @api_key, 'Sign' => sign(params)}
-        result = HTTParty.post @@api_url, {:body => params, :headers => headers, :format => :json}
-        if result.parsed_response["success"] == "1"
-          result.parsed_response["return"]
-        else
-          log result.parsed_response.inspect
+        begin
+          result = HTTParty.post @@api_url, {:body => params, :headers => headers, :format => :json}
+          if result.parsed_response["success"] == "1"
+            result.parsed_response["return"]
+          else
+            log result.parsed_response.inspect
+          end
+        rescue Errno::ECONNRESET => e
+          log e.to_s
         end
       end
 
