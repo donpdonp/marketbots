@@ -150,7 +150,7 @@ class WarpBubble
           log 'email confirm link found'
           confirm_url = links.first.attribute('href')
           if login
-            log 'confirming'
+            log "confirming #{confirm_url}"
             web_driver.navigate.to(confirm_url)
           end
         else

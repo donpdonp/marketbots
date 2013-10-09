@@ -103,8 +103,9 @@ class WarpBubble
           if login
             log "confirming #{confirm_url}"
             web_driver.navigate.to(confirm_url)
+          else
+            log 'email confirm, login failed'
           end
-          log 'email confirm link found'
         else
           log 'email confirm not found'
         end
