@@ -53,10 +53,7 @@ class WarpBubble
         end
       end
 
-      def transfer(payload)
-        currency = payload["currency"]
-        amount = trim_float(payload["amount"],8)
-        address = payload["address"]
+      def login
         log "logging in with #{@chan_pub.get("#{@@short_name}:username")}"
         web_driver.navigate.to "https://www.cryptsy.com/users/login"
         element = web_driver.find_element(:id, 'UserUsername')
@@ -69,7 +66,14 @@ class WarpBubble
         wait = Selenium::WebDriver::Wait.new(:timeout => 10) # seconds
         wait.until { web_driver.find_element(:class => "messages") }
         element = web_driver.find_element(:class, 'messages')
-        if element.text == "You have been successfully logged in"
+        element.text == "You have been successfully logged in"
+      end
+
+      def transfer(payload)
+        currency = payload["currency"]
+        amount = trim_float(payload["amount"],8)
+        address = payload["address"]
+        if login
           log 'Login Success!'
           marketid = "2" if currency == 'ltc'
           marketid = "3" if currency == 'btc'
@@ -95,6 +99,11 @@ class WarpBubble
         username = @chan_pub.get("#{@@short_name}:username")
         links = mailinator(username, /Confirm Your Withdrawal/, /confirmwithdrawal/)
         if links.size == 1
+          confirm_url = links.first.attribute('href')
+          if login
+            log "confirming #{confirm_url}"
+            web_driver.navigate.to(confirm_url)
+          end
           log 'email confirm link found'
         else
           log 'email confirm not found'
