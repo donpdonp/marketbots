@@ -28,7 +28,7 @@ class WarpBubble
                         'rate' => trim_float(payload['price'],8),
                         'amount' => trim_float(payload['quantity'],8) }
         log "ORDER GO #{order_detail}"
-        post('Trade', order_detail)
+        log post('Trade', order_detail)
         super
       end
 

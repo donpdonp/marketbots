@@ -31,7 +31,7 @@ class WarpBubble
                         'price' => payload['price'],
                         'quantity' => payload['quantity']}
         log "ORDER GO #{order_detail}"
-        post('createorder', order_detail)
+        log post('createorder', order_detail)
         super
       end
 
