@@ -85,10 +85,9 @@ class WarpBubble
           balances = balance_load(exg.name)
           if balances
             purse = balances["object"]["btc"]
-            purse_after_fee = purse*(1-exg.fee)
-            log "plan ready: #{exg.name} #{"%0.8f"%purse}btc available. #{"%0.8f"%purse_after_fee} after fee. plan cost #{"%0.8f"%plan.cost}"
-            nma("Buying. #{exg.name} #{"%0.8f"%purse}btc available. plan cost #{"%0.8f"%plan.cost}")
-            place_orders(plan, purse_after_fee)
+            log "plan ready: plan cost #{"%0.8f"%plan.cost}. #{exg.name} #{"%0.8f"%purse}btc available."
+            nma("Buying #{exg.name} plan cost #{"%0.5f"%plan.cost}btc. #{"%0.5f"%purse}btc available.")
+            place_orders(plan, purse, exg.fee)
             plan.state = "bought"
             set('warpbubble:plan', plan.to_simple)
           else
@@ -124,10 +123,9 @@ class WarpBubble
         exg = plan.steps.first.to_offer.exchange
         balances = balance_load(exg.name)
         balance = balances["object"]["ltc"]
-        balance_after_fee = balance*(1-exg.fee)
-        log "post-plan: #{exg.name} #{"%0.8f"%balance}ltc available. #{"%0.8f"%balance_after_fee} after fee. plan purse #{"%0.8f"%plan.purse}"
+        log "post-plan: #{exg.name} #{"%0.8f"%balance}ltc available. plan purse #{"%0.8f"%plan.purse}"
         if balance > plan.purse
-          place_orders(plan, plan.purse)
+          place_orders(plan, plan.purse, exg.fee)
           fee = plan.steps.first.from_offer.exchange.fee+plan.steps.first.to_offer.exchange.fee
           log "post-plan profit #{plan.purse-plan.spent}btc - #{fee}%fee = #{(plan.purse-plan.spent)*(1-fee)}btc"
           plan.state = "sold"
@@ -149,7 +147,7 @@ class WarpBubble
       end
     end
 
-    def place_orders(plan, purse)
+    def place_orders(plan, purse, fee)
       if plan.state == 'buying'
         state = 'buy'
       elsif plan.state == 'selling'
@@ -182,11 +180,11 @@ class WarpBubble
         acquired += coins_spent
       end
       if state == 'buy'
-        plan.purse = acquired
+        plan.purse = acquired*(1-fee)
         plan.spent = expense
       end
       if state == 'sell'
-        plan.purse = expense
+        plan.purse = expense*(1-fee)
       end
       log("#{state} orders finished. totals #{expense}btc #{acquired}ltc. plan.purse = #{plan.purse}. plan.spent = #{plan.spent}")
     end
