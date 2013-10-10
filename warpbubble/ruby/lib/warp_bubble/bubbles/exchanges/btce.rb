@@ -145,9 +145,9 @@ class WarpBubble
       def email_confirm(payload)
         email = @chan_pub.get("#{@@short_name}:username")
         username = email.split('@').first
-        links = mailinator(username, /Withdraw confirmation/, /cancel/)
-        if links.size == 1
-          log 'email confirm link found'
+        links = mailinator(username, /Withdraw confirmation/, /withdraw_confirm/)
+        if links.size > 0
+          log "#{links.size} email confirm link(s) found"
           confirm_url = links.first.attribute('href')
           if login
             log "confirming #{confirm_url}"
