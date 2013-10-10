@@ -159,11 +159,11 @@ class WarpBubble
         return
       end
       expense = 0.0
-      acquired = 0
+      acquired = 0.0
       plan.steps.each do |step|
         remaining = purse - expense if state == 'buy'
         remaining = purse - acquired if state == 'sell'
-        if remaining <= 0.00001
+        if remaining <= 0.0001
           log("out of money.")
           break
         end
