@@ -41,6 +41,7 @@ class WarpBubble
       now = Time.now
       exchange.time = now
       @arby.add_depth(exchange, message['depth'])
+      log "Depth added for #{exchange.name}"
       times = @arby.exchanges.map{|r| r.time ? (now - r.time) : nil }
       recent = times.all? {|t| t && t < 30}
       if recent
