@@ -105,7 +105,7 @@ var poll_levers = {
         xml(body, function (err, result) {
           standard_depth = {}
           standard_depth.asks = result.doc.sell[0].o.map(function(offer){
-            return [parseFloat(offer.p[0]*0.92), parseFloat(offer.c1[0])]
+            return [parseFloat(offer.p[0]), parseFloat(offer.c1[0])]
           })
           standard_depth.bids = result.doc.buy[0].o.map(function(offer){
             return [parseFloat(offer.p[0]), parseFloat(offer.c1[0])]
