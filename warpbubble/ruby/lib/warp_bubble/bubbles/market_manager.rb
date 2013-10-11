@@ -113,7 +113,8 @@ class WarpBubble
         plan = Heisencoin::Plan.new(get('warpbubble:plan'))
         if plan.state == "bought"
           log "Time: plan.state/bought. balance refresh"
-          publish({"action" => "balance refresh", "payload" => {"exchange" => "*"}})
+          from_exg = plan.steps.first.from_offer.exchange
+          publish({"action" => "balance refresh", "payload" => {"exchange" => from_exg.name}})
         end
       end
     end
