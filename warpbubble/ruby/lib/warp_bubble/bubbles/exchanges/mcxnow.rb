@@ -19,20 +19,24 @@ class WarpBubble
         html = post('account.html')
         xml_regex = /var startData='(<.*doc>)';/m
         xml = xml_regex.match(html)
-        doc = REXML::Document.new xml[1]
-        doc.elements.each('doc/cur') do |e|
-          code = ""
-          e.elements.each('tla'){|e| code = e.text.downcase}
-          e.elements.each('balavail'){|e| @balances[code] = e.text.to_f}
+        if xml
+          doc = REXML::Document.new xml[1]
+          doc.elements.each('doc/cur') do |e|
+            code = ""
+            e.elements.each('tla'){|e| code = e.text.downcase}
+            e.elements.each('balavail'){|e| @balances[code] = e.text.to_f}
+          end
+          msg = "balance refresh. #{"%0.8f"% @balances['ltc']} ltc. "+
+                "#{"%0.8f"% @balances['btc']} btc. "+
+                "#{@balances["open_orders"]} open orders"
+          log(msg)
+          blnce = { type: 'Exchange#balance',
+                    time: Time.now.iso8601,
+                    object: @balances }
+          @chan_pub.set("warpbubble:balance:#{@@short_name}", blnce.to_json)
+        else
+          log "account.html: balance data not found. #{html[0,50]}"
         end
-        msg = "balance refresh. #{"%0.8f"% @balances['ltc']} ltc. "+
-              "#{"%0.8f"% @balances['btc']} btc. "+
-              "#{@balances["open_orders"]} open orders"
-        log(msg)
-        blnce = { type: 'Exchange#balance',
-                  time: Time.now.iso8601,
-                  object: @balances }
-        @chan_pub.set("warpbubble:balance:#{@@short_name}", blnce.to_json)
       end
 
       def order(payload)
