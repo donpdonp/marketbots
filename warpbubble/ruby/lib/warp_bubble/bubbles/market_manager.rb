@@ -87,8 +87,8 @@ class WarpBubble
           balances = balance_load(exg.name)
           if balances
             purse = balances["object"]["btc"]
-            purse_trim = (BigDecimal.new(purse,8) - 0.00000001).to_s('F')
-            log "plan ready: plan cost #{"%0.8f"%plan.cost}. #{exg.name} #{"%0.8f"%purse}btc (trimmed #{purse_trim})available."
+            purse_trim = purse - 0.00000001
+            log "plan ready: plan cost #{"%0.8f"%plan.cost}. #{exg.name} #{"%0.8f"%purse}btc (trimmed #{"%0.8f"%purse_trim})available."
             nma("Buying #{exg.name} plan cost #{"%0.5f"%plan.cost}btc. #{"%0.5f"%purse}btc available.")
             place_orders(plan, purse_trim, exg.fee)
             plan.state = "bought"
