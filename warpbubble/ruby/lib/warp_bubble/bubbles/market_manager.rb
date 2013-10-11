@@ -109,6 +109,7 @@ class WarpBubble
     def plan_time(payload)
       @last_time ||= Time.now
       if Time.now - @last_time > 30
+        @last_time = Time.now
         return unless @chan_pub.exists('warpbubble:plan')
         plan = Heisencoin::Plan.new(get('warpbubble:plan'))
         if plan.state == "bought"
