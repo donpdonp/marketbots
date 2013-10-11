@@ -87,12 +87,16 @@ class WarpBubble
           balances = balance_load(exg.name)
           if balances
             purse = balances["object"]["btc"]
-            purse_trim = purse - 0.00000001
-            log "plan ready: plan cost #{"%0.8f"%plan.cost}. #{exg.name} #{"%0.8f"%purse}btc (trimmed #{"%0.8f"%purse_trim})available."
-            nma("Buying #{exg.name} plan cost #{"%0.5f"%plan.cost}btc. #{"%0.5f"%purse}btc available.")
-            place_orders(plan, purse_trim, exg.fee)
-            plan.state = "bought"
-            set('warpbubble:plan', plan.to_simple)
+            if purse > 0
+              purse_trim = purse - 0.00000001
+              log "Go plan: plan cost #{"%0.8f"%plan.cost}. #{exg.name} #{"%0.8f"%purse}btc (trimmed #{"%0.8f"%purse_trim})available."
+              nma("Buying #{exg.name} plan cost #{"%0.5f"%plan.cost}btc. #{"%0.5f"%purse}btc available.")
+              place_orders(plan, purse_trim, exg.fee)
+              plan.state = "bought"
+              set('warpbubble:plan', plan.to_simple)
+            else
+              log "#{exg.name} is out of coins"
+            end
           else
             log "missing balances report for #{exg.name}"
           end
