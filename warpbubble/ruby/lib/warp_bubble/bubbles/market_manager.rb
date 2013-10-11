@@ -20,6 +20,8 @@ class WarpBubble
         on.message do |channel, json|
           message = JSON.parse(json)
           case message["action"]
+          when "time"
+            plan_time(message["payload"])
           when "depth ready"
             depth_ready(message["payload"])
           when "plan ready"
@@ -98,6 +100,17 @@ class WarpBubble
           log "plan in #{plan.state}. skipping this plan."
           return
         end
+    end
+
+    def plan_time(payload)
+      @last_time ||= Time.now
+      if Time.now - @last_time > 30
+        plan = Heisencoin::Plan.new(get('warpbubble:plan'))
+        if plan.state == "bought"
+          log "Time: plan.state/bought. balance refresh"
+          publish({"action" => "balance refresh", "payload" => {"exchange" => "*"}})
+        end
+      end
     end
 
     def balance_ready(payload)
