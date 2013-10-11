@@ -89,7 +89,7 @@ class WarpBubble
   end
 end
 
-WarpBubble.add_service({"name" => "Exchanges::Btce", "thread" => Thread.new do
+WarpBubble.add_service({"name" => "Exchanges::Mcxnow", "thread" => Thread.new do
   WarpBubble::Exchanges::Mcxnow.new.go
 end})
 
