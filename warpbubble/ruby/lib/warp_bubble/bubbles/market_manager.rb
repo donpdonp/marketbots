@@ -87,7 +87,7 @@ class WarpBubble
           balances = balance_load(exg.name)
           if balances
             purse = balances["object"]["btc"]
-            if purse > 0
+            if purse > 0.001
               purse_trim = purse - 0.00000001
               log "Go plan: plan cost #{"%0.8f"%plan.cost}. #{exg.name} #{"%0.8f"%purse}btc (trimmed #{"%0.8f"%purse_trim})available."
               nma("Buying #{exg.name} plan cost #{"%0.5f"%plan.cost}btc. #{"%0.5f"%purse}btc available.")
@@ -114,7 +114,9 @@ class WarpBubble
         if plan.state == "bought"
           log "Time: plan.state/bought. balance refresh"
           from_exg = plan.steps.first.from_offer.exchange
-          publish({"action" => "balance refresh", "payload" => {"exchange" => from_exg.name}})
+          if balance_load(from_exg.name)
+            publish({"action" => "balance refresh", "payload" => {"exchange" => from_exg.name}})
+          end
         end
       end
     end
