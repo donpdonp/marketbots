@@ -1,4 +1,5 @@
 require 'time'
+require 'bigdecimal'
 
 class WarpBubble
   class Base
