@@ -114,6 +114,7 @@ class WarpBubble
     end
 
     def balance_ready(payload)
+      return unless get('warpbubble:plan')
       plan = Heisencoin::Plan.new(get('warpbubble:plan'))
       if plan.state == "bought"
         plan.state = "moving"
