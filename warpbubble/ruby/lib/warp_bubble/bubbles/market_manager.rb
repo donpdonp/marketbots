@@ -87,7 +87,7 @@ class WarpBubble
           balances = balance_load(exg.name)
           if balances
             purse = balances["object"]["btc"]
-            purse_trim = (BigDecimal.new(purse).floor(8) - 0.00000001).to_s('F')
+            purse_trim = (BigDecimal.new(purse,8) - 0.00000001).to_s('F')
             log "plan ready: plan cost #{"%0.8f"%plan.cost}. #{exg.name} #{"%0.8f"%purse}btc (trimmed #{purse_trim})available."
             nma("Buying #{exg.name} plan cost #{"%0.5f"%plan.cost}btc. #{"%0.5f"%purse}btc available.")
             place_orders(plan, purse_trim, exg.fee)
@@ -105,6 +105,7 @@ class WarpBubble
     def plan_time(payload)
       @last_time ||= Time.now
       if Time.now - @last_time > 30
+        return unless @chan_pub.exists('warpbubble:plan')
         plan = Heisencoin::Plan.new(get('warpbubble:plan'))
         if plan.state == "bought"
           log "Time: plan.state/bought. balance refresh"
