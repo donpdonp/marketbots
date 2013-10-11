@@ -19,7 +19,7 @@ class WarpBubble
                   time: Time.at(@balances["server_time"]).iso8601,
                   object: @balances["funds"] }
         @chan_pub.set("warpbubble:balance:#{@@short_name}", blnce.to_json)
-        super.balance(payload)
+        balance(payload)
       end
 
       def order(payload)
