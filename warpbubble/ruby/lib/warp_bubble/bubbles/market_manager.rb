@@ -130,6 +130,7 @@ class WarpBubble
         plan.state = "moving"
         from_exg = plan.steps.first.from_offer.exchange
         balances = balance_load(from_exg.name)
+        return unless balances
         if balances["object"]["ltc"] >= plan.purse
           to_exg = plan.steps.first.to_offer.exchange
           log "move: #{plan.purse}ltc #{from_exg.name} => #{to_exg.name}"
