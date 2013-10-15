@@ -120,6 +120,11 @@ class WarpBubble
             publish({"action" => "balance refresh", "payload" => {"exchange" => from_exg.name}})
           end
         end
+        if plan.state == "email"
+          log "Time: plan.state/email. email check"
+          from_exg = plan.steps.first.from_offer.exchange
+          publish({"action" => "check email", "payload" => {"exchange" => from_exg.name}})
+        end
       end
     end
 
@@ -139,7 +144,7 @@ class WarpBubble
                                                          "amount" => plan.purse,
                                                          "currency" => 'ltc',
                                                          "address" => address}})
-          plan.state = "moved"
+          plan.state = "email"
           set('warpbubble:plan', plan.to_simple)
         else
           log "#{from_exg.name} balance of #{balances["object"]["ltc"]} is not purse #{plan.purse}"
