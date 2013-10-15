@@ -82,7 +82,7 @@ class WarpBubble
           items = [items] unless items.is_a?(Array)
           confirm_email = items.select{|i| i["title"].match(title_words)}.last
           if confirm_email
-            log "confirm email found. loading"
+            log "email subject found. loading #{confirm_email["rdf:about"]}"
             @@driver.navigate.to(confirm_email["rdf:about"])
             @@driver.find_elements(:css, 'div.mailview a').select do |link|
               link.attribute('href').match(link_words)
