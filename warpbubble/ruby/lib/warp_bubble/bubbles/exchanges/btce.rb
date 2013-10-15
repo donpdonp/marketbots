@@ -11,7 +11,7 @@ class WarpBubble
 
       def balance_refresh(payload)
         @balances = post('getInfo')
-        msg = "balance refresh. #{"%0.8f"% @balances['funds']['ltc']} ltc. "+
+        msg = "balance refreshed. #{"%0.8f"% @balances['funds']['ltc']} ltc. "+
               "#{"%0.8f"% @balances['funds']['btc']} btc. "+
               "#{@balances["open_orders"]} open orders"
         log(msg)

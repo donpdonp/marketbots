@@ -15,7 +15,7 @@ class WarpBubble
         balances = post('getinfo')
         @balances = {}
         balances["balances_available"].each{|key, value| @balances[key.downcase] = value.to_f }
-        msg = "balance refresh. #{"%0.8f"% @balances['ltc']} ltc. "+
+        msg = "balance refreshed. #{"%0.8f"% @balances['ltc']} ltc. "+
               "#{"%0.8f"% @balances['btc']} btc. "+
               "#{balances["openordercount"]} open orders"
         log(msg)
