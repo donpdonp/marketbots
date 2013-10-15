@@ -125,7 +125,7 @@ class WarpBubble
         if plan.state == "email"
           log "Time: plan.state/email. email check"
           from_exg = plan.steps.first.from_offer.exchange
-          publish({"action" => "check email", "payload" => {"exchange" => from_exg.name}})
+          publish({"action" => "email check", "payload" => {"exchange" => from_exg.name}})
         end
       end
     end
