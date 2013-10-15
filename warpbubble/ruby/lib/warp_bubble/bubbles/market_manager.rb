@@ -230,12 +230,16 @@ class WarpBubble
         coins_spent = [coins_afforded, step.quantity].min
         cost = coins_spent*offer.price
         log "#{"%0.8f"%remaining} remains. #{state} offer: #{offer.exchange.name} #{offer.price} x#{step.quantity}. consuming x#{coins_spent} = #{"%0.5f"%cost}btc"
-        publish({:action => 'order', :payload => {:exchange => offer.exchange.name,
-                                                  :order => state,
-                                                  :price => offer.price,
-                                                  :quantity => coins_spent} })
-        expense += cost
-        acquired += coins_spent
+        if coins_spent > 0.1
+          publish({:action => 'order', :payload => {:exchange => offer.exchange.name,
+                                                    :order => state,
+                                                    :price => offer.price,
+                                                    :quantity => coins_spent} })
+          expense += cost
+          acquired += coins_spent
+        else
+          log "skipping order due to market rejection of miniscule volume #{coins_spent}ltc"
+        end
       end
       if state == 'buy'
         plan.purse = acquired
