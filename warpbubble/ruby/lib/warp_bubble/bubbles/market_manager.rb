@@ -131,7 +131,7 @@ class WarpBubble
           log "Time: plan.state/moved. balance refresh"
           to_exg = plan.steps.first.to_offer.exchange
           if balance_load(to_exg.name)
-            publish({"action" => "balance refresh", "payload" => {"exchange" => from_exg.name}})
+            publish({"action" => "balance refresh", "payload" => {"exchange" => to_exg.name}})
           end
         end
       end
