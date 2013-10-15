@@ -179,17 +179,19 @@ class WarpBubble
         plan.state = "selling"
         exg = plan.steps.first.to_offer.exchange
         balances = balance_load(exg.name)
-        balance = balances["object"]["ltc"]
-        log "post-plan: #{exg.name} #{"%0.8f"%balance}ltc available. plan purse #{"%0.8f"%plan.purse}"
-        if balance > plan.purse
-          place_orders(plan, plan.purse, exg.fee)
-          fee = plan.steps.first.from_offer.exchange.fee+plan.steps.first.to_offer.exchange.fee
-          log "post-plan profit #{plan.purse-plan.spent}btc - #{fee}%fee = #{(plan.purse-plan.spent)*(1-fee)}btc"
-          nma("purse #{plan.purse} spent #{plan.spent} = profit #{plan.purse-plan.spent}btc")
-          plan.state = "sold"
-          set('warpbubble:plan', plan.to_simple)
-        else
-          log "post-plan: balance of #{balance} is not sufficient for plan purse of #{plan.purse}. waiting for deposit."
+        if balances
+          balance = balances["object"]["ltc"]
+          log "post-plan: #{exg.name} #{"%0.8f"%balance}ltc available. plan purse #{"%0.8f"%plan.purse}"
+          if balance > plan.purse
+            place_orders(plan, plan.purse, exg.fee)
+            fee = plan.steps.first.from_offer.exchange.fee+plan.steps.first.to_offer.exchange.fee
+            log "post-plan profit #{plan.purse-plan.spent}btc - #{fee}%fee = #{(plan.purse-plan.spent)*(1-fee)}btc"
+            nma("purse #{plan.purse} spent #{plan.spent} = profit #{plan.purse-plan.spent}btc")
+            plan.state = "sold"
+            set('warpbubble:plan', plan.to_simple)
+          else
+            log "post-plan: balance of #{balance} is not sufficient for plan purse of #{plan.purse}. waiting for deposit."
+          end
         end
       else
         log "plan in #{plan.state}. skipping this balance."
