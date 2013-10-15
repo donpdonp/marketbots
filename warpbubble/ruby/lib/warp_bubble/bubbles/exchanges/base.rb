@@ -56,6 +56,10 @@ class WarpBubble
                                                              "balances" => @balances}})
       end
 
+      def email_complete(payload)
+        publish({"action" => "email complete", "payload" => {"exchange" => @short_name}})
+      end
+
       def sign(params)
         hmac = OpenSSL::HMAC.new(@api_secret, OpenSSL::Digest::SHA512.new)
         hmac.update(URI.encode_www_form(params)).to_s

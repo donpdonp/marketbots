@@ -30,6 +30,8 @@ class WarpBubble
             plan_drop(message["payload"])
           when "balance ready"
             balance_ready(message["payload"])
+          when "email complete"
+            email_complete(message["payload"])
           end
         end
       end
@@ -125,6 +127,22 @@ class WarpBubble
           from_exg = plan.steps.first.from_offer.exchange
           publish({"action" => "check email", "payload" => {"exchange" => from_exg.name}})
         end
+      end
+    end
+
+    def email_complete(payload)
+      return unless @chan_pub.exists('warpbubble:plan')
+      plan = Heisencoin::Plan.new(get('warpbubble:plan'))
+      if plan.state == "email"
+        from_exg = plan.steps.first.from_offer.exchange
+        if payload["exchange"] == from_exg.name
+          plan.state = "moved"
+          set('warpbubble:plan', plan.to_simple)
+        else
+          log "ignoring email complete from #{payload["exchange"]}, waiting for #{from_exg.name}"
+        end
+      else
+        log "Error, email_complete recevied when plan is state #{plan.state}"
       end
     end
 
