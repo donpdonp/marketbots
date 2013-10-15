@@ -127,6 +127,13 @@ class WarpBubble
           from_exg = plan.steps.first.from_offer.exchange
           publish({"action" => "email check", "payload" => {"exchange" => from_exg.name}})
         end
+        if plan.state == "moved"
+          log "Time: plan.state/moved. balance refresh"
+          to_exg = plan.steps.first.to_offer.exchange
+          if balance_load(to_exg.name)
+            publish({"action" => "balance refresh", "payload" => {"exchange" => from_exg.name}})
+          end
+        end
       end
     end
 
