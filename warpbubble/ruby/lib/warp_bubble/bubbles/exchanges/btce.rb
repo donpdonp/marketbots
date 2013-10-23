@@ -110,6 +110,7 @@ class WarpBubble
         amount = trim_float(payload["amount"],8)
         address = payload["address"]
         log "transfer #{amount} #{currency} to #{address}"
+        logged_in = false
         3.times { logged_in = login; break if logged_in }
         if logged_in
           profile = web_driver.find_elements(:css, "div.profile a").select{|b| b.attribute("href") == "https://btc-e.com/profile#funds"}.first
@@ -127,7 +128,7 @@ class WarpBubble
               xfer_button = buttons.first
               xfer_button.click
               log "#{currency} withdrawal button pushed"
-              wait = Selenium::WebDriver::Wait.new(:timeout => 10) # seconds
+              wait = Selenium::WebDriver::Wait.new(:timeout => 20) # seconds
               wait.until { web_driver.find_element(:css => 'div#billing h1') }
               element = web_driver.find_element(:css, 'div#billing h1')
               if element.text == "Withdrawal #{currency.upcase}"
