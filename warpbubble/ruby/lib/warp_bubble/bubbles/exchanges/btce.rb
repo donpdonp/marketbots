@@ -85,14 +85,18 @@ class WarpBubble
             element.send_keys password
             element.submit
             log web_driver.title
-            wait = Selenium::WebDriver::Wait.new(:timeout => 10) # seconds
-            wait.until { web_driver.find_element(:class => "profile") }
-            element = web_driver.find_element(:class, 'profile')
-            if element.text.split.first == username
-              log 'Login Success!'
-              logged_in = true
-            else
-              log "Login fail: #{element.text.split.first}"
+            begin
+              wait = Selenium::WebDriver::Wait.new(:timeout => 10) # seconds
+              wait.until { web_driver.find_element(:class => "profile") }
+              element = web_driver.find_element(:class, 'profile')
+              if element.text.split.first == username
+                log 'Login Success!'
+                logged_in = true
+              else
+                log "Login fail: #{element.text.split.first}"
+              end
+            rescue Selenium::WebDriver::Error::TimeOutError => e
+              log "#{e}"
             end
           end
         rescue Timeout::Error => e
@@ -106,7 +110,7 @@ class WarpBubble
         amount = trim_float(payload["amount"],8)
         address = payload["address"]
         log "transfer #{amount} #{currency} to #{address}"
-        logged_in = login
+        3.times { logged_in = login; break if logged_in }
         if logged_in
           profile = web_driver.find_elements(:css, "div.profile a").select{|b| b.attribute("href") == "https://btc-e.com/profile#funds"}.first
           if profile
