@@ -71,28 +71,32 @@ class WarpBubble
         password = @chan_pub.get("#{@@short_name}:password")
         logged_in = false
         log "https://btc-e.com #{username}"
-        web_driver.navigate.to "https://btc-e.com"
-        elements = web_driver.find_elements(:class, 'profile')
-        if elements.size == 1 && elements.first.text.split.first == username
-          log 'Already logged in!'
-          logged_in = true
-        else
-          log "logging in with #{email}"
-          element = web_driver.find_element(:id, 'email')
-          element.send_keys email
-          element = web_driver.find_element(:id, 'password')
-          element.send_keys password
-          element.submit
-          log web_driver.title
-          wait = Selenium::WebDriver::Wait.new(:timeout => 10) # seconds
-          wait.until { web_driver.find_element(:class => "profile") }
-          element = web_driver.find_element(:class, 'profile')
-          if element.text.split.first == username
-            log 'Login Success!'
+        begin
+          web_driver.navigate.to "https://btc-e.com"
+          elements = web_driver.find_elements(:class, 'profile')
+          if elements.size == 1 && elements.first.text.split.first == username
+            log 'Already logged in!'
             logged_in = true
           else
-            log "Login fail: #{element.text.split.first}"
+            log "logging in with #{email}"
+            element = web_driver.find_element(:id, 'email')
+            element.send_keys email
+            element = web_driver.find_element(:id, 'password')
+            element.send_keys password
+            element.submit
+            log web_driver.title
+            wait = Selenium::WebDriver::Wait.new(:timeout => 10) # seconds
+            wait.until { web_driver.find_element(:class => "profile") }
+            element = web_driver.find_element(:class, 'profile')
+            if element.text.split.first == username
+              log 'Login Success!'
+              logged_in = true
+            else
+              log "Login fail: #{element.text.split.first}"
+            end
           end
+        rescue Timeout::Error => e
+          log "login: #{e}"
         end
         logged_in
       end
