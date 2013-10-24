@@ -92,8 +92,7 @@ class WarpBubble
             purse = balances["object"]["btc"]
             if purse > 0.001
               purse_trim = purse - 0.00000001
-              log "Go plan: plan cost #{"%0.8f"%plan.cost}. #{exg.name} #{"%0.8f"%purse}btc (trimmed #{"%0.8f"%purse_trim})available."
-              nma("Buying #{exg.name} plan profit #{"%0.4f"%plan.profit}btc. #{"%0.5f"%purse}btc available.")
+              log "Go plan: plan cost #{"%0.8f"%plan.cost}. #{exg.name} #{"%0.8f"%purse}btc (trimmed #{"%0.8f"%purse_trim})available.", "beacon"
               place_orders(plan, purse_trim, exg.fee)
               plan.state = "bought"
               set('warpbubble:plan', plan.to_simple)
@@ -143,7 +142,7 @@ class WarpBubble
       if plan.state == "email"
         from_exg = plan.steps.first.from_offer.exchange
         if payload["exchange"] == from_exg.name
-          nma("Buying #{from_exg.name} transfer confirmed")
+          log("Buying #{from_exg.name} transfer confirmed","beacon")
           plan.state = "moved"
           set('warpbubble:plan', plan.to_simple)
         else
@@ -185,8 +184,7 @@ class WarpBubble
           if balance > plan.purse
             place_orders(plan, plan.purse, exg.fee)
             fee = plan.steps.first.from_offer.exchange.fee+plan.steps.first.to_offer.exchange.fee
-            log "post-plan profit #{plan.purse-plan.spent}btc - #{fee}%fee = #{(plan.purse-plan.spent)*(1-fee)}btc"
-            nma("purse #{plan.purse} spent #{plan.spent} = profit #{plan.purse-plan.spent}btc")
+            log "post-plan profit #{plan.purse-plan.spent}btc - #{fee}%fee = #{(plan.purse-plan.spent)*(1-fee)}btc", "beacon"
             plan.state = "sold"
             set('warpbubble:plan', plan.to_simple)
           else

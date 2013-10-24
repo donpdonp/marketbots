@@ -16,11 +16,12 @@ class WarpBubble
       @chan_pub.publish(@@channel_name, payload.to_json)
     end
 
-    def log(msg)
+    def log(msg, tag="")
       short_class_name = self.class.name.split('::').drop(1).join('::')
       time = Time.now.strftime("%H:%M")
       puts "#{time} #{short_class_name}: #{msg.to_s}"
       irc_say "#{short_class_name}: #{msg.to_s}"
+      beacon(msg) if tag == "beacon"
       nil
     end
 
@@ -43,9 +44,9 @@ class WarpBubble
       end
     end
 
-    def nma(msg)
-      @chan_pub.publish('lines', {'type'=>'notifymyandroid',
-                                  'application'=>'warpbubble',
+    def beacon(msg)
+      @chan_pub.publish('lines', {'type'=>'beacon',
+                                  'sender'=>'warpbubble',
                                   'message'=>msg
                                  }.to_json)
     end
