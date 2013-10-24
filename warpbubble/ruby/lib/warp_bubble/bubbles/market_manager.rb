@@ -227,7 +227,7 @@ class WarpBubble
         end
         offer = step.from_offer if state == 'buy'
         offer = step.to_offer if state == 'sell'
-        coins_afforded = remaining/offer.price*(1-fee) if state == 'buy'
+        coins_afforded = remaining/offer.price if state == 'buy'
         coins_afforded = remaining if state == 'sell'
         coins_spent = [coins_afforded, step.quantity].min
         cost = coins_spent*offer.price
@@ -248,9 +248,11 @@ class WarpBubble
         plan.spent = expense
       end
       if state == 'sell'
-        plan.purse = expense*(1-fee)
+        plan.purse = expense
       end
-      log("#{state} orders finished. totals #{expense}btc #{acquired}ltc. plan.purse = #{plan.purse}. plan.spent = #{plan.spent}")
+      original_purse = plan.purse
+      plan.purse = plan.purse*(1-fee)
+      log("#{state} orders finished. totals #{expense}btc #{acquired}ltc. plan.purse = #{plan.purse} (original purse #{original_purse}). plan.spent = #{plan.spent}")
     end
 
   end
