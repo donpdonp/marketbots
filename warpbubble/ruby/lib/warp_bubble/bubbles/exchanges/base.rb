@@ -83,9 +83,14 @@ class WarpBubble
           confirm_email = items.select{|i| i["title"].match(title_words)}.last
           if confirm_email
             log "email subject found. loading #{confirm_email["rdf:about"]}"
-            @@driver.navigate.to(confirm_email["rdf:about"])
-            @@driver.find_elements(:css, 'div.mailview a').select do |link|
-              link.attribute('href').match(link_words)
+            begin
+              @@driver.navigate.to(confirm_email["rdf:about"])
+              @@driver.find_elements(:css, 'div.mailview a').select do |link|
+                link.attribute('href').match(link_words)
+              end
+            rescue Timeout::Error => e
+              log "mailinator: #{e}"
+              []
             end
           else
             log "no confirmation mail for #{url}"
