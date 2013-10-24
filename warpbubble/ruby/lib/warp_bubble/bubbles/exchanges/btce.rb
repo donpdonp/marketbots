@@ -49,19 +49,23 @@ class WarpBubble
         @chan_pub.set("#{@@short_name}:nonce", nonce+1)
         params["nonce"] = nonce
         headers = {'Key' => @api_key, 'Sign' => sign(params)}
-        result = HTTParty.post @@api_url, {:body => params, :headers => headers, :format => :json}
-        if result.parsed_response["success"] == 1
-          result.parsed_response["return"]
-        else
-          # more noncesense
-          match = /invalid nonce.*on key:(\d+)/.match(result.parsed_response["error"])
-          if match
-            params["nonce"] = match[1].to_i+1
-            log "nonce readjusted to #{params["nonce"]} and retrying."
-            post(command, params) #do it again
+        begin
+          result = HTTParty.post @@api_url, {:body => params, :headers => headers, :format => :json}
+          if result.parsed_response["success"] == 1
+            result.parsed_response["return"]
           else
-            log result.parsed_response
+            # more noncesense
+            match = /invalid nonce.*on key:(\d+)/.match(result.parsed_response["error"])
+            if match
+              params["nonce"] = match[1].to_i+1
+              log "nonce readjusted to #{params["nonce"]} and retrying."
+              post(command, params) #do it again
+            else
+              log result.parsed_response
+            end
           end
+        rescue MultiJson::LoadError => e
+          log "API POST #{e}"
         end
       end
 
