@@ -352,7 +352,7 @@ function save_inventory(){
   inventory.btc.amount.amount = parseFloat(inventory.btc.amount.toFixed(8))
   inventory.usd.amount.amount = parseFloat(inventory.usd.amount.toFixed(5))
   json_log({msg:"save_inventory",inventory:inventory})
-  fs.writeFileSync("./inventory.json", JSON.stringify(inventory))
+  fs.writeFileSync("./inventory.json", JSON.stringify(inventory)+"\n")
 }
 
 function email_alert(msg){
