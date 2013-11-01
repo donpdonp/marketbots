@@ -201,8 +201,10 @@ function sell(price){
                                  price: price,
                                  amount: inventory.btc.amount,
                                  lag: lag_secs})
-          add_order('ask', price, inventory.btc.amount)
-          email_alert("stoploss sell "+price.toFixed(2)+" "+inventory.btc.amount+"btc")
+          btc = inventory.btc.amount
+          add_order('ask', price, btc)
+          profit = (price-inventory.usd.price)*btc
+          email_alert("sell "+price.toFixed(2)+" x"+btc.toFixed(2)+"btc. profit: $"+profit.toFixed(2))
           inventory.btc.price = price
           inventory.usd.amount = inventory.btc.price*inventory.btc.amount*(1-(config.mtgox.fee_percentage/100))
           inventory.usd.price = null
@@ -242,7 +244,8 @@ function buy(price){
                                  amount: btc,
                                  lag: lag_secs})
           add_order('bid', price, btc)
-          email_alert("stoploss buy "+price.toFixed(2)+" "+btc.toFixed(5)+"btc")
+          profit = (inventory.btc.price-price)*btc
+          email_alert("stoploss buy "+price.toFixed(2)+" x"+btc.toFixed(2)+"btc. profit: $"+profit.toFixed(2))
           inventory.usd.price = price
           inventory.btc.amount = btc*(1-(config.mtgox.fee_percentage/100))
           inventory.btc.price = null
