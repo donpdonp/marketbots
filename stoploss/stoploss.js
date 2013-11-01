@@ -108,7 +108,7 @@ mtgoxob.on('trade', function(trade){
       if(highwater > target_highwater) {
         msg = msg + '+'
       }
-      msg = msg + 'target '+target_highwater.toFixed(2) +
+      msg = msg +
                   ' sell '+sell_price.toFixed(2)
       if(buy_price > 0) {
         var buy_diff = trade.price-buy_price
@@ -122,7 +122,7 @@ mtgoxob.on('trade', function(trade){
       if(lowwater < target_lowwater) {
         msg = msg + '+'
       }
-      msg = msg +'target '+target_lowwater.toFixed(2) +
+      msg = msg +
                  ' buy '+buy_price.toFixed(2)
       if(sell_price > 0) {
         var sell_diff = sell_price-trade.price
