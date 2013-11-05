@@ -100,9 +100,9 @@ mtgoxob.on('trade', function(trade){
   if(trade.price_currency == 'USD') {
     var trade_delay = (new Date() - (trade.date*1000))/1000
 
+    var trade_msg = '$'+trade.price.toFixed(2)+
+                    ' x'+trade.amount.toFixed(1)
     var msg = ""
-    msg = msg + '$'+trade.price.toFixed(2)+
-                ' x'+trade.amount.toFixed(1)
     if(swing_side == "sell"){
       msg = msg + ' highwater '+highwater.toFixed(2) + ' '
       if(highwater > target_highwater) {
@@ -138,7 +138,9 @@ mtgoxob.on('trade', function(trade){
       msg = msg + ' (lag '+lag_secs.toFixed(1)+'s)'
     }
 
-    json_log({trade:msg, btc: parseFloat(inventory.btc.amount.toFixed(5)),
+    json_log({trade:trade_msg,
+              quant: msg,
+              btc: parseFloat(inventory.btc.amount.toFixed(5)),
               usd: parseFloat(inventory.usd.amount.toFixed(2))})
 
     if(swing_side == "sell") {
