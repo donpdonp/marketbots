@@ -104,31 +104,24 @@ mtgoxob.on('trade', function(trade){
                     ' x'+trade.amount.toFixed(1)
     var msg = ""
     if(swing_side == "sell"){
-      msg = msg + ' highwater '+highwater.toFixed(2) + ' '
-      if(highwater > target_highwater) {
-        msg = msg + '+'
-      }
-      msg = msg +
-                  ' sell '+sell_price.toFixed(2)
+      msg += 'highwater '+highwater.toFixed(2)+' '+
+             ' sell '+sell_price.toFixed(2)
       if(buy_price > 0) {
         var buy_diff = trade.price-buy_price
         var diff_sign = ''
         if (buy_diff > 0) { diff_sign = '+'}
-        msg = msg + ' '+diff_sign+buy_diff.toFixed(2)
+        msg = msg + ' '+diff_sign+buy_diff.toFixed(2)+'/'+buy_price
       }
     }
+
     if(swing_side == "buy"){
-      msg = msg + ' lowwater '+lowwater.toFixed(2)+' '
-      if(lowwater < target_lowwater) {
-        msg = msg + '+'
-      }
-      msg = msg +
-                 ' buy '+buy_price.toFixed(2)
+      msg += ' lowwater '+lowwater.toFixed(2)+' '+
+             ' buy '+buy_price.toFixed(2)
       if(sell_price > 0) {
         var sell_diff = sell_price-trade.price
         var diff_sign = ''
         if (sell_diff > 0) { diff_sign = '+'}
-        msg = msg + ' '+diff_sign+sell_diff.toFixed(2)
+        msg = msg + ' '+diff_sign+sell_diff.toFixed(2)+'/'+sell_price
       }
     }
     if(trade_delay > 3){
