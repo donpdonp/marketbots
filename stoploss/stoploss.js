@@ -354,8 +354,8 @@ function freshen_last_msg_time(){
 
 function save_inventory(){
   // reformat numbers
-  inventory.btc.amount.amount = parseFloat(inventory.btc.amount.toFixed(8))
-  inventory.usd.amount.amount = parseFloat(inventory.usd.amount.toFixed(5))
+  inventory.btc.amount = parseFloat(inventory.btc.amount.toFixed(8))
+  inventory.usd.amount = parseFloat(inventory.usd.amount.toFixed(5))
   json_log({msg:"save_inventory",inventory:inventory})
   fs.writeFileSync("./inventory.json", JSON.stringify(inventory)+"\n")
 }
