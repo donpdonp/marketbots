@@ -17,6 +17,11 @@ var last_trade
 json_log({msg:"*** STARTING ***",version: pkg.version})
 json_log({config: config.quant})
 
+if(!parseFloat(config.quant.trigger_speed) > 0){
+  console.log('bad quant.trigger_speed value')
+  process.exit()
+}
+
 order_info()
 
 mtgoxob.on('connect', function(trade){
@@ -74,7 +79,7 @@ mtgoxob.on('trade', function(trade){
       msg = msg + timediff.toFixed(1)+'s. '
       var speed = pricediff / timediff
       msg = msg + speed.toFixed(1)+'$/s '
-      if (speed > config.speed){
+      if (speed > config.quant.trigger_speed){
         msg = msg + "SPEED MAX! "
       }
     }
