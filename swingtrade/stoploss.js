@@ -172,10 +172,10 @@ function set_target_lowwater_for(price){
 
 function set_highwater(price) {
   highwater = price
-  var swing_gap = (highwater-lowwater)/lowwater
+  var swing_gap = (highwater-lowwater)/lowwater/4
   var fee = config.mtgox.fee_percentage/100
   swing_gap = swing_gap > fee ? swing_gap : fee
-  sell_price = (highwater * (1-(swing_gap/2)))
+  sell_price = (highwater * (1-swing_gap))
   json_log({msg:'new highwater', highwater:highwater.toFixed(2),
            target_highwater: target_highwater.toFixed(2),
            sell_price:sell_price.toFixed(2), last_lowwater:lowwater, swing_gap: swing_gap})
@@ -183,10 +183,10 @@ function set_highwater(price) {
 
 function set_lowwater(price) {
   lowwater = price
-  var swing_gap = (highwater-lowwater)/lowwater
+  var swing_gap = (highwater-lowwater)/lowwater/4
   var fee = config.mtgox.fee_percentage/100
   swing_gap = swing_gap > fee ? swing_gap : fee
-  buy_price = (lowwater * (1+(swing_gap/2)))
+  buy_price = (lowwater * (1+swing_gap))
   json_log({msg:'new lowwater', lowwater:lowwater.toFixed(2),
            target_lowwater: target_lowwater.toFixed(2),
            buy_price:buy_price.toFixed(2), last_highwater: highwater, swing_gap: swing_gap})
