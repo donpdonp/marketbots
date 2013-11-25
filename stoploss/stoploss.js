@@ -13,6 +13,7 @@ var last_msg_time
 var lag_confidence = false
 var deadman_interval_id
 var last_trade
+var max_speed = 0
 
 json_log({msg:"*** STARTING ***",version: pkg.version})
 json_log({config: config.quant})
@@ -77,10 +78,17 @@ mtgoxob.on('trade', function(trade){
       msg = msg + '$'+pricediff.toFixed(3)+' '
       var timediff = (new Date(trade.date*1000) - new Date(last_trade.date*1000))/1000.0
       msg = msg + timediff.toFixed(1)+'s. '
-      var speed = pricediff / timediff
-      msg = msg + speed.toFixed(1)+'$/s '
-      if (speed > config.quant.trigger_speed){
-        msg = msg + "SPEED MAX! "
+      if(timediff > 0){
+        var speed = pricediff / timediff
+        msg = msg + speed.toFixed(3)+'$/s '
+        if(Math.abs(speed) > config.quant.trigger_speed){
+          msg = msg + "SPEED REACHED "
+        }
+        if(Math.abs(speed) > Math.abs(max_speed)){
+          max_speed = speed
+          msg = msg + "MAX! "
+        }
+        msg = msg + max_speed+"$/s max"
       }
     }
     if(trade_delay > 3){
