@@ -142,8 +142,8 @@ mtgoxob.on('trade', function(trade){
 
     json_log({trade:trade_msg,
               quant: msg,
-              btc: parseFloat(inventory.btc.amount.toFixed(5)),
-              usd: parseFloat(inventory.usd.amount.toFixed(2))})
+              btc: inventory.btc.amount.toFixed(3)+(inventory.usd.price&&'/$'+inventory.usd.price.toFixed(2)),
+              usd: inventory.usd.amount.toFixed(2)+(inventory.btc.price&&'/$'+inventory.btc.price.toFixed(2))})
 
     if(swing_side == "sell") {
       if(trade.price > highwater) {
