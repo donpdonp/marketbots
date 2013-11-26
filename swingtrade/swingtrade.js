@@ -14,8 +14,8 @@ var inventory = JSON.parse(fs.readFileSync("./inventory.json"))
 var highwater = 0.0
 var target_highwater = 0
 var sell_price = 0.0
-var lowwater = 500.0
-var target_lowwater = 500.0
+var lowwater = 10000.0
+var target_lowwater = 10000.0
 var buy_price = 0.0
 var lag_secs = 0
 var last_msg_time
