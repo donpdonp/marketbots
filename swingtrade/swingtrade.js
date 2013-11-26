@@ -22,6 +22,7 @@ var last_msg_time
 var lag_confidence = false
 var swing_side
 var deadman_interval_id
+var last_tick
 
 json_log({msg:"*** STARTING ***",version: pkg.version})
 json_log({quant: config.quant})
@@ -96,12 +97,20 @@ mtgoxob.on('lag', function(lag){
   }
 })
 
+mtgoxob.on('ticker', function(tick){
+  last_tick = tick
+})
+
 mtgoxob.on('trade', function(trade){
   if(trade.price_currency == 'USD') {
     var trade_delay = (new Date() - (trade.date*1000))/1000
 
     var trade_msg = '$'+trade.price.toFixed(2)+
                     ' x'+trade.amount.toFixed(1)
+    if(last_tick) {
+      trade_msg += ' sp$'+(last_tick.sell.value-last_tick.buy.value).toFixed(2)
+    }
+
     var msg = ""
     if(swing_side == "sell"){
       msg += 'highwater '+highwater.toFixed(2)+' '+
