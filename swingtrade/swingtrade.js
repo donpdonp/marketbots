@@ -12,10 +12,10 @@ var inventory = JSON.parse(fs.readFileSync("./inventory.json"))
 
 // internal vars
 var highwater = 0.0
-var target_highwater = 0
+var target_highwater = highwater
 var sell_price = 0.0
 var lowwater = 10000.0
-var target_lowwater = 10000.0
+var target_lowwater = lowwater
 var buy_price = 0.0
 var lag_secs = 0
 var last_msg_time
@@ -64,7 +64,7 @@ mtgoxob.on('connect', function(trade){
 })
 
 mtgoxob.on('disconnect', function(trade){
-  json_log({msg: "disconnected to mtgox"})
+  json_log({msg: "disconnected from mtgox"})
   clearInterval(deadman_interval_id)
 })
 
@@ -112,25 +112,28 @@ mtgoxob.on('trade', function(trade){
     }
 
     var msg = ""
+    var target_msg = ""
     if(swing_side == "sell"){
-      msg += 'highwater '+highwater.toFixed(2)+' '+
-             ' sell '+sell_price.toFixed(2)
+      msg += 'highwater $'+highwater.toFixed(2)+' '
+      target_msg += '$'+target_highwater.toFixed(2)+' bounce to '+
+                    '$'+sell_price.toFixed(2)
       if(buy_price > 0) {
         var buy_diff = trade.price-buy_price
         var diff_sign = ''
         if (buy_diff > 0) { diff_sign = '+'}
-        msg = msg + ' '+diff_sign+buy_diff.toFixed(2)+'/'+buy_price
+        msg = msg + ' '+diff_sign+buy_diff.toFixed(2)
       }
     }
 
     if(swing_side == "buy"){
-      msg += ' lowwater '+lowwater.toFixed(2)+' '+
-             ' buy '+buy_price.toFixed(2)
+      msg += 'lowwater $'+lowwater.toFixed(2)+' '
+      target_msg += ' $'+target_lowwater.toFixed(2)+' bounce to'+
+                    ' $'+buy_price.toFixed(2)
       if(sell_price > 0) {
         var sell_diff = sell_price-trade.price
-        var diff_sign = ''
-        if (sell_diff > 0) { diff_sign = '+'}
-        msg = msg + ' '+diff_sign+sell_diff.toFixed(2)+'/'+sell_price
+        var diff_sign = 'loss '
+        if (sell_diff > 0) { diff_sign = 'profit +'}
+        msg = msg + diff_sign+sell_diff.toFixed(2)
       }
     }
     if(trade_delay > 3){
@@ -142,6 +145,7 @@ mtgoxob.on('trade', function(trade){
 
     json_log({trade:trade_msg,
               quant: msg,
+              target: target_msg,
               btc: inventory.btc.amount.toFixed(3)+(inventory.usd.price&&'/$'+inventory.usd.price.toFixed(2)),
               usd: inventory.usd.amount.toFixed(2)+(inventory.btc.price&&'/$'+inventory.btc.price.toFixed(2))})
 
@@ -183,7 +187,6 @@ function set_highwater(price) {
   highwater = price
   sell_price = (highwater * (1-config.quant.bounce_percentage/100))
   json_log({msg:'new highwater', highwater:highwater.toFixed(2),
-           target_highwater: target_highwater.toFixed(2),
            sell_price:sell_price.toFixed(2)})
 }
 
@@ -191,7 +194,6 @@ function set_lowwater(price) {
   lowwater = price
   buy_price = (lowwater * (1+config.quant.bounce_percentage/100))
   json_log({msg:'new lowwater', lowwater:lowwater.toFixed(2),
-           target_lowwater: target_lowwater.toFixed(2),
            buy_price:buy_price.toFixed(2)})
 }
 
