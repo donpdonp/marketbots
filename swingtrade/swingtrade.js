@@ -154,7 +154,8 @@ mtgoxob.on('trade', function(trade){
         // price rising
         set_highwater(trade.price)
       } else {
-        if(trade.price < sell_price) {
+        if(trade.price > target_highwater &&
+           trade.price < sell_price) {
           // swing
           sell(trade.price)
         }
@@ -166,7 +167,8 @@ mtgoxob.on('trade', function(trade){
         // price falling
         set_lowwater(trade.price)
       } else {
-        if(trade.price > buy_price) {
+        if(trade.price < target_lowwater &&
+           trade.price > buy_price) {
           // swing!
           buy(trade.price)
         }
