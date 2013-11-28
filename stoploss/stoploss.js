@@ -219,13 +219,14 @@ function add_order(bidask, price, amount){
 }
 
 function order_info(){
+  console.log('querying open orders...')
   mtgox.query('/1/generic/orders', function(error, result){
     if(error){
       json_log(error)
     } else {
       if(result.length == 0) { console.log('no open mtgox orders') }
       result.forEach(function(e){
-        json_log(e)
+        json_log({open_order:e.type+" "+e.amount.display_short+" "+e.price.display_short})
       })
     }
   })
