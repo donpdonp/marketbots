@@ -99,16 +99,16 @@ function trade_decision(price){
   if(big_button){
     if(price > buy_price) {
       // abort
+      json_log({swing:"ABORTING over $"+buy_swing.toFixed(2)+" with secured price "+safe_price, low_water: low_water})
       buy(price)
     } else {
       if(price < sell_price) {
         // swing
         var buy_swing = low_water*(1+config.quant.swing_gap)
         if(price > buy_swing){
-          var safe_price = price*(1+config.quant.buy_security)
           json_log({swing:"BUYING over $"+buy_swing.toFixed(2)+" with secured price "+safe_price, low_water: low_water})
           // profit
-          buy(safe_price)
+          buy(price)
         } else {
           json_log({swing:"ARMED. waiting above $"+buy_swing.toFixed(2),
                     low_water: low_water, sold_at: sell_price, buy_price: buy_price})
@@ -144,15 +144,16 @@ function sell(price){
 }
 
 function buy(price){
+  var safe_price = price*(1+config.quant.buy_security)
   var btc = config.quant.fixed_quantity*(price/config.quant.fixed_price)
   json_log({msg: "BUY",
-                        price: price,
-                        amount: btc,
+                        safety_adjusted_price: safe_price.toFixed(2),
+                        profit_adjusted_amount: btc.toFixed(5),
                         lag: lag_secs})
-  add_order('bid', price, btc)
+  add_order('bid', safe_price, btc)
   big_button = false
 
-  var email_msg = "stoploss buy "+price.toFixed(2)+" x"+btc.toFixed(2)+"btc."
+  var email_msg = "stoploss buy "+safe_price.toFixed(2)+" x"+btc.toFixed(2)+"btc."
   if(price > buy_price) {
     email_msg = "Abort "+email_msg
   }
