@@ -169,7 +169,7 @@ mtgoxob.on('lag', function(lag){
         lag_confidence = false
       } else {
         if(lag_confidence == false) {
-          console.log('confidence in lag '+ lag_secs + "s delay: "+delay_secs+"s.")
+          console.log('reconfidence in lag '+ lag_secs + "s delay: "+delay_secs+"s.")
         }
         lag_confidence = true
       }
