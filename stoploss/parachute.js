@@ -27,7 +27,7 @@ var last_tick
 json_log({msg:"*** STARTING ***",version: pkg.version})
 json_log({config: config.quant})
 json_log({sold_at: "$"+sell_price.toFixed(2),
-          abort_buy_at: "$"+buy_price.toFixed(2),
+          abort_at: "$"+buy_price.toFixed(2),
           low_water: "$"+low_water.toFixed(2)})
 
 order_info()
