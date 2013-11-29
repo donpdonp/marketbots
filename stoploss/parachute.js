@@ -26,8 +26,8 @@ var last_tick
 
 json_log({msg:"*** STARTING ***",version: pkg.version})
 json_log({config: config.quant})
-json_log({sell_price: "$"+sell_price.toFixed(2),
-          buy_price: "$"+buy_price.toFixed(2),
+json_log({sold_at: "$"+sell_price.toFixed(2),
+          abort_buy_at: "$"+buy_price.toFixed(2),
           low_water: "$"+low_water.toFixed(2)})
 
 order_info()
@@ -63,20 +63,22 @@ mtgoxob.on('ticker', function(tick){
 
   if(ask_price < low_water) { set_low_water(ask_price) }
 
-  if(tick_delay_s < config.quant.max_lag) {
-    trade_decision(ask_price)
-  } else {
-    delay_msg += " BLOCKED"
-  }
-
   json_log({order_book:"*",
-            ask:last_tick.sell.display_short,
-            progress: progress.toFixed(1)+"%",
+            ask:last_tick.sell.display,
+            progress: progress.toFixed(2)+"%",
             lag: delay_msg,
             bid:last_tick.buy.display_short
             })
+
+  if(tick_delay_s < config.quant.max_lag) {
+    trade_decision(ask_price)
+  } else {
+    json_log({alert: "trade decision blocked by lag"})
+  }
+
 })
 
+/*
 mtgoxob.on('trade', function(trade){
   if(trade.price_currency == 'USD') {
     var msg = ""
@@ -92,6 +94,7 @@ mtgoxob.on('trade', function(trade){
     last_trade = trade
   }
 })
+*/
 
 function trade_decision(price){
   if(big_button){
@@ -194,10 +197,12 @@ function add_order(bidask, price, amount){
                     } else {
                       json_log({msg:"ADD ORDER result",result:result})
                     }
+                    order_info()
                   })
     */
     order.query = '/1/BTCUSD/order/add'
     json_log(order)
+    order_info()
   }
 }
 
@@ -207,10 +212,14 @@ function order_info(){
     if(error){
       json_log(error)
     } else {
-      if(result.length == 0) { console.log('no open mtgox orders') }
+      console.log(result.length+' open mtgox orders')
       result.forEach(function(e){
         json_log({open_order:e.type+" "+e.amount.display_short+" "+e.price.display_short})
       })
+      if(result.length > 1) {
+        console.log('too many open orders. halt!')
+        process.exit()
+      }
     }
   })
 
