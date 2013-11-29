@@ -153,7 +153,7 @@ function buy(price){
   add_order('bid', safe_price, btc)
   big_button = false
 
-  var email_msg = "stoploss buy "+safe_price.toFixed(2)+" x"+btc.toFixed(2)+"btc."
+  var email_msg = "stoploss buy "+safe_price.toFixed(2)+" x"+btc.toFixed(5)+"btc. from "+config.quant.fixed_price
   if(price > buy_price) {
     email_msg = "Abort "+email_msg
   }
