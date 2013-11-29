@@ -66,8 +66,7 @@ mtgoxob.on('ticker', function(tick){
   json_log({order_book:"*",
             ask:last_tick.sell.display,
             progress: progress.toFixed(2)+"%",
-            lag: delay_msg,
-            bid:last_tick.buy.display_short
+            lag: delay_msg
             })
 
   if(tick_delay_s < config.quant.max_lag) {
@@ -102,12 +101,16 @@ function trade_decision(price){
       // abort
       buy(price)
     } else {
-      // swing
-      var buy_swing = low_water*(1+config.quant.swing_gap)
-      json_log({swing:"above $"+buy_swing.toFixed(2), low_water: low_water})
-      if(price > buy_swing){
-        // profit
-        buy(price)
+      if(price < sell_price) {
+        // swing
+        var buy_swing = low_water*(1+config.quant.swing_gap)
+        if(price > buy_swing){
+          json_log({swing:"above $"+buy_swing.toFixed(2), low_water: low_water})
+          // profit
+          buy(price)
+        } else {
+          json_log({swing:"waiting above $"+buy_swing.toFixed(2), low_water: low_water})
+        }
       }
     }
   } else {
