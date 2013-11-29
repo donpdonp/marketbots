@@ -163,25 +163,28 @@ mtgoxob.on('lag', function(lag){
     var lag_age_secs = lag.age/1000000
     var delay_secs = (new Date() - new Date(lag.stamp/1000))/1000
     if (delay_secs < 30) {
-      lag_confidence = true
       lag_secs = lag_age_secs
       if (lag_secs > config.quant.max_lag) {
-        console.log('lag '+ lag_secs + "s delay: "+delay_secs+"s.")
+        console.log('no confidence in lag '+ lag_secs + "s delay: "+delay_secs+"s.")
+        lag_confidence = false
+      } else {
+        console.log('confidence in lag '+ lag_secs + "s delay: "+delay_secs+"s.")
+        lag_confidence = true
       }
     } else {
       lag_confidence = false
-      console.log('no confidence in lag of '+ lag_secs + "s with delay: "+delay_secs+"s.")
+      console.log('no confidence in delayed lag msg of '+ lag_secs + "s with delay: "+delay_secs+"s.")
     }
   } else {
     // lag idle
     lag_secs = 0
     lag_confidence = true
+    console.log('confidence in idle lag')
   }
 })
 
 function low_lag(secs){
-  return lag_confidence == true && ( (lag_secs < config.quant.max_lag) ||
-                                     (secs < config.quant.max_lag)        )
+  return lag_confidence == true && (lag_secs < config.quant.max_lag) && (secs < config.quant.max_lag)
 }
 
 function add_order(bidask, price, amount){
