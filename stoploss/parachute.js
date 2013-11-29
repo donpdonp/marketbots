@@ -55,17 +55,25 @@ mtgoxob.on('message', function(sub){
 
 mtgoxob.on('ticker', function(tick){
   last_tick = tick
+  var ask_price = parseFloat(tick.sell.value)
 
   var tick_delay_s = (new Date() - (tick.now/1000))/1000
   var delay_msg = tick_delay_s.toFixed(1)+"s"
-  var progress = ((sell_price-tick.sell.value)/sell_price)*100
+  var progress = ((sell_price-ask_price)/sell_price)*100
+
+  if(ask_price < low_water) { set_low_water(ask_price) }
+
+  if(tick_delay_s < config.quant.max_lag) {
+    trade_decision(ask_price)
+  } else {
+    delay_msg += " BLOCKED"
+  }
 
   json_log({order_book:"*",
-            buy:last_tick.buy.display_short,
-            sell:last_tick.sell.display_short,
+            bid:last_tick.buy.display_short,
+            ask:last_tick.sell.display_short,
             progress: progress.toFixed(1)+"%",
             lag: delay_msg})
-  if(tick.sell.value < low_water) { set_low_water(tick.sell.value) }
 })
 
 mtgoxob.on('trade', function(trade){
@@ -85,17 +93,13 @@ mtgoxob.on('trade', function(trade){
 })
 
 function trade_decision(price){
-  msg += "low_water "+low_water+" "
-  msg += "buy_price "+buy_price.toFixed(2)+" "
-  if(price > buy_price) {
-    if(big_button){
-      //buy(trade.price)
-      big_button = false
-    } else {
-      json_log({alert:"Buy "+trade.price+" blocked by big button"})
+  if(big_button){
+    if(price > buy_price) {
+      buy(price)
     }
+  } else {
+    json_log({alert:"Buy "+price+" blocked by big button"})
   }
-
 }
 
 function set_high_ask(price){
@@ -109,66 +113,29 @@ function set_low_water(price){
 }
 
 function sell(price){
-  if (low_lag()) {
-    var sale_away_percentage = price / highwater
-    if(sale_away_percentage > 0.5 && sale_away_percentage < 1.5 ) {
-      var btc = config.quant.fixed_quantity
-      json_log({msg: "SELL",
-                             price: price,
-                             amount: btc,
-                             lag: lag_secs})
-      add_order('ask', price, btc)
-      email_alert("sell "+price.toFixed(2)+" x"+btc)
-    } else {
-      json_log({msg: "sell order blocked by crazy price",
-                highwater: highwater, price: price})
-    }
-  } else {
-    json_log({msg: "sell aborted due to lag.", lag_confidence: lag_confidence,
-                                               lag_secs: lag_secs,
-                                               sell_price: price})
-  }
+  var btc = config.quant.fixed_quantity
+  json_log({msg: "SELL",
+                         price: price,
+                         amount: btc,
+                         lag: lag_secs})
+  add_order('ask', price, btc)
+  email_alert("sell "+price.toFixed(2)+" x"+btc)
 }
 
 function buy(price){
-  if (low_lag()) {
-    var sale_away_percentage = price / lowwater
-    if(sale_away_percentage > 0.5 && sale_away_percentage < 1.5 ) {
-      if(inventory.usd.amount >= 0.01){
-        if(swing_side == "buy"){
-          var btc = inventory.usd.amount/price
-          json_log({msg: "BUY", buy_price: buy_price,
-                                 price: price,
-                                 amount: btc,
-                                 lag: lag_secs})
-  //        add_order('bid', price, btc)
-          profit = (inventory.btc.price-price)*btc
-          email_alert("stoploss buy "+price.toFixed(2)+" up from "+lowwater+" x"+btc.toFixed(2)+"btc. profit: $"+profit.toFixed(2))
-          inventory.usd.price = price
-          inventory.btc.amount = btc*(1-(config.mtgox.fee_percentage/100))
-          inventory.btc.price = null
-          inventory.usd.amount = 0
-          save_inventory()
-          swing_side = "sell"
-          set_target_highwater_for(price)
-          set_highwater(price)
-          buy_price = price
-        } else {
-          json_log({msg: "buy order blocked by swing side", swing_side: swing_side})
-        }
-      } else {
-        json_log({msg: "buy order blocked by low USD inventory",
-                  inventory: inventory})
-      }
-    } else {
-      json_log({msg: "buy order blocked by crazy price",
-                lowwater: lowwater, price: price})
-    }
-  } else {
-    json_log({msg: "buy aborted due to lag.", lag_confidence:lag_confidence,
-                                               lag_secs:lag_secs,
-                                               sell_price: sell_price})
+  var btc = config.quant.fixed_quantity
+  json_log({msg: "BUY",
+                        price: price,
+                        amount: btc,
+                        lag: lag_secs})
+  add_order('bid', price, btc)
+  big_button = false
+
+  var email_msg = "stoploss buy "+price.toFixed(2)+" x"+btc.toFixed(2)+"btc."
+  if(price > buy_price) {
+    email_msg = "Abort "+email_msg
   }
+  email_alert(email_msg)
 }
 
 mtgoxob.on('lag', function(lag){
