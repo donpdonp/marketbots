@@ -12,7 +12,7 @@ var mtgox = new Mtgoxjs(config.mtgox)
 // lag vars
 var lag_secs = 0
 var last_msg_time
-var lag_confidence = false
+var lag_confidence = true
 var deadman_interval_id
 
 // safetys
@@ -69,7 +69,7 @@ mtgoxob.on('ticker', function(tick){
             lag: delay_msg
             })
 
-  if(tick_delay_s < config.quant.max_lag) {
+  if(low_lag(tick_delay_s)) {
     trade_decision(ask_price)
   } else {
     json_log({alert: "trade decision blocked by lag"})
@@ -179,8 +179,8 @@ mtgoxob.on('lag', function(lag){
   }
 })
 
-function low_lag(){
-  return lag_confidence == true && (lag_secs < config.quant.max_lag)
+function low_lag(secs){
+  return lag_confidence == true && (lag_secs < config.quant.max_lag) && (secs < config.quant.max_lag)
 }
 
 function add_order(bidask, price, amount){
