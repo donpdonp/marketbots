@@ -206,7 +206,6 @@ function add_order(bidask, price, amount){
     if(price > 0) {
       order.price_int = parseInt(price * 1E5)
     }
-    /*
     mtgox.query('/1/BTCUSD/order/add', order,
                   function(error, result){
                     if(error){
@@ -216,7 +215,6 @@ function add_order(bidask, price, amount){
                     }
                     order_info()
                   })
-    */
     order.query = '/1/BTCUSD/order/add'
     json_log(order)
     order_info()
