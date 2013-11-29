@@ -12,7 +12,7 @@ var mtgox = new Mtgoxjs(config.mtgox)
 // lag vars
 var lag_secs = 0
 var last_msg_time
-var lag_confidence = true
+var lag_confidence = false
 var deadman_interval_id
 
 // safetys
@@ -168,7 +168,9 @@ mtgoxob.on('lag', function(lag){
         console.log('no confidence in lag '+ lag_secs + "s delay: "+delay_secs+"s.")
         lag_confidence = false
       } else {
-        console.log('confidence in lag '+ lag_secs + "s delay: "+delay_secs+"s.")
+        if(lag_confidence == false) {
+          console.log('confidence in lag '+ lag_secs + "s delay: "+delay_secs+"s.")
+        }
         lag_confidence = true
       }
     } else {
@@ -177,9 +179,11 @@ mtgoxob.on('lag', function(lag){
     }
   } else {
     // lag idle
+    if(lag_confidence == false) {
+      console.log('reconfidence in idle lag')
+    }
     lag_secs = 0
     lag_confidence = true
-    console.log('confidence in idle lag')
   }
 })
 
