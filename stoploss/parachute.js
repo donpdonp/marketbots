@@ -111,7 +111,7 @@ function trade_decision(price){
           buy(price)
         } else {
           json_log({swing:"ARMED. waiting above $"+buy_swing.toFixed(2),
-                    low_water: low_water, sold_at: sell_price, buy_price: buy_price})
+                    low_water: low_water, sold_at: sell_price, abort_price: buy_price})
         }
       } else {
         json_log({swing:"dead between sell and abort.", low_water: low_water,
