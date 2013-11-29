@@ -180,7 +180,8 @@ mtgoxob.on('lag', function(lag){
 })
 
 function low_lag(secs){
-  return lag_confidence == true && (lag_secs < config.quant.max_lag) && (secs < config.quant.max_lag)
+  return lag_confidence == true && ( (lag_secs < config.quant.max_lag) ||
+                                     (secs < config.quant.max_lag)        )
 }
 
 function add_order(bidask, price, amount){
