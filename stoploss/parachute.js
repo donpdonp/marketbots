@@ -70,10 +70,11 @@ mtgoxob.on('ticker', function(tick){
   }
 
   json_log({order_book:"*",
-            bid:last_tick.buy.display_short,
             ask:last_tick.sell.display_short,
             progress: progress.toFixed(1)+"%",
-            lag: delay_msg})
+            lag: delay_msg,
+            bid:last_tick.buy.display_short
+            })
 })
 
 mtgoxob.on('trade', function(trade){
@@ -95,7 +96,16 @@ mtgoxob.on('trade', function(trade){
 function trade_decision(price){
   if(big_button){
     if(price > buy_price) {
+      // abort
       buy(price)
+    } else {
+      // swing
+      var buy_swing = low_water*(1+config.quant.swing_gap)
+      json_log({swing:"above $"+buy_swing.toFixed(2), low_water: low_water})
+      if(price > buy_swing){
+        // profit
+        buy(price)
+      }
     }
   } else {
     json_log({alert:"Buy "+price+" blocked by big button"})
@@ -201,6 +211,15 @@ function order_info(){
       result.forEach(function(e){
         json_log({open_order:e.type+" "+e.amount.display_short+" "+e.price.display_short})
       })
+    }
+  })
+
+  mtgox.query('/1/generic/private/info', function(error, result){
+    if(error){
+      //json_log(error)
+    } else {
+      json_log({btc:result.Wallets.BTC.Balance.display_short,
+                usd:result.Wallets.USD.Balance.display_short})
     }
   })
 }
