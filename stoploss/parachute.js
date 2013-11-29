@@ -102,7 +102,7 @@ function trade_decision(price){
       json_log({swing:"ABORTING over $"+buy_price.toFixed(2)})
       buy(price)
     } else {
-      if(price < sell_price) {
+      if(price < sell_price*(1-config.quant.buy_security)) {
         // swing
         var buy_swing = low_water*(1+config.quant.swing_gap)
         if(price > buy_swing){
