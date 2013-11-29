@@ -105,9 +105,10 @@ function trade_decision(price){
         // swing
         var buy_swing = low_water*(1+config.quant.swing_gap)
         if(price > buy_swing){
-          json_log({swing:"above $"+buy_swing.toFixed(2), low_water: low_water})
+          var safe_price = price*(1+config.quant.buy_security)
+          json_log({swing:"BUYING over $"+buy_swing.toFixed(2)+" with secured price "+safe_price, low_water: low_water})
           // profit
-          buy(price)
+          buy(safe_price)
         } else {
           json_log({swing:"ARMED. waiting above $"+buy_swing.toFixed(2),
                     low_water: low_water, sold_at: sell_price, buy_price: buy_price})
@@ -143,7 +144,7 @@ function sell(price){
 }
 
 function buy(price){
-  var btc = config.quant.fixed_quantity
+  var btc = config.quant.fixed_quantity*(price/config.quant.fixed_price)
   json_log({msg: "BUY",
                         price: price,
                         amount: btc,
