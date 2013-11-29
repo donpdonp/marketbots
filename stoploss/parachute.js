@@ -99,14 +99,14 @@ function trade_decision(price){
   if(big_button){
     if(price > buy_price) {
       // abort
-      json_log({swing:"ABORTING over $"+buy_swing.toFixed(2)+" with secured price "+safe_price, low_water: low_water})
+      json_log({swing:"ABORTING over $"+buy_price.toFixed(2)})
       buy(price)
     } else {
       if(price < sell_price) {
         // swing
         var buy_swing = low_water*(1+config.quant.swing_gap)
         if(price > buy_swing){
-          json_log({swing:"BUYING over $"+buy_swing.toFixed(2)+" with secured price "+safe_price, low_water: low_water})
+          json_log({swing:"BUYING over $"+buy_swing.toFixed(2), low_water: low_water})
           // profit
           buy(price)
         } else {
