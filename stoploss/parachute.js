@@ -145,7 +145,7 @@ function sell(price){
 
 function buy(price){
   var safe_price = price*(1+config.quant.buy_security)
-  var btc = config.quant.fixed_quantity*(price/config.quant.fixed_price)
+  var btc = config.quant.fixed_quantity*(config.quant.fixed_price/safe_price)
   json_log({msg: "BUY",
                         safety_adjusted_price: safe_price.toFixed(2),
                         profit_adjusted_amount: btc.toFixed(5),
