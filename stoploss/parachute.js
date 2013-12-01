@@ -114,7 +114,7 @@ function trade_decision(price){
                     low_water: low_water, sold_at: sell_price, abort_price: buy_price})
         }
       } else {
-        set_low_water(price) // start over
+        set_low_water(sell_price) // start over
         json_log({swing:"dead between sell and abort.", low_water: low_water,
                   sold_at: sell_price, abort_price: buy_price})
       }
