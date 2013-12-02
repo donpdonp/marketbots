@@ -54,27 +54,28 @@ mtgoxob.on('message', function(sub){
 
 
 mtgoxob.on('ticker', function(tick){
-  last_tick = tick
-  var ask_price = parseFloat(tick.sell.value)
+  if(big_button){
+    last_tick = tick
+    var ask_price = parseFloat(tick.sell.value)
 
-  var tick_delay_s = (new Date() - (tick.now/1000))/1000
-  var delay_msg = tick_delay_s.toFixed(1)+"s"
-  var progress = ((sell_price-ask_price)/sell_price)*100
+    var tick_delay_s = (new Date() - (tick.now/1000))/1000
+    var delay_msg = tick_delay_s.toFixed(1)+"s"
+    var progress = ((sell_price-ask_price)/sell_price)*100
 
-  if(ask_price < low_water) { set_low_water(ask_price) }
+    if(ask_price < low_water) { set_low_water(ask_price) }
 
-  json_log({order_book:"*",
-            ask:last_tick.sell.display,
-            progress: progress.toFixed(2)+"%",
-            lag: delay_msg
-            })
+    json_log({order_book:"*",
+              ask:last_tick.sell.display,
+              progress: progress.toFixed(2)+"%",
+              lag: delay_msg
+              })
 
-  if(low_lag(tick_delay_s)) {
-    trade_decision(ask_price)
-  } else {
-    json_log({alert: "trade decision blocked by lag"})
+    if(low_lag(tick_delay_s)) {
+      trade_decision(ask_price)
+    } else {
+      json_log({alert: "trade decision blocked by lag"})
+    }
   }
-
 })
 
 /*
@@ -162,6 +163,12 @@ function buy(price){
 }
 
 mtgoxob.on('lag', function(lag){
+  if(big_button){
+    do_lag(lag)
+  }
+})
+
+function do_lag(lag){
   if (lag.qid) {
     var lag_age_secs = lag.age/1000000
     var delay_secs = (new Date() - new Date(lag.stamp/1000))/1000
@@ -188,7 +195,7 @@ mtgoxob.on('lag', function(lag){
     lag_secs = 0
     lag_confidence = true
   }
-})
+}
 
 function low_lag(secs){
   return lag_confidence == true && (lag_secs < config.quant.max_lag) && (secs < config.quant.max_lag)
@@ -207,6 +214,7 @@ function add_order(bidask, price, amount){
     if(price > 0) {
       order.price_int = parseInt(price * 1E5)
     }
+    /*
     mtgox.query('/1/BTCUSD/order/add', order,
                   function(error, result){
                     if(error){
@@ -216,6 +224,7 @@ function add_order(bidask, price, amount){
                     }
                     order_info()
                   })
+                  */
     order.query = '/1/BTCUSD/order/add'
     json_log(order)
     order_info()
@@ -263,7 +272,7 @@ function order_status(oid){
 
 function json_log(o){
   var msg = JSON.stringify(o)+"\n"
-  var display_msg = moment().format("ddd HH:MM:ss")+" "+msg
+  var display_msg = moment().format("ddd HH:mm:ss")+" "+msg
   var log_msg = moment().format()+" "+msg
   process.stdout.write(display_msg)
   fs.appendFile('act.log', log_msg)
