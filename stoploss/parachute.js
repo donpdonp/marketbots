@@ -214,17 +214,18 @@ function add_order(bidask, price, amount){
     if(price > 0) {
       order.price_int = parseInt(price * 1E5)
     }
-    /*
     mtgox.query('/1/BTCUSD/order/add', order,
                   function(error, result){
                     if(error){
+                      console.log('** order/add error!!')
+                      console.dir(error)
                       json_log({msg:"ADD ORDER error",error:error})
+                      console.dir(result)
                     } else {
                       json_log({msg:"ADD ORDER result",result:result})
                     }
                     order_info()
                   })
-                  */
     order.query = '/1/BTCUSD/order/add'
     json_log(order)
     order_info()
@@ -235,6 +236,8 @@ function order_info(){
   console.log('querying open orders...')
   mtgox.query('/1/generic/orders', function(error, result){
     if(error){
+      console.log('** generic/orders error!!')
+      console.dir(error)
       json_log(error)
     } else {
       console.log(result.length+' open mtgox orders')
@@ -250,6 +253,8 @@ function order_info(){
 
   mtgox.query('/1/generic/private/info', function(error, result){
     if(error){
+      console.log('** private/info error!!')
+      console.dir(error)
       //json_log(error)
     } else {
       json_log({btc:result.Wallets.BTC.Balance.display_short,
@@ -261,6 +266,8 @@ function order_info(){
 function order_status(oid){
   mtgox.query('/1/generic/order/result', function(error, result){
     if(error){
+      console.log('** order/result error!!')
+      console.dir(error)
       //json_log(error)
     } else {
       result.forEach(function(e){
