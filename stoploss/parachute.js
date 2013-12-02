@@ -214,7 +214,7 @@ function add_order(bidask, price, amount){
     if(price > 0) {
       order.price_int = parseInt(price * 1E5)
     }
-    mtgox.query('/1/BTCUSD/order/add', order,
+    mtgox.query('/1/BTCUSD/private/order/add', order,
                   function(error, result){
                     if(error){
                       console.log('** order/add error!!')
@@ -234,9 +234,9 @@ function add_order(bidask, price, amount){
 
 function order_info(){
   console.log('querying open orders...')
-  mtgox.query('/1/generic/orders', function(error, result){
+  mtgox.query('/1/generic/private/orders', function(error, result){
     if(error){
-      console.log('** generic/orders error!!')
+      console.log('** /1/generic/private/orders error!!')
       console.dir(error)
       json_log(error)
     } else {
@@ -253,7 +253,7 @@ function order_info(){
 
   mtgox.query('/1/generic/private/info', function(error, result){
     if(error){
-      console.log('** private/info error!!')
+      console.log('** /1/generic/private/info error!!')
       console.dir(error)
       //json_log(error)
     } else {
