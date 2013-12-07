@@ -1,0 +1,13 @@
+{
+  "name": "stoploss",
+  "version": "0.0.8",
+  "private": true,
+  "dependencies": {
+    "mtgox-orderbook": "0.4.x",
+    "mtgox": "0.0.x",
+    "moment": "2.x.x"
+  },
+  "devDependencies": {
+    "vows": ">=0.7.0"
+  }
+}

@@ -1,0 +1,13 @@
+
+Initial state:
+sell price from config.quant.fixed_price
+buy price = 3%(config.quant.stop_loss) of sell price
+low water = buy price
+
+Watch ask price:
+  if ask price > buy price
+     BUY
+  else
+    refresh low water
+    if ask price > low water
+
