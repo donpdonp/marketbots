@@ -5,7 +5,8 @@
   "dependencies": {
     "mtgox-orderbook": "0.4.x",
     "mtgox": "0.0.x",
-    "moment": "2.x.x"
+    "moment": "2.x.x",
+    "nodemailer": "0.5.x"
   },
   "devDependencies": {
     "vows": ">=0.7.0"
