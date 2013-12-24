@@ -1,13 +1,13 @@
 "strict on"
 var fs = require('fs')
 var moment = require('moment')
-var Mtgoxjs = require('mtgox')
-var mtgoxob = require('mtgox-orderbook')
+var mtgox = require('mtgox-orderbook')
 var nodemailer = require("nodemailer")
 
 var pkg = require('./package.json')
 var config = JSON.parse(fs.readFileSync("./config.json"))
-var mtgox = new Mtgoxjs(config.mtgox)
+
+mtgox.setup('websocket', config.mtgox)
 
 // lag vars
 var lag_secs = 0
@@ -30,30 +30,31 @@ json_log({sold_at: "$"+sell_price.toFixed(2),
           abort_at: "$"+buy_price.toFixed(2),
           low_water: "$"+low_water.toFixed(2)})
 
-order_info()
 
-mtgoxob.on('connect', function(trade){
+mtgox.on('connect', function(trade){
   json_log({msg: "connected to mtgox"})
-  setTimeout(function(){mtgoxob.subscribe("lag")}, 1000) // trade.lag
+  order_info()
+  mtgox.subscribe('ticker')
+  setTimeout(function(){mtgox.subscribe("lag")}, 1000) // trade.lag
   freshen_last_msg_time()
   deadman_interval_id = setInterval(deadman_switch, 5000)
 })
 
-mtgoxob.on('disconnect', function(trade){
+mtgox.on('disconnect', function(trade){
   json_log({msg: "disconnected to mtgox"})
   clearInterval(deadman_interval_id)
 })
 
-mtgoxob.on('subscribe', function(sub){
-  //console.log('subscribed '+sub)
+mtgox.on('subscribe', function(sub){
+  console.log('subscribed '+sub)
 })
 
-mtgoxob.on('message', function(sub){
+mtgox.on('message', function(sub){
   freshen_last_msg_time()
 })
 
 
-mtgoxob.on('ticker', function(tick){
+mtgox.on('ticker', function(tick){
   if(big_button){
     last_tick = tick
     var ask_price = parseFloat(tick.sell.value)
@@ -77,24 +78,6 @@ mtgoxob.on('ticker', function(tick){
     }
   }
 })
-
-/*
-mtgoxob.on('trade', function(trade){
-  if(trade.price_currency == 'USD') {
-    var msg = ""
-    var trade_delay = (new Date() - (trade.date*1000))/1000
-
-    if(trade_delay > 3){
-      msg = msg + '(delay '+trade_delay.toFixed(1)+'s) '
-    }
-
-    json_log({trade:"*",
-              price: '$'+trade.price.toFixed(2),
-              amount: ' x'+trade.amount.toFixed(1)})
-    last_trade = trade
-  }
-})
-*/
 
 function trade_decision(price){
   if(big_button){
@@ -162,7 +145,7 @@ function buy(price){
   email_alert(email_msg)
 }
 
-mtgoxob.on('lag', function(lag){
+mtgox.on('lag', function(lag){
   if(big_button){
     do_lag(lag)
   }
@@ -214,7 +197,8 @@ function add_order(bidask, price, amount){
     if(price > 0) {
       order.price_int = parseInt(price * 1E5)
     }
-    mtgox.query('/1/BTCUSD/private/order/add', order,
+    /*
+    mtgox.call('private/order/add', order,
                   function(error, result){
                     if(error){
                       console.log('** order/add error!!')
@@ -226,14 +210,24 @@ function add_order(bidask, price, amount){
                     }
                     order_info()
                   })
-    order.query = '/1/BTCUSD/order/add'
+    */
+    order.query = 'private/order/add'
     json_log(order)
     order_info()
   }
 }
 
 function order_info(){
-  console.log('querying open orders...')
+  console.log('querying account info...')
+  mtgox.call('private/info', {}, function(error, result){
+    if(error){
+      console.dir(error)
+    } else {
+      json_log({btc:result.Wallets.BTC.Balance.display_short,
+                usd:result.Wallets.USD.Balance.display_short})
+    }
+  })
+  /*
   mtgox.query('/1/generic/private/orders', function(error, result){
     if(error){
       console.log('** /1/generic/private/orders error!!')
@@ -250,17 +244,7 @@ function order_info(){
       }
     }
   })
-
-  mtgox.query('/1/generic/private/info', function(error, result){
-    if(error){
-      console.log('** /1/generic/private/info error!!')
-      console.dir(error)
-      //json_log(error)
-    } else {
-      json_log({btc:result.Wallets.BTC.Balance.display_short,
-                usd:result.Wallets.USD.Balance.display_short})
-    }
-  })
+  */
 }
 
 function order_status(oid){
@@ -324,4 +308,4 @@ function email_alert(msg){
 }
 
 /* CONNECT TO MTGOX */
-mtgoxob.connect('usd')
+mtgox.connect('usd')
