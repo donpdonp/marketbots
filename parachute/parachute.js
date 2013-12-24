@@ -38,6 +38,7 @@ mtgox.on('connect', function(trade){
   setTimeout(function(){mtgox.subscribe("lag")}, 1000) // trade.lag
   freshen_last_msg_time()
   deadman_interval_id = setInterval(deadman_switch, 5000)
+  mtgox.call('private/idkey', {}, function(e,r){mtgox.subscribe(r)})
 })
 
 mtgox.on('disconnect', function(trade){
