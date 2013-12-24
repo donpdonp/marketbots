@@ -197,20 +197,16 @@ function add_order(bidask, price, amount){
     if(price > 0) {
       order.price_int = parseInt(price * 1E5)
     }
-    /*
     mtgox.call('private/order/add', order,
-                  function(error, result){
-                    if(error){
-                      console.log('** order/add error!!')
-                      console.dir(error)
-                      json_log({msg:"ADD ORDER error",error:error})
-                      console.dir(result)
-                    } else {
-                      json_log({msg:"ADD ORDER result",result:result})
-                    }
-                    order_info()
-                  })
-    */
+        function(error, result){
+          if(error){
+            json_log({msg:"ADD ORDER error",error:error,result:result})
+          } else {
+            json_log({msg:"ADD ORDER result",result:result})
+          }
+          order_info()
+        }
+    )
     order.query = 'private/order/add'
     json_log(order)
     order_info()
