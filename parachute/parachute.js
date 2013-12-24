@@ -227,14 +227,11 @@ function order_info(){
                 usd:result.Wallets.USD.Balance.display_short})
     }
   })
-  /*
-  mtgox.query('/1/generic/private/orders', function(error, result){
+  mtgox.call('private/orders', {}, function(error, result){
     if(error){
-      console.log('** /1/generic/private/orders error!!')
-      console.dir(error)
       json_log(error)
     } else {
-      console.log(result.length+' open mtgox orders')
+      json_log({"open orders":result.length})
       result.forEach(function(e){
         json_log({open_order:e.type+" "+e.amount.display_short+" "+e.price.display_short})
       })
@@ -244,7 +241,6 @@ function order_info(){
       }
     }
   })
-  */
 }
 
 function order_status(oid){
