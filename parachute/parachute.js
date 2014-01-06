@@ -54,6 +54,10 @@ mtgox.on('message', function(sub){
   freshen_last_msg_time()
 })
 
+mtgox.on('remark', function(sub){
+  json_log({remark:sub})
+})
+
 
 mtgox.on('ticker', function(tick){
   if(big_button){
@@ -121,11 +125,11 @@ function set_low_water(price){
 
 function sell(price){
   var btc = config.quant.fixed_quantity
-  json_log({msg: "SELL",
+  json_log({msg: "SELL *DISABLED*",
                          price: price,
                          amount: btc,
                          lag: lag_secs})
-  add_order('ask', price, btc)
+  //add_order('ask', price, btc)
   email_alert("sell "+price.toFixed(2)+" x"+btc)
 }
 
@@ -138,6 +142,7 @@ function buy(price){
                         lag: lag_secs})
   add_order('bid', safe_price, btc)
   big_button = false
+  setInterval(function(){order_info();console.log("-*-")}, 9000)
 
   var email_msg = "stoploss buy "+safe_price.toFixed(2)+" x"+btc.toFixed(5)+"btc. from "+config.quant.fixed_price
   if(price > buy_price) {
@@ -210,15 +215,13 @@ function add_order(bidask, price, amount){
     )
     order.query = 'private/order/add'
     json_log(order)
-    order_info()
   }
 }
 
 function order_info(){
-  console.log('querying account info...')
   mtgox.call('private/info', {}, function(error, result){
     if(error){
-      console.dir(error)
+      json_log({info_error:error, params: result})
     } else {
       json_log({btc:result.Wallets.BTC.Balance.display_short,
                 usd:result.Wallets.USD.Balance.display_short})
@@ -226,7 +229,7 @@ function order_info(){
   })
   mtgox.call('private/orders', {}, function(error, result){
     if(error){
-      json_log(error)
+      json_log({orders_error:error, params: result})
     } else {
       json_log({"open orders":result.length})
       result.forEach(function(e){

@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "mtgox-orderbook": "0.5.x",
-    "mtgox": "0.0.x",
     "moment": "2.x.x",
     "nodemailer": "0.5.x"
   },
