@@ -20,7 +20,6 @@ var target_lowwater = lowwater
 var buy_price = 0.0
 var lag_secs = 0
 var last_msg_time
-var lag_confidence = false
 var swing_side
 var deadman_interval_id
 var last_tick
@@ -123,6 +122,7 @@ coinbasebook.on('order.match', function(trade){
   trade.price = parseFloat(trade.price) // floathack
   trade.size = parseFloat(trade.size)
   var trade_delay = (new Date() - new Date(trade.time))
+  lag_secs = trade_delay
 
   var trade_msg = '$'+trade.price+
                   ' x'+trade.size.toFixed(4)
@@ -158,13 +158,9 @@ coinbasebook.on('order.match', function(trade){
   if(trade_delay > 3){
     msg = msg + ' (delay '+trade_delay.toFixed(1)+'s)'
   }
-  if(lag_secs > 5){
-    msg = msg + ' (lag '+lag_secs.toFixed(1)+'s)'
-  }
 
   json_log({trade:trade_msg,
             quant: msg,
-            swing: swing_side,
             target: target_msg,
             btc: inventory.btc.amount.toFixed(3)+(inventory.usd.price&&'/$'+inventory.usd.price.toFixed(2)),
             usd: inventory.usd.amount.toFixed(2)+(inventory.btc.price&&'/$'+inventory.btc.price.toFixed(2))})
@@ -253,7 +249,7 @@ function sell(price){
                 highwater: highwater, price: price})
     }
   } else {
-    json_log({msg: "sell aborted due to lag.", lag_confidence:lag_confidence,
+    json_log({msg: "sell aborted due to lag.",
                                                lag_secs:lag_secs,
                                                sell_price: sell_price})
   }
@@ -294,14 +290,14 @@ function buy(price){
                 lowwater: lowwater, price: price})
     }
   } else {
-    json_log({msg: "buy aborted due to lag.", lag_confidence:lag_confidence,
+    json_log({msg: "buy aborted due to lag.",
                                                lag_secs:lag_secs,
                                                sell_price: sell_price})
   }
 }
 
 function low_lag(){
-  return lag_confidence == true && (lag_secs < config.quant.max_lag)
+  return (lag_secs < config.quant.max_lag)
 }
 
 function add_order(bidask, price, amount){
