@@ -2,12 +2,14 @@ var fs = require('fs')
 var moment = require('moment')
 var nodemailer = require("nodemailer")
 var CoinbaseExchange = require('coinbase-exchange');
+var coinbasebook = new CoinbaseExchange.OrderbookSync();
 
 var pkg = require('./package.json')
 var config = JSON.parse(fs.readFileSync("./config.json"))
 var coinbase = new CoinbaseExchange.AuthenticatedClient(config.coinbase.key,
                                                         config.coinbase.secret,
                                                         config.coinbase.pass);
+
 var inventory = JSON.parse(fs.readFileSync("./inventory.json"))
 
 // internal vars
@@ -23,6 +25,7 @@ var lag_confidence = false
 var swing_side
 var deadman_interval_id
 var last_tick
+var deadman_seconds_limit = 60
 
 json_log({msg:"*** STARTING ***",version: pkg.version})
 json_log({quant: config.quant})
@@ -56,52 +59,70 @@ if(config.quant.gap_percentage < config.coinbase.fee) {
 
 order_info()
 
-/*
-mtgoxob.on('connect', function(trade){
-  json_log({msg: "connected to coinbase"})
-  setTimeout(function(){mtgoxob.subscribe("lag")}, 1000) // trade.lag
+coinbasebook.on('open', function(trade){
+  json_log({msg: "connected to coinbase orderbook"})
   freshen_last_msg_time()
   deadman_interval_id = setInterval(deadman_switch, 5000)
 })
 
-mtgoxob.on('disconnect', function(trade){
-  json_log({msg: "disconnected from coinbase"})
+coinbasebook.on('close', function(trade){
+  json_log({msg: "disconnected from coinbase orderbook"})
   clearInterval(deadman_interval_id)
 })
 
-mtgoxob.on('subscribe', function(sub){
-  //console.log('subscribed '+sub)
-})
-
-mtgoxob.on('message', function(sub){
+coinbasebook.on('syncing', function(msg){
+  console.log('orderbook sync started')
   freshen_last_msg_time()
 })
 
-mtgoxob.on('lag', function(lag){
-  if (lag.qid) {
-    var lag_age_secs = lag.age/1000000
-    var delay_secs = (new Date() - new Date(lag.stamp/1000))/1000
-    if (delay_secs < 30) {
-      lag_confidence = true
-      lag_secs = lag_age_secs
-      if (lag_secs > config.quant.max_lag) {
-        console.log('lag '+ lag_secs + "s delay: "+delay_secs+"s.")
-      }
-    } else {
-      lag_confidence = false
-      console.log('no confidence in lag of '+ lag_secs + "s with delay: "+delay_secs+"s.")
-    }
-  } else {
-    // lag idle
-    lag_secs = 0
-    lag_confidence = true
-  }
+coinbasebook.on('synced', function(msg){
+  console.log('orderbook synced', msg.asks.length, msg.bids.length)
+  freshen_last_msg_time()
 })
 
-mtgoxob.on('ticker', function(tick){
-  last_tick = tick
+coinbasebook.on('order.open', function(msg){
+  console.log('order open', msg.price)
+  /*
+    onMessage { type: 'open',
+    sequence: 474384882,
+    side: 'sell',
+    price: '453.87',
+    order_id: '7b96909a-881f-429d-900d-c5efddf7515b',
+    remaining_size: '0.311',
+    product_id: 'BTC-USD',
+    time: '2015-12-24T18:54:34.901671Z' }
+  */
+  freshen_last_msg_time()
 })
 
+coinbasebook.on('order.done', function(msg){
+  console.log('order done', msg.reason)
+  freshen_last_msg_time()
+})
+
+coinbasebook.on('order.match', function(msg){
+  console.log('order match', msg)
+  /*
+  { type: 'match',
+  sequence: 474401219,
+  trade_id: 5745007,
+  maker_order_id: '86ea2bdc-2831-4491-babf-79caad1d24e4',
+  taker_order_id: 'e678507e-f07f-4999-923d-e87ecfef0a75',
+  side: 'sell',
+  size: '0.874',
+  price: '454.21',
+  product_id: 'BTC-USD',
+  time: '2015-12-24T19:00:52.89176Z' }
+  */
+  freshen_last_msg_time()
+})
+
+coinbasebook.on('order.change', function(msg){
+  console.log('order change', msg)
+  freshen_last_msg_time()
+})
+
+/*
 mtgoxob.on('trade', function(trade){
   if(trade.price_currency == 'USD') {
     var trade_delay = (new Date() - (trade.date*1000))/1000
@@ -351,8 +372,8 @@ function json_log(o){
 
 function deadman_switch(){
   var last_msg_delay = (new Date() - last_msg_time)/1000
-  if(last_msg_delay > 30) {
-    json_log({msg: "deadman: mtgox connection not responding! halting!",
+  if(last_msg_delay > deadman_seconds_limit) {
+    json_log({msg: "deadman: orderbook connection not responding! halting!",
               last_msg_delay: last_msg_delay})
     process.exit()
   }
@@ -386,8 +407,4 @@ function email_alert(msg){
     smtpTransport.close()
   });
 }
-
-/* CONNECT TO EXCHANGE */
-var orderbookSync = new CoinbaseExchange.OrderbookSync();
-console.log('cb book', orderbookSync.book.state());
 
