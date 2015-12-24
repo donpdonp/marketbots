@@ -1,0 +1,21 @@
+{
+  "coinbase": {
+    "key": "---",
+    "secret": "==",
+    "pass": "--",
+    "fee": 0.2
+  },
+
+  "quant": {
+    "gap_percentage": 2,
+    "bounce_percentage": 0.02,
+    "max_lag": 300
+  },
+
+  "email": {
+    "from": "laptop@example.org"
+    "to": "owner@example.com"
+    "server": "laptop"
+  }
+
+}
