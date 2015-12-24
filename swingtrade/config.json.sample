@@ -13,8 +13,8 @@
   },
 
   "email": {
-    "from": "laptop@example.org"
-    "to": "owner@example.com"
+    "from": "laptop@example.org",
+    "to": "owner@example.com",
     "server": "laptop"
   }
 
