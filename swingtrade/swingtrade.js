@@ -1,13 +1,13 @@
 var fs = require('fs')
 var moment = require('moment')
 var nodemailer = require("nodemailer")
-var Mtgoxjs = require('mtgox')
-var mtgoxob = require('mtgox-orderbook')
+var CoinbaseExchange = require('coinbase-exchange');
 
 var pkg = require('./package.json')
 var config = JSON.parse(fs.readFileSync("./config.json"))
-var mtgox = new Mtgoxjs(config.mtgox)
-
+var coinbase = new CoinbaseExchange.AuthenticatedClient(config.coinbase.key,
+                                                        config.coinbase.secret,
+                                                        config.coinbase.pass);
 var inventory = JSON.parse(fs.readFileSync("./inventory.json"))
 
 // internal vars
@@ -27,7 +27,7 @@ var last_tick
 json_log({msg:"*** STARTING ***",version: pkg.version})
 json_log({quant: config.quant})
 json_log({inventory:inventory})
-console.log('connecting to mtgox...')
+console.log('connecting to coinbase...')
 
 if((typeof(inventory.btc.amount) != 'number') ||
    (typeof(inventory.usd.amount) != 'number') ||
@@ -49,22 +49,23 @@ if(inventory.usd.amount > 0) {
   sell_price = inventory.btc.price
 }
 
-if(config.quant.gap_percentage < config.mtgox.fee) {
+if(config.quant.gap_percentage < config.coinbase.fee) {
   console.log("gap percentage is less than fee percentage! stopping")
   process.exit()
 }
 
 order_info()
 
+/*
 mtgoxob.on('connect', function(trade){
-  json_log({msg: "connected to mtgox"})
+  json_log({msg: "connected to coinbase"})
   setTimeout(function(){mtgoxob.subscribe("lag")}, 1000) // trade.lag
   freshen_last_msg_time()
   deadman_interval_id = setInterval(deadman_switch, 5000)
 })
 
 mtgoxob.on('disconnect', function(trade){
-  json_log({msg: "disconnected from mtgox"})
+  json_log({msg: "disconnected from coinbase"})
   clearInterval(deadman_interval_id)
 })
 
@@ -176,6 +177,7 @@ mtgoxob.on('trade', function(trade){
     }
   }
 })
+*/
 
 function set_target_highwater_for(price){
   target_highwater = price*(1+config.quant.gap_percentage/100)
@@ -214,7 +216,7 @@ function sell(price){
           profit = (price-inventory.usd.price)*btc
           email_alert("sell "+price.toFixed(2)+" down from "+highwater+" x"+btc.toFixed(2)+"btc. profit: $"+profit.toFixed(2))
           inventory.btc.price = price
-          inventory.usd.amount = inventory.btc.price*inventory.btc.amount*(1-(config.mtgox.fee_percentage/100))
+          inventory.usd.amount = inventory.btc.price*inventory.btc.amount*(1-(config.coinbase.fee_percentage/100))
           inventory.usd.price = null
           inventory.btc.amount = 0
           save_inventory()
@@ -255,7 +257,7 @@ function buy(price){
           profit = (inventory.btc.price-price)*btc
           email_alert("stoploss buy "+price.toFixed(2)+" up from "+lowwater+" x"+btc.toFixed(2)+"btc. profit: $"+profit.toFixed(2))
           inventory.usd.price = price
-          inventory.btc.amount = btc*(1-(config.mtgox.fee_percentage/100))
+          inventory.btc.amount = btc*(1-(config.coinbase.fee_percentage/100))
           inventory.btc.price = null
           inventory.usd.amount = 0
           save_inventory()
@@ -314,10 +316,12 @@ function add_order(bidask, price, amount){
 }
 
 function order_info(){
-  mtgox.query('/1/generic/orders', function(error, result){
+  coinbase.getOrders(function(error, response, data){
     if(error){
       json_log(error)
     } else {
+      var result = JSON.parse(response.body)
+      console.log('coinbase open orders count', result.length)
       result.forEach(function(e){
         json_log(e)
       })
@@ -383,5 +387,7 @@ function email_alert(msg){
   });
 }
 
-/* CONNECT TO MTGOX */
-mtgoxob.connect('usd')
+/* CONNECT TO EXCHANGE */
+var orderbookSync = new CoinbaseExchange.OrderbookSync();
+console.log('cb book', orderbookSync.book.state());
+
