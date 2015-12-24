@@ -2,7 +2,6 @@ var fs = require('fs')
 var moment = require('moment')
 var nodemailer = require("nodemailer")
 var CoinbaseExchange = require('coinbase-exchange');
-var coinbasebook = new CoinbaseExchange.OrderbookSync();
 
 var pkg = require('./package.json')
 var config = JSON.parse(fs.readFileSync("./config.json"))
@@ -31,6 +30,7 @@ json_log({msg:"*** STARTING ***",version: pkg.version})
 json_log({quant: config.quant})
 json_log({inventory:inventory})
 console.log('connecting to coinbase...')
+var coinbasebook = new CoinbaseExchange.OrderbookSync();
 
 if((typeof(inventory.btc.amount) != 'number') ||
    (typeof(inventory.usd.amount) != 'number') ||
@@ -76,12 +76,13 @@ coinbasebook.on('syncing', function(msg){
 })
 
 coinbasebook.on('synced', function(msg){
-  console.log('orderbook synced', msg.asks.length, msg.bids.length)
+  console.log('orderbook synced', 'asks', msg.asks.length, 'bids', msg.bids.length)
+  console.log('bidmax', coinbasebook.book._bids.max().price.toString())
+  console.log('askmin', coinbasebook.book._asks.min().price.toString())
   freshen_last_msg_time()
 })
 
 coinbasebook.on('order.open', function(msg){
-  console.log('order open', msg.price)
   /*
     onMessage { type: 'open',
     sequence: 474384882,
@@ -96,12 +97,13 @@ coinbasebook.on('order.open', function(msg){
 })
 
 coinbasebook.on('order.done', function(msg){
-  console.log('order done', msg.reason)
   freshen_last_msg_time()
 })
 
 coinbasebook.on('order.match', function(msg){
-  console.log('order match', msg)
+  console.log('orders matched at', msg.price,
+              'bidmax', coinbasebook.book._bids.max().price.toString(),
+              'askmin', coinbasebook.book._asks.min().price.toString())
   /*
   { type: 'match',
   sequence: 474401219,
