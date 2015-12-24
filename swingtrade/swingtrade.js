@@ -51,7 +51,7 @@ if(inventory.usd.amount > 0) {
   sell_price = inventory.btc.price
 }
 
-if(config.quant.gap_percentage < config.coinbase.fee) {
+if(config.quant.gap_percentage < config.coinbase.fee_percentage) {
   console.log("gap percentage is less than fee percentage! stopping")
   process.exit()
 }

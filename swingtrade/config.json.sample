@@ -3,7 +3,7 @@
     "key": "---",
     "secret": "==",
     "pass": "--",
-    "fee": 0.2
+    "fee_percentage": 0.2
   },
 
   "quant": {
