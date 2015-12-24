@@ -76,9 +76,8 @@ coinbasebook.on('syncing', function(msg){
 })
 
 coinbasebook.on('synced', function(msg){
-  console.log('orderbook synced', 'asks', msg.asks.length, 'bids', msg.bids.length)
-  console.log('bidmax', coinbasebook.book._bids.max().price.toString())
-  console.log('askmin', coinbasebook.book._asks.min().price.toString())
+  console.log('orderbook synced', 'asks', msg.asks.length, '$'+coinbasebook.book._bids.max().price.toString(),
+                                  'bids', msg.bids.length, '$'+coinbasebook.book._asks.min().price.toString())
   freshen_last_msg_time()
 })
 
@@ -100,10 +99,13 @@ coinbasebook.on('order.done', function(msg){
   freshen_last_msg_time()
 })
 
-coinbasebook.on('order.match', function(msg){
-  console.log('orders matched at', msg.price,
-              'bidmax', coinbasebook.book._bids.max().price.toString(),
-              'askmin', coinbasebook.book._asks.min().price.toString())
+
+coinbasebook.on('order.change', function(msg){
+  console.log('order change', msg)
+  freshen_last_msg_time()
+})
+
+coinbasebook.on('order.match', function(trade){
   /*
   { type: 'match',
   sequence: 474401219,
@@ -117,90 +119,82 @@ coinbasebook.on('order.match', function(msg){
   time: '2015-12-24T19:00:52.89176Z' }
   */
   freshen_last_msg_time()
-})
 
-coinbasebook.on('order.change', function(msg){
-  console.log('order change', msg)
-  freshen_last_msg_time()
-})
+  trade.price = parseFloat(trade.price) // floathack
+  trade.size = parseFloat(trade.size)
+  var trade_delay = (new Date() - new Date(trade.time))
 
-/*
-mtgoxob.on('trade', function(trade){
-  if(trade.price_currency == 'USD') {
-    var trade_delay = (new Date() - (trade.date*1000))/1000
+  var trade_msg = '$'+trade.price+
+                  ' x'+trade.size.toFixed(4)
+  if(last_tick) {
+    trade_msg += ' sp$'+(last_tick.sell.value-last_tick.buy.value).toFixed()
+  }
 
-    var trade_msg = '$'+trade.price.toFixed(2)+
-                    ' x'+trade.amount.toFixed(1)
-    if(last_tick) {
-      trade_msg += ' sp$'+(last_tick.sell.value-last_tick.buy.value).toFixed(2)
+  var msg = ""
+  var target_msg = ""
+  if(swing_side == "sell"){
+    msg += 'highwater $'+highwater.toFixed(2)+' '
+    target_msg += '$'+target_highwater.toFixed(2)+' bounce to '+
+                  '$'+sell_price.toFixed(2)
+    if(buy_price > 0) {
+      var buy_diff = trade.price-buy_price
+      var diff_sign = ''
+      if (buy_diff > 0) { diff_sign = '+'}
+      msg = msg + ' '+diff_sign+buy_diff.toFixed(2)
     }
+  }
 
-    var msg = ""
-    var target_msg = ""
-    if(swing_side == "sell"){
-      msg += 'highwater $'+highwater.toFixed(2)+' '
-      target_msg += '$'+target_highwater.toFixed(2)+' bounce to '+
-                    '$'+sell_price.toFixed(2)
-      if(buy_price > 0) {
-        var buy_diff = trade.price-buy_price
-        var diff_sign = ''
-        if (buy_diff > 0) { diff_sign = '+'}
-        msg = msg + ' '+diff_sign+buy_diff.toFixed(2)
+  if(swing_side == "buy"){
+    msg += 'lowwater $'+lowwater.toFixed(2)+' '
+    target_msg += '$'+target_lowwater.toFixed(2)+' bounce to '+
+                  '$'+buy_price.toFixed(2)
+    if(sell_price > 0) {
+      var sell_diff = sell_price-trade.price
+      var diff_sign = 'loss '
+      if (sell_diff > 0) { diff_sign = 'profit +'}
+      msg = msg + diff_sign+sell_diff.toFixed(2)
+    }
+  }
+  if(trade_delay > 3){
+    msg = msg + ' (delay '+trade_delay.toFixed(1)+'s)'
+  }
+  if(lag_secs > 5){
+    msg = msg + ' (lag '+lag_secs.toFixed(1)+'s)'
+  }
+
+  json_log({trade:trade_msg,
+            quant: msg,
+            swing: swing_side,
+            target: target_msg,
+            btc: inventory.btc.amount.toFixed(3)+(inventory.usd.price&&'/$'+inventory.usd.price.toFixed(2)),
+            usd: inventory.usd.amount.toFixed(2)+(inventory.btc.price&&'/$'+inventory.btc.price.toFixed(2))})
+
+  if(swing_side == "sell") {
+    if(trade.price > highwater) {
+      // price rising
+      set_highwater(trade.price)
+    } else {
+      if(trade.price > target_highwater &&
+         trade.price < sell_price) {
+        // swing
+        sell(trade.price)
       }
     }
+  }
 
-    if(swing_side == "buy"){
-      msg += 'lowwater $'+lowwater.toFixed(2)+' '
-      target_msg += ' $'+target_lowwater.toFixed(2)+' bounce to'+
-                    ' $'+buy_price.toFixed(2)
-      if(sell_price > 0) {
-        var sell_diff = sell_price-trade.price
-        var diff_sign = 'loss '
-        if (sell_diff > 0) { diff_sign = 'profit +'}
-        msg = msg + diff_sign+sell_diff.toFixed(2)
-      }
-    }
-    if(trade_delay > 3){
-      msg = msg + ' (delay '+trade_delay.toFixed(1)+'s)'
-    }
-    if(lag_secs > 5){
-      msg = msg + ' (lag '+lag_secs.toFixed(1)+'s)'
-    }
-
-    json_log({trade:trade_msg,
-              quant: msg,
-              target: target_msg,
-              btc: inventory.btc.amount.toFixed(3)+(inventory.usd.price&&'/$'+inventory.usd.price.toFixed(2)),
-              usd: inventory.usd.amount.toFixed(2)+(inventory.btc.price&&'/$'+inventory.btc.price.toFixed(2))})
-
-    if(swing_side == "sell") {
-      if(trade.price > highwater) {
-        // price rising
-        set_highwater(trade.price)
-      } else {
-        if(trade.price > target_highwater &&
-           trade.price < sell_price) {
-          // swing
-          sell(trade.price)
-        }
-      }
-    }
-
-    if(swing_side == "buy") {
-      if(trade.price < lowwater) {
-        // price falling
-        set_lowwater(trade.price)
-      } else {
-        if(trade.price < target_lowwater &&
-           trade.price > buy_price) {
-          // swing!
-          buy(trade.price)
-        }
+  if(swing_side == "buy") {
+    if(trade.price < lowwater) {
+      // price falling
+      set_lowwater(trade.price)
+    } else {
+      if(trade.price < target_lowwater &&
+         trade.price > buy_price) {
+        // swing!
+        buy(trade.price)
       }
     }
   }
 })
-*/
 
 function set_target_highwater_for(price){
   target_highwater = price*(1+config.quant.gap_percentage/100)
