@@ -134,7 +134,7 @@ coinbasebook.on('order.match', function(trade){
   var target_msg = ""
   if(swing_side == "sell"){
     msg += 'highwater $'+highwater.toFixed(2)+' '
-    target_msg += '$'+target_highwater.toFixed(2)+' bounce to '+
+    target_msg += '>$'+target_highwater.toFixed(2)+' falling to '+
                   '$'+sell_price.toFixed(2)
     if(buy_price > 0) {
       var buy_diff = trade.price-buy_price
@@ -146,7 +146,7 @@ coinbasebook.on('order.match', function(trade){
 
   if(swing_side == "buy"){
     msg += 'lowwater $'+lowwater.toFixed(2)+' '
-    target_msg += '$'+target_lowwater.toFixed(2)+' bounce to '+
+    target_msg += '<$'+target_lowwater.toFixed(2)+' rising to '+
                   '$'+buy_price.toFixed(2)
     if(sell_price > 0) {
       var sell_diff = sell_price-trade.price
@@ -162,8 +162,9 @@ coinbasebook.on('order.match', function(trade){
   json_log({trade:trade_msg,
             quant: msg,
             target: target_msg,
-            btc: inventory.btc.amount.toFixed(3)+(inventory.usd.price&&'/$'+inventory.usd.price.toFixed(2)),
-            usd: inventory.usd.amount.toFixed(2)+(inventory.btc.price&&'/$'+inventory.btc.price.toFixed(2))})
+            btc: inventory.btc.amount.toFixed(3)+inventory.usd.price&&('/$'+inventory.usd.price.toFixed(2)),
+            usd: inventory.usd.amount.toFixed(2)+inventory.btc.price&&('/$'+inventory.btc.price.toFixed(2))
+           })
 
   if(swing_side == "sell") {
     if(trade.price > highwater) {
@@ -356,7 +357,7 @@ function order_status(oid){
 
 function json_log(o){
   var msg = JSON.stringify(o)+"\n"
-  var display_msg = moment().format("ddd HH:MM:ss")+" "+msg
+  var display_msg = moment().format("ddd HH:mm:ss")+" "+msg
   var log_msg = moment().format()+" "+msg
   process.stdout.write(display_msg)
   fs.appendFile('act.log', log_msg)
