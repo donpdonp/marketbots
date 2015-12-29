@@ -5,6 +5,7 @@
   "dependencies": {
     "coinbase-exchange": "*",
     "moment": "2.x.x",
+    "request": "*",
     "nodemailer": "0.4.x"
   },
   "devDependencies": {

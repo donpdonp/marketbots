@@ -2,6 +2,7 @@ var fs = require('fs')
 var moment = require('moment')
 var nodemailer = require("nodemailer")
 var CoinbaseExchange = require('coinbase-exchange');
+var request = require('request')
 
 var pkg = require('./package.json')
 var config = JSON.parse(fs.readFileSync("./config.json"))
@@ -29,7 +30,8 @@ json_log({msg:"*** STARTING ***",version: pkg.version})
 json_log({quant: config.quant})
 json_log({inventory:inventory})
 console.log('connecting to coinbase...')
-var coinbasebook = new CoinbaseExchange.OrderbookSync();
+//var coinbasebook = new CoinbaseExchange.OrderbookSync();
+var coinbasebook = cointhink_data('coinbase', '2015-06-01')
 
 if((typeof(inventory.btc.amount) != 'number') ||
    (typeof(inventory.usd.amount) != 'number') ||
@@ -162,8 +164,8 @@ coinbasebook.on('order.match', function(trade){
   json_log({trade:trade_msg,
             quant: msg,
             target: target_msg,
-            btc: inventory.btc.amount.toFixed(3)+inventory.usd.price&&('/$'+inventory.usd.price.toFixed(2)),
-            usd: inventory.usd.amount.toFixed(2)+inventory.btc.price&&('/$'+inventory.btc.price.toFixed(2))
+            btc: inventory.btc.amount.toFixed(3)+(inventory.usd.price&&('/$'+inventory.usd.price.toFixed(2))),
+            usd: inventory.usd.amount.toFixed(2)+(inventory.btc.price&&('/$'+inventory.btc.price.toFixed(2)))
            })
 
   if(swing_side == "sell") {
@@ -298,7 +300,7 @@ function buy(price){
 }
 
 function low_lag(){
-  return (lag_secs < config.quant.max_lag)
+  return true //(lag_secs < config.quant.max_lag)
 }
 
 function add_order(bidask, price, amount){
@@ -401,3 +403,32 @@ function email_alert(msg){
   });
 }
 
+
+function cointhink_data(exchange, start_date) {
+  var EventEmitter = require('events');
+
+  events = new EventEmitter();
+  events.emit('open')
+
+  var date = moment(start_date)
+  setInterval(function(){
+    var url = 'https://cointhink.com/data/orderbook?exchange='+exchange+'&market=btc:usd&date='+date.format()
+    console.log(url)
+    request(url, function (error, response, body) {
+      if(error) {
+        console.log('get err')
+      } else {
+        resp = JSON.parse(body)
+        events.emit('order.match', {
+            size: resp.ask.quantity,
+            price: resp.ask.price,
+            time: resp.date
+        })
+      }
+    })
+    date.add(10, 'minutes')
+
+  }, 1000)
+
+ return events
+}
