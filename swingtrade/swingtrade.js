@@ -271,7 +271,7 @@ function buy(price){
                                  lag: lag_secs})
           add_order('bid', price, btc)
           profit = (inventory.btc.price-price)*btc
-          email_alert("stoploss buy "+price.toFixed(2)+" up from "+lowwater+" x"+btc.toFixed(2)+"btc. profit: $"+profit.toFixed(2))
+          email_alert("buy "+price.toFixed(2)+" up from "+lowwater+" x"+btc.toFixed(2)+"btc. profit: $"+profit.toFixed(2))
           inventory.usd.price = price
           inventory.btc.amount = btc*(1-(config.coinbase.fee_percentage/100))
           inventory.btc.price = null
@@ -391,6 +391,7 @@ function email_alert(msg){
   body.from = config.email.from
   body.to = config.email.to
   body.subject = config.email.server+":"+msg
+  body.text = JSON.stringify(inventory)
   json_log({msg:"email", body: body})
   var smtpTransport = nodemailer.createTransport("SMTP",{host: "localhost"});
   smtpTransport.sendMail(body, function(error, response){
@@ -411,24 +412,35 @@ function cointhink_data(exchange, start_date) {
   events.emit('open')
 
   var date = moment(start_date)
-  setInterval(function(){
-    var url = 'https://cointhink.com/data/orderbook?exchange='+exchange+'&market=btc:usd&date='+date.format()
-    console.log(url)
-    request(url, function (error, response, body) {
-      if(error) {
-        console.log('get err')
-      } else {
+  var interval_id = setInterval(function(){
+    cointhink_grab(exchange, date)
+    if(date < moment()) {
+      date.add(1, 'day')
+    } else {
+      clearInterval(interval_id)
+    }
+  }, 1000)
+
+ return events
+}
+
+function cointhink_grab(exchange, date) {
+  var url = 'https://cointhink.com/data/orderbook?exchange='+exchange+'&market=btc:usd&date='+date.format()
+  console.log(url)
+  request(url, function (error, response, body) {
+    if(error) {
+      console.log('get err')
+    } else {
+      try {
         resp = JSON.parse(body)
         events.emit('order.match', {
             size: resp.ask.quantity,
             price: resp.ask.price,
             time: resp.date
         })
+      } catch(e) {
+        console.log('json parse error! skipping')
       }
-    })
-    date.add(10, 'minutes')
-
-  }, 1000)
-
- return events
+    }
+  })
 }
