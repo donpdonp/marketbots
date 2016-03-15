@@ -3,15 +3,12 @@ require "./src/wsarbi"
 puts "wsarbi"
 
 orderbook = Wsarbi::Orderbook.new
-market = Wsarbi::Market.new
-o1 = Wsarbi::Offer.new
-o2 = Wsarbi::Offer.new
+o1 = Wsarbi::Offer.new(2.0, 1.0)
+o2 = Wsarbi::Offer.new(1.0, 1.0)
 
 # market_pool.add(market)
 # market_pool.add(market)
 
-orderbook.add_bids([o1])
-orderbook.add_asks([o2])
-
-# orderbook.profitable_asks => [ask]
-# orderbook.profitable_bids => [bid]
+orderbook.bids.add([o1])
+orderbook.asks.add([o2])
+winners = orderbook.profitables

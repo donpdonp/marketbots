@@ -30,8 +30,8 @@ json_log({msg:"*** STARTING ***",version: pkg.version})
 json_log({quant: config.quant})
 json_log({inventory:inventory})
 console.log('connecting to coinbase...')
-//var coinbasebook = new CoinbaseExchange.OrderbookSync();
-var coinbasebook = cointhink_data('coinbase', '2015-06-01')
+var coinbasebook = new CoinbaseExchange.OrderbookSync();
+//var coinbasebook = cointhink_data('coinbase', '2015-06-01')
 
 if((typeof(inventory.btc.amount) != 'number') ||
    (typeof(inventory.usd.amount) != 'number') ||
@@ -391,7 +391,7 @@ function email_alert(msg){
   body.from = config.email.from
   body.to = config.email.to
   body.subject = config.email.server+":"+msg
-  body.text = JSON.stringify(inventory)
+  body.text = 'pre-sale inventory '+JSON.stringify(inventory)
   json_log({msg:"email", body: body})
   var smtpTransport = nodemailer.createTransport("SMTP",{host: "localhost"});
   smtpTransport.sendMail(body, function(error, response){
