@@ -27,7 +27,7 @@ module Wsarbi
     end
 
     def better_than(price : Float64)
-      @offers.select { |offer| @better_proc.call(offer.price, price) == 1 }
+      @offers.select { |offer| @better_proc.call(offer.price, price) == -1 }
     end
   end
 end
