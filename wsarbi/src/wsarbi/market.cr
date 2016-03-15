@@ -8,19 +8,18 @@ module Wsarbi
     end
 
     def initialize(bidask : BidAsk)
-      puts "New Market"
       @offers = [] of Offer
       if bidask == BidAsk::Bid
-        @better_proc = ->(offer : Offer, price : Float64) { offer.price > price }
+        @better_proc = ->(was : Float64, is : Float64) { was <=> is }
       else
-        @better_proc = ->(offer : Offer, price : Float64) { offer.price < price }
+        @better_proc = ->(was : Float64, is : Float64) { is <=> was }
       end
     end
 
     def add(offers : Array(Offer))
       # TODO: sorted insert
       @offers += offers
-      @offers.sort_by! { |o| o.price }
+      @offers.sort! { |a, b| @better_proc.call(a.price, b.price) }
     end
 
     def best
@@ -28,7 +27,7 @@ module Wsarbi
     end
 
     def better_than(price : Float64)
-      @offers.select { |offer| @better_proc.call(offer, price) }
+      @offers.select { |offer| @better_proc.call(offer.price, price) == 1 }
     end
   end
 end
