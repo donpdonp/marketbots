@@ -10,9 +10,9 @@ module Wsarbi
     def initialize(bidask : BidAsk)
       @offers = [] of Offer
       if bidask == BidAsk::Bid
-        @better_proc = ->(was : Float64, is : Float64) { was <=> is }
-      else
         @better_proc = ->(was : Float64, is : Float64) { is <=> was }
+      else
+        @better_proc = ->(was : Float64, is : Float64) { was <=> is }
       end
     end
 
