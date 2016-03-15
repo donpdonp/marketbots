@@ -12,3 +12,4 @@ o2 = Wsarbi::Offer.new(1.0, 1.0)
 orderbook.bids.add([o1])
 orderbook.asks.add([o2])
 winners = orderbook.profitables
+puts winners.inspect

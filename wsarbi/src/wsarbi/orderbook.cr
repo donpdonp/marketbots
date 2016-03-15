@@ -4,16 +4,13 @@ module Wsarbi
 
     def initialize
       puts "New Orderbook"
-      @bids = Market.new
-      @asks = Market.new
+      @bids = Market.new(Market::BidAsk::Bid)
+      @asks = Market.new(Market::BidAsk::Ask)
     end
 
     def profitables
-      ask_price = @asks.best.price
       bid_price = @bids.best.price
-      if ask_price < bid_price
-        puts "Winner"
-      end
+      @asks.better_than(bid_price)
     end
   end
 end
