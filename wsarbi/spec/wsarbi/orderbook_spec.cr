@@ -19,6 +19,7 @@ module Wsarbi
       subject.bids.add(bids)
       subject.asks.add(asks)
       subject.profitables.size.should eq(1)
+      subject.profitables.first.price.should eq(1)
     end
   end
 end
