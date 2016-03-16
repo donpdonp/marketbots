@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "bitfinex-api-node": "*",
+    "debug": "*",
+    "autobahn": "*",
+    "redis": "*",
+    "websock": "*"
+  }
+}

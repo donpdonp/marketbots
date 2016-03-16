@@ -16,14 +16,19 @@ redis = Redis.new
 orderbook = Wsarbi::Orderbook.new
 
 # Blocking subscribe
-redis.subscribe("exchanges") do |on|
+redis.subscribe("orderbook") do |on|
   on.message do |channel, json|
     begin
       msg = JSON.parse(json)
       puts msg.inspect
-      # orderbook.asks.add([o2])
-      # orderbook.bids.add([o1])
+      if msg["type"] == "bid"
+        orderbook.bids.add([Wsarbi::Offer.new(msg["price"].as_s.to_f, msg["amount"].as_s.to_f)])
+      end
+      if msg["type"] == "ask"
+        orderbook.asks.add([Wsarbi::Offer.new(msg["price"].as_s.to_f, msg["amount"].as_s.to_f)])
+      end
       winners = orderbook.profitables
+      puts "Orderbook asks #{orderbook.asks.offers.size} bids #{orderbook.bids.offers.size}"
       puts winners.inspect
     rescue ex
       puts ex.message
