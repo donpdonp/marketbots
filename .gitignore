@@ -1,5 +1,6 @@
 node_modules/
+logs/
 
-config.json
-inventory.json
+config.json*
+inventory.json*
 act.log
