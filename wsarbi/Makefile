@@ -1,7 +1,7 @@
 all: build
 
 build:
-	crystal wsarbi.cr
+	crystal server.cr
 
 test:
 	crystal spec

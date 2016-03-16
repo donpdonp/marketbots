@@ -1,19 +1,19 @@
 name: wsarbi
 version: 0.1.0
 
-# authors:
-#   - name <email@example.com>
+authors:
+  - Don Park <donp@donp.org>
 
 # description: |
 #   Short description of wsarbi
 
-# dependencies:
-#   pg:
-#     github: will/crystal-pg
-#     version: "~> 0.5"
+dependencies:
+  redis:
+    github: stefanwille/crystal-redis
+    version: ~> 1.4.0
 
 # development_dependencies:
 #   webmock:
 #     github: manastech/webmock
 
-# license: MIT
+license: MIT
