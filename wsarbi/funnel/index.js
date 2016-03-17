@@ -16,22 +16,22 @@ var channel_name = 'orderbook'
 connection.onopen = function (session) {
   function marketEvent (args, kwargs) {
     args.forEach(function(ob){
-      console.log("POLO", ob);
-      wsob = {
-        exchange: 'poloniex',
-        market: 'ETH:BTC',
-        type:   ob.data.type,
-        price:  ob.data.rate,
-        amount: ob.type == "orderBookRemove" ? "0" : ob.data.amount
+      if(ob.type == "orderBookModify" || ob.type == "orderBookRemove") {
+        console.log("POLO", ob.type, ob.data);
+        wsob = {
+          exchange: 'poloniex',
+          market: 'ETH:BTC',
+          type:   ob.data.type,
+          price:  ob.data.rate,
+          amount: ob.type == "orderBookRemove" ? "0" : ob.data.amount
+        }
+        redis.publish(channel_name, JSON.stringify(wsob))
       }
-      redis.publish(channel_name, JSON.stringify(wsob))
     })
   }
   function tickerEvent (args,kwargs) {
-          console.log("POLO", args);
   }
   function trollboxEvent (args,kwargs) {
-          console.log(args);
   }
 
   session.subscribe('BTC_ETH', marketEvent);
@@ -55,7 +55,7 @@ bws.on('trade', function (pair, trade) {
 });
 
 bws.on('orderbook', function (pair, book) {
-  console.log('Order book:', book);
+  console.log('BTFX', book);
   wsob = {
     exchange: 'bitfinex',
     market: 'ETH:BTC',
@@ -80,7 +80,7 @@ bws.on('error', console.error);
 setInterval(function(){
   request.get('https://bleutrade.com/api/v2/public/getorderbook?type=ALL&market=ETH_BTC', function (error, response, body) {
     var book = JSON.parse(body)
-    console.log('bluetrade orderbook ', book.success)
+    console.log('BLUE ', book.result.buy.length, book.result.sell.length)
     book.result.buy.forEach(function(o){
       wsob = {
         exchange: 'bleutrade',
