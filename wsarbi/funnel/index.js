@@ -18,7 +18,8 @@ connection.onopen = function (session) {
     args.forEach(function(ob){
       console.log("POLO", ob);
       wsob = {
-        market: 'poloniex',
+        exchange: 'poloniex',
+        market: 'ETH:BTC',
         type:   ob.data.type,
         price:  ob.data.rate,
         amount: ob.type == "orderBookRemove" ? "0" : ob.data.amount
@@ -56,7 +57,8 @@ bws.on('trade', function (pair, trade) {
 bws.on('orderbook', function (pair, book) {
   console.log('Order book:', book);
   wsob = {
-    market: 'bitfinex',
+    exchange: 'bitfinex',
+    market: 'ETH:BTC',
     type:   book.amount > 0 ? "bid" : "ask",
     price:  ""+book.price,
     amount: ""+Math.abs(book.amount)
@@ -81,7 +83,8 @@ setInterval(function(){
     console.log('bluetrade orderbook ', book.success)
     book.result.buy.forEach(function(o){
       wsob = {
-        market: "bleutrade",
+        exchange: 'bleutrade',
+        market: 'ETH:BTC',
         type:   "bid",
         price:  o.Rate,
         amount: o.Quantity
@@ -90,7 +93,8 @@ setInterval(function(){
     })
     book.result.sell.forEach(function(o){
       wsob = {
-        market: "bleutrade",
+        exchange: 'bleutrade',
+        market: 'ETH:BTC',
         type:   "ask",
         price:  o.Rate,
         amount: o.Quantity

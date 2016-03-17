@@ -22,14 +22,27 @@ redis.subscribe("orderbook") do |on|
       msg = JSON.parse(json)
       puts msg.inspect
       if msg["type"] == "bid"
-        orderbook.bids.add([Wsarbi::Offer.new(msg["price"].as_s.to_f, msg["amount"].as_s.to_f)])
+        orderbook.bids.add([Wsarbi::Offer.new(
+          msg["exchange"].as_s,
+          msg["market"].as_s,
+          msg["price"].as_s.to_f,
+          msg["amount"].as_s.to_f
+          )])
       end
       if msg["type"] == "ask"
-        orderbook.asks.add([Wsarbi::Offer.new(msg["price"].as_s.to_f, msg["amount"].as_s.to_f)])
+        orderbook.asks.add([Wsarbi::Offer.new(
+          msg["exchange"].as_s,
+          msg["market"].as_s,
+          msg["price"].as_s.to_f,
+          msg["amount"].as_s.to_f
+          )])
       end
       winners = orderbook.profitables
       puts "Orderbook asks #{orderbook.asks.offers.size} bids #{orderbook.bids.offers.size}"
-      puts winners.inspect
+      winners.each do |o|
+        puts "      |#{o.exchange}| #{o.quantity}@#{o.price}"
+      end
+
     rescue ex
       puts ex.message
       puts json.inspect
