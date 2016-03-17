@@ -1,7 +1,7 @@
 all: build
 
 build:
-	crystal server.cr
+	crystal run server.cr
 
 test:
 	crystal spec
