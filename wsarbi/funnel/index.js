@@ -1,6 +1,8 @@
 var BitfinexWS = require('bitfinex-api-node').WS;
 var bws = new BitfinexWS();
 
+var request = require('request')
+
 var autobahn = require('autobahn');
 var connection = new autobahn.Connection({
   url: "wss://api.poloniex.com",
@@ -71,4 +73,31 @@ bws.on('subscribed', function (data) {
 });
 
 bws.on('error', console.error);
+
+// Bleutrade pump
+setInterval(function(){
+  request.get('https://bleutrade.com/api/v2/public/getorderbook?type=ALL&market=ETH_BTC', function (error, response, body) {
+    var book = JSON.parse(body)
+    console.log('bluetrade orderbook ', book.success)
+    book.result.buy.forEach(function(o){
+      wsob = {
+        market: "bleutrade",
+        type:   "bid",
+        price:  o.Rate,
+        amount: o.Quantity
+      }
+      redis.publish(channel_name, JSON.stringify(wsob))
+    })
+    book.result.sell.forEach(function(o){
+      wsob = {
+        market: "bleutrade",
+        type:   "ask",
+        price:  o.Rate,
+        amount: o.Quantity
+      }
+      redis.publish(channel_name, JSON.stringify(wsob))
+    })
+  })
+}, 5000)
+
 
