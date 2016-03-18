@@ -7,6 +7,14 @@ module Wsarbi
       @offers = [] of Offer
     end
 
+    def quantity
+      @offers.sum{|offer| offer.quantity}
+    end
+
+    def exchanges
+      @offers.map(&.exchange).uniq
+    end
+
     def value
       @offers.sum{|offer| offer.price * offer.quantity}
     end

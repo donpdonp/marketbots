@@ -51,12 +51,12 @@ redis.subscribe("orderbook") do |on|
       win_ask_value = win_ask.reduce(0){|m,ob| m + ob.value}
       win_bid_value = win_bid.reduce(0){|m,ob| m + ob.value}
       puts "Arbitrage ask value #{win_ask_value}  bid value #{win_bid_value}"
-      # win_ask.each do |o|
-      #   puts "      ASK |#{o.exchange}| #{o.price} x#{o.quantity}"
-      # end
-      # win_bid.each do |o|
-      #   puts "      BID |#{o.exchange}| #{o.price} x#{o.quantity}"
-      # end
+      win_ask.each do |ob|
+        puts "      ASK |#{ob.exchanges}| #{ob.price} x#{ob.quantity}"
+      end
+      win_bid.each do |ob|
+        puts "      BID |#{ob.exchanges}| #{ob.price} x#{ob.quantity}"
+      end
 
     rescue ex
       puts ex.message
