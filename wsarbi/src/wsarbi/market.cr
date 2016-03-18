@@ -20,8 +20,11 @@ module Wsarbi
 
     def add(offer : Offer)
       bin = find_or_create_closest_bin(offer)
-
-      bin.offers << offer
+      if offer.quantity == 0
+        bin.remove(offer)
+      else
+        bin.offers << offer
+      end
       # TODO: sorted insert
       @bins.sort! { |a, b| @better_proc.call(a.price, b.price) }
     end

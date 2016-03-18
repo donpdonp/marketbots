@@ -50,6 +50,10 @@ bws.on('open', function () {
     //bws.subscribeTicker('LTCBTC');
 });
 
+bws.on('close', function (pair, trade) {
+    console.log('btfx closed.', trade);
+});
+
 bws.on('trade', function (pair, trade) {
     console.log('Trade:', trade);
 });
