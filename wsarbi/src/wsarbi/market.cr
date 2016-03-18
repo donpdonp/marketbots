@@ -48,5 +48,14 @@ module Wsarbi
     def summary
       "$#{bins.first.price}/#{bins.first.offers.size} - $#{bins.last.price}/#{bins.last.offers.size} value #{value}/#{bins.size}"
     end
+
+    def clear(exchange : String)
+      @bins.select! do |bin|
+        bin.offers.reject! do |offer|
+          offer.exchange == exchange
+        end
+        bin.offers.size > 0
+      end
+    end
   end
 end

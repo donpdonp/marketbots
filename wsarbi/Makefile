@@ -1,4 +1,4 @@
-all: build
+all: test build
 
 build:
 	crystal run server.cr

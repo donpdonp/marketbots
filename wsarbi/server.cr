@@ -37,6 +37,10 @@ redis.subscribe("orderbook") do |on|
           msg["amount"].as_s.to_f
           ))
       end
+      if msg["type"] == "clear"
+        #orderbook.bids.clear(msg["exchange"])
+        #orderbook.asks.clear(msg["exchange"])
+      end
       win_ask, win_bid = orderbook.profitables
       puts "Orderbook asks #{orderbook.asks.summary}"
       puts "          bids #{orderbook.bids.summary}"

@@ -5,21 +5,26 @@ module Wsarbi
     subject = Orderbook.new
 
     bids = [
-      Offer.new(1.5, 1.0),
-      Offer.new(1.0, 1.0),
+      Offer.new("shareco", "btc_usd", 1.5, 1.0),
+      Offer.new("shareco", "btc_usd", 1.0, 1.0),
     ]
 
     asks = [
-      Offer.new(1.0, 1.0),
-      Offer.new(1.5, 1.0),
-      Offer.new(2.0, 1.0),
+      Offer.new("shareco", "btc_usd", 1.0, 1.0),
+      Offer.new("shareco", "btc_usd", 1.5, 1.0),
+      Offer.new("shareco", "btc_usd", 2.0, 1.0),
     ]
 
     it "remembers price and quantity" do
-      subject.bids.add(bids)
-      subject.asks.add(asks)
-      subject.profitables.size.should eq(1)
-      subject.profitables.first.price.should eq(1)
+      bids.each do |bid|
+        subject.bids.add(bid)
+      end
+      asks.each do |ask|
+        subject.asks.add(ask)
+      end
+      good_asks, good_bids = subject.profitables
+      good_asks.size.should eq(1)
+      good_asks.first.price.should eq(1)
     end
   end
 end
