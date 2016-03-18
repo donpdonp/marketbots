@@ -34,7 +34,7 @@ connection.onopen = function (session) {
   function trollboxEvent (args,kwargs) {
   }
 
-  session.subscribe('BTC_ETH', marketEvent);
+  //session.subscribe('BTC_ETH', marketEvent);
   //session.subscribe('ticker', tickerEvent);
   //session.subscribe('trollbox', trollboxEvent);
 }
@@ -61,7 +61,7 @@ bws.on('orderbook', function (pair, book) {
     market: 'ETH:BTC',
     type:   book.amount > 0 ? "bid" : "ask",
     price:  ""+book.price,
-    amount: ""+Math.abs(book.amount)
+    amount: book.count == 0 ? "0" : (""+Math.abs(book.amount))
   }
   redis.publish(channel_name, JSON.stringify(wsob))
 });
@@ -77,7 +77,9 @@ bws.on('subscribed', function (data) {
 bws.on('error', console.error);
 
 // Bleutrade pump
-setInterval(function(){
+//setInterval(bleu_refresh, 5000)
+
+function bleu_refresh(){
   request.get('https://bleutrade.com/api/v2/public/getorderbook?type=ALL&market=ETH_BTC', function (error, response, body) {
     try {
       var book = JSON.parse(body)
@@ -107,6 +109,5 @@ setInterval(function(){
       console.log('BLUE JSON ERR', body[0,100])
     }
   })
-}, 5000)
-
+}
 
