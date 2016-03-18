@@ -10,9 +10,9 @@ module Wsarbi
     def profitables
       good_asks = [] of OfferBin
       good_bids = [] of OfferBin
-      if @bids.offers.size > 0 && @asks.offers.size > 0
-        good_asks += @asks.better_than(@bids.best.bin)
-        good_bids += @bids.better_than(@asks.best.bin)
+      if @bids.bins.size > 0 && @asks.bins.size > 0
+        good_asks += @asks.better_than(@bids.best.price)
+        good_bids += @bids.better_than(@asks.best.price)
       end
       { good_asks, good_bids }
     end

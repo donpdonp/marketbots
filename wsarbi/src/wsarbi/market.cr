@@ -1,6 +1,6 @@
 module Wsarbi
   class Market
-    getter :offers
+    getter :bins
 
     enum BidAsk
       Bid
@@ -10,7 +10,7 @@ module Wsarbi
     def initialize(bidask : BidAsk, precision : Float64)
       @precision = precision
       @decimals = Math.log10(1/precision)
-      @offers = [] of OfferBin
+      @bins = [] of OfferBin
       if bidask == BidAsk::Bid
         @better_proc = ->(was : Float64, is : Float64) { is <=> was }
       else
@@ -20,22 +20,23 @@ module Wsarbi
 
     def add(offer : Offer)
       bin = closest_bin(offer)
-      @offers << bin
+      bin.offers << offer
+      @bins << bin
       # TODO: sorted insert
-      @offers.sort! { |a, b| @better_proc.call(a.bin, b.bin) }
+      @bins.sort! { |a, b| @better_proc.call(a.price, b.price) }
     end
 
     def best
-      @offers.first
+      @bins.first
     end
 
     def better_than(price : Float64)
-      @offers.select { |offer| @better_proc.call(offer.bin, price) == -1 }
+      @bins.select { |bin| @better_proc.call(bin.price, price) == -1 }
     end
 
     def closest_bin(offer : Offer)
-      close = @offers.find do |offer_a|
-        offer.price >= offer_a.bin && offer.price < (offer_a.bin+@precision)
+      close = @bins.find do |bin_a|
+        offer.price >= bin_a.price && offer.price < (bin_a.price+@precision)
       end
       close || OfferBin.new(offer, @decimals)
     end
