@@ -38,8 +38,8 @@ redis.subscribe("orderbook") do |on|
           ))
       end
       win_ask, win_bid = orderbook.profitables
-      puts "Orderbook ask bins #{orderbook.asks.bins.size} #{orderbook.asks.bins.first.price}-#{orderbook.asks.bins.last.price}"+
-            " bid bins #{orderbook.bids.bins.size} #{orderbook.bids.bins.first.price}-#{orderbook.bids.bins.last.price}"
+      puts "Orderbook asks #{orderbook.asks.summary}"
+      puts "          bids #{orderbook.bids.summary}"
       win_ask_value = win_ask.reduce(0){|m,ob| m + ob.value}
       win_bid_value = win_bid.reduce(0){|m,ob| m + ob.value}
       puts "Arbitrage ask value #{win_ask_value}  bid value #{win_bid_value}"

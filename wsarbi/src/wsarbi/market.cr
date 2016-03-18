@@ -40,5 +40,13 @@ module Wsarbi
       end
       close || OfferBin.new(offer, @decimals)
     end
+
+    def value : Float64
+      @bins.sum{|ob| ob.value}
+    end
+
+    def summary
+      "$#{bins.first.price}/#{bins.first.offers.size} - $#{bins.last.price}/#{bins.last.offers.size} value #{value}/#{bins.size}"
+    end
   end
 end
