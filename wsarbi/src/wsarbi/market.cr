@@ -22,6 +22,7 @@ module Wsarbi
       bin = find_or_create_closest_bin(offer)
       if offer.quantity == 0
         bin.remove(offer)
+        @bins.delete(bin) if bin.offers.size == 0
       else
         bin.offers << offer
       end
