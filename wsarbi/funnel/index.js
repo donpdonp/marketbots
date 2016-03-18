@@ -34,7 +34,7 @@ connection.onopen = function (session) {
   function trollboxEvent (args,kwargs) {
   }
 
-  //session.subscribe('BTC_ETH', marketEvent);
+  session.subscribe('BTC_ETH', marketEvent);
   //session.subscribe('ticker', tickerEvent);
   //session.subscribe('trollbox', trollboxEvent);
 }
@@ -44,10 +44,10 @@ connection.open()
 
 // Bitfinex pump
 bws.on('open', function () {
-    bws.subscribeOrderBook('ETHBTC');
+  bws.subscribeOrderBook('ETHBTC');
 
-    //bws.subscribeTrades('ETHBTC');
-    //bws.subscribeTicker('LTCBTC');
+  //bws.subscribeTrades('ETHBTC');
+  //bws.subscribeTicker('LTCBTC');
 });
 
 bws.on('close', function (pair, trade) {
@@ -81,7 +81,7 @@ bws.on('subscribed', function (data) {
 bws.on('error', console.error);
 
 // Bleutrade pump
-//setInterval(bleu_refresh, 5000)
+setInterval(bleu_refresh, 5000)
 
 function bleu_refresh(){
   request.get('https://bleutrade.com/api/v2/public/getorderbook?type=ALL&market=ETH_BTC', function (error, response, body) {
