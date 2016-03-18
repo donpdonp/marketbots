@@ -79,28 +79,33 @@ bws.on('error', console.error);
 // Bleutrade pump
 setInterval(function(){
   request.get('https://bleutrade.com/api/v2/public/getorderbook?type=ALL&market=ETH_BTC', function (error, response, body) {
-    var book = JSON.parse(body)
-    console.log('BLUE ', book.result.buy.length, book.result.sell.length)
-    book.result.buy.forEach(function(o){
-      wsob = {
-        exchange: 'bleutrade',
-        market: 'ETH:BTC',
-        type:   "bid",
-        price:  o.Rate,
-        amount: o.Quantity
-      }
-      redis.publish(channel_name, JSON.stringify(wsob))
-    })
-    book.result.sell.forEach(function(o){
-      wsob = {
-        exchange: 'bleutrade',
-        market: 'ETH:BTC',
-        type:   "ask",
-        price:  o.Rate,
-        amount: o.Quantity
-      }
-      redis.publish(channel_name, JSON.stringify(wsob))
-    })
+    try {
+      var book = JSON.parse(body)
+      console.log('BLUE ', book.result.buy.length, book.result.sell.length)
+      redis.publish(channel_name, JSON.stringify({exchange: "bleutrade", type: "clear"}))
+      book.result.buy.forEach(function(o){
+        wsob = {
+          exchange: "bleutrade",
+          market: "ETH:BTC",
+          type:   "bid",
+          price:  o.Rate,
+          amount: o.Quantity
+        }
+        redis.publish(channel_name, JSON.stringify(wsob))
+      })
+      book.result.sell.forEach(function(o){
+        wsob = {
+          exchange: "bleutrade",
+          market: "ETH:BTC",
+          type:   "ask",
+          price:  o.Rate,
+          amount: o.Quantity
+        }
+        redis.publish(channel_name, JSON.stringify(wsob))
+      })
+    } catch (e) {
+      console.log('BLUE JSON ERR', body[0,100])
+    }
   })
 }, 5000)
 

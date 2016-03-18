@@ -38,8 +38,12 @@ redis.subscribe("orderbook") do |on|
           ))
       end
       if msg["type"] == "clear"
-        #orderbook.bids.clear(msg["exchange"])
-        #orderbook.asks.clear(msg["exchange"])
+        exchange_name = msg["exchange"].as_s
+        ask_drop = orderbook.asks.clear(exchange_name)
+        bid_drop = orderbook.bids.clear(exchange_name)
+        puts "********"
+        puts "CLEARED #{exchange_name} #{ask_drop} #{bid_drop}"
+        puts "********"
       end
       win_ask, win_bid = orderbook.profitables
       puts "Orderbook asks #{orderbook.asks.summary}"
