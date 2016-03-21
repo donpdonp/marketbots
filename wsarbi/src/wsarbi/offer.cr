@@ -1,6 +1,7 @@
 module Wsarbi
   class Offer
     getter :exchange, :market, :price, :quantity
+    setter :quantity
 
     def initialize(exchange : String, market : String, price : Float64, quantity : Float64)
       @exchange = exchange

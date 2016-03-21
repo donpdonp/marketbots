@@ -28,8 +28,17 @@ module Wsarbi
           @bins.delete(bin)
         end
       else
-        puts "bin #{bin.price}/#{bin.offers.size} adding offer #{offer.price}"
-        bin.offers << offer
+        match = bin.offers.find do |boffer|
+          boffer.exchange == offer.exchange &&
+            boffer.price == offer.price
+        end
+        if match
+          match.quantity = offer.quantity
+          puts "bin #{bin.price}/#{bin.offers.size} updated offer #{offer.price} to #{offer.quantity}"
+        else
+          bin.offers << offer
+          puts "bin #{bin.price}/#{bin.offers.size} added offer #{offer.price}"
+        end
       end
     end
 
@@ -66,8 +75,8 @@ module Wsarbi
 
     def summary
       if bins.size > 0
-        "$#{"%0.4f" % bins.first.price}/#{bins.first.offers.size}" + " - " +
-          "$#{"%0.4f" % bins.last.price}/#{bins.last.offers.size} " + "value #{value}/#{bins.size}bins"
+        "$#{"%0.4f" % bins.first.price}/#{"%2d" % bins.first.offers.size}/#{bins.first.offers.first.price}" + " - " +
+          "$#{"%0.4f" % bins.last.price}/#{"%2d" % bins.last.offers.size} " + "value #{value}/#{bins.size}bins"
       else
         "empty"
       end
