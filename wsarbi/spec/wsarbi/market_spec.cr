@@ -44,5 +44,13 @@ module Wsarbi
       subject = Market.new(Market::BidAsk::Bid, 0.0001)
       subject.bin_price_for(0.123456).should eq(0.1234)
     end
+
+    it "doesnt float around" do
+      # * poloniex ETH:BTC ask 0.02839999 x49.43663712
+      # bin 0.0283/0 adding offer 0.0284
+      "0.02839999".to_f.should eq(0.02839999)
+      # puts "%0.8f" % 0.02839999 => "0.02839999"
+      # puts 0.02839999 => "0.0284"
+    end
   end
 end
