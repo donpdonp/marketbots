@@ -39,5 +39,10 @@ module Wsarbi
         subject.clear("shareco")
       end
     end
+
+    it "decides on a bin for a price" do
+      subject = Market.new(Market::BidAsk::Bid, 0.0001)
+      subject.bin_price_for(0.123456).should eq(0.1234)
+    end
   end
 end

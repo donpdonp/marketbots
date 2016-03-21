@@ -20,14 +20,14 @@ redis.subscribe("orderbook") do |on|
   on.message do |channel, json|
     begin
       msg = JSON.parse(json)
-      puts msg.inspect
+      puts "* #{msg["exchange"].as_s} #{msg["market"].as_s} #{msg["type"].as_s} #{"%0.8f" % msg["price"].as_s} x#{msg["amount"].as_s}"
       if msg["type"] == "bid"
         orderbook.bids.add(Wsarbi::Offer.new(
           msg["exchange"].as_s,
           msg["market"].as_s,
           msg["price"].as_s.to_f,
           msg["amount"].as_s.to_f
-          ))
+        ))
       end
       if msg["type"] == "ask"
         orderbook.asks.add(Wsarbi::Offer.new(
@@ -35,7 +35,7 @@ redis.subscribe("orderbook") do |on|
           msg["market"].as_s,
           msg["price"].as_s.to_f,
           msg["amount"].as_s.to_f
-          ))
+        ))
       end
       if msg["type"] == "clear"
         exchange_name = msg["exchange"].as_s
@@ -48,16 +48,23 @@ redis.subscribe("orderbook") do |on|
       win_ask, win_bid = orderbook.profitables
       puts "Orderbook asks #{orderbook.asks.summary}"
       puts "          bids #{orderbook.bids.summary}"
-      win_ask_value = win_ask.reduce(0){|m,ob| m + ob.value}
-      win_bid_value = win_bid.reduce(0){|m,ob| m + ob.value}
-      puts "Arbitrage ask value #{win_ask_value}  bid value #{win_bid_value}"
-      win_ask.each do |ob|
-        puts "      ASK |#{ob.exchanges}| #{ob.price} x#{ob.quantity}"
+      win_ask_value = win_ask.reduce(0) { |m, ob| m + ob.value }
+      win_bid_value = win_bid.reduce(0) { |m, ob| m + ob.value }
+      unless win_ask_value == 0 && win_bid_value == 0
+        puts "Arbitrage ask value #{win_ask_value}  bid value #{win_bid_value}"
+        win_ask.each do |ob|
+          puts "      ASK |#{ob.exchanges}| #{ob.price} x#{ob.quantity}"
+          ob.offers.each do |o|
+            puts "            offer #{o.exchange} ask #{o.price} x#{o.quantity}"
+          end
+        end
+        win_bid.each do |ob|
+          puts "      BID |#{ob.exchanges}| #{ob.price} x#{ob.quantity}"
+          ob.offers.each do |o|
+            puts "            offer #{o.exchange} bid #{o.price} x#{o.quantity}"
+          end
+        end
       end
-      win_bid.each do |ob|
-        puts "      BID |#{ob.exchanges}| #{ob.price} x#{ob.quantity}"
-      end
-
     rescue ex
       puts ex.message
       puts json.inspect

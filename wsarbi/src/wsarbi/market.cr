@@ -21,13 +21,16 @@ module Wsarbi
     def add(offer : Offer)
       bin = find_or_create_closest_bin(offer)
       if offer.quantity == 0
+        puts "bin #{bin.price}/#{bin.offers.size} removing offer #{offer.price}"
         bin.remove(offer)
-        @bins.delete(bin) if bin.offers.size == 0
+        if bin.offers.size == 0
+          puts "bin #{bin.price} empty. removing"
+          @bins.delete(bin)
+        end
       else
+        puts "bin #{bin.price}/#{bin.offers.size} adding offer #{offer.price}"
         bin.offers << offer
       end
-      # TODO: sorted insert
-      @bins.sort! { |a, b| @better_proc.call(a.price, b.price) }
     end
 
     def best
@@ -39,24 +42,32 @@ module Wsarbi
     end
 
     def find_or_create_closest_bin(offer : Offer)
-      close = @bins.find do |bin_a|
-        offer.price >= bin_a.price && offer.price < (bin_a.price+@precision)
+      bin_price = bin_price_for(offer.price)
+      close = @bins.find do |bin|
+        bin.price == bin_price
       end
       unless close
-        close = OfferBin.new(offer.price, @decimals)
+        close = OfferBin.new(bin_price, @decimals)
+        # TODO: sorted insert
         @bins << close
+        @bins.sort! { |a, b| @better_proc.call(a.price, b.price) }
       end
       close
     end
 
+    def bin_price_for(price : Float64)
+      shift = 10**@decimals
+      (price*shift).floor/shift
+    end
+
     def value : Float64
-      @bins.sum{|ob| ob.value}
+      @bins.sum { |ob| ob.value }
     end
 
     def summary
       if bins.size > 0
         "$#{"%0.4f" % bins.first.price}/#{bins.first.offers.size}" + " - " +
-        "$#{"%0.4f" % bins.last.price}/#{bins.last.offers.size} " + "value #{value}/#{bins.size}"
+          "$#{"%0.4f" % bins.last.price}/#{bins.last.offers.size} " + "value #{value}/#{bins.size}bins"
       else
         "empty"
       end
