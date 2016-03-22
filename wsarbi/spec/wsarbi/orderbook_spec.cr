@@ -5,14 +5,14 @@ module Wsarbi
     subject = Orderbook.new
 
     bids = [
-      Offer.new("shareco", "btc_usd", 1.5, 1.0),
-      Offer.new("shareco", "btc_usd", 1.0, 1.0),
+      Offer.new("shareco", "btc_usd", "1.5", "1.0"),
+      Offer.new("shareco", "btc_usd", "1.0", "1.0"),
     ]
 
     asks = [
-      Offer.new("shareco", "btc_usd", 1.0, 1.0),
-      Offer.new("shareco", "btc_usd", 1.5, 1.0),
-      Offer.new("shareco", "btc_usd", 2.0, 1.0),
+      Offer.new("shareco", "btc_usd", "1.0", "1.0"),
+      Offer.new("shareco", "btc_usd", "1.5", "1.0"),
+      Offer.new("shareco", "btc_usd", "2.0", "1.0"),
     ]
 
     it "remembers price and quantity" do
@@ -24,7 +24,7 @@ module Wsarbi
       end
       good_asks, good_bids = subject.profitables
       good_asks.size.should eq(1)
-      good_asks.first.price.should eq(1)
+      good_asks.first.price.to_s.should eq("1.0000")
     end
   end
 end

@@ -3,11 +3,11 @@ module Wsarbi
     getter :exchange, :market, :price, :quantity
     setter :quantity
 
-    def initialize(exchange : String, market : String, price : Float64, quantity : Float64)
+    def initialize(exchange : String, market : String, price : String, quantity : String)
       @exchange = exchange
       @market = market
-      @price = price
-      @quantity = quantity
+      @price = FauxDecimal.new(price, 8)
+      @quantity = FauxDecimal.new(quantity, 8)
     end
   end
 end

@@ -9,7 +9,7 @@ module Wsarbi
 
     def initialize(bidask : BidAsk, precision : Float64)
       @precision = precision
-      @decimals = Math.log10(1/precision)
+      @decimals = Math.log10(1/precision).to_i32
       @bins = [] of OfferBin
       if bidask == BidAsk::Bid
         @better_proc = ->(was : Float64, is : Float64) { is <=> was }
@@ -19,7 +19,7 @@ module Wsarbi
     end
 
     def add(offer : Offer)
-      bin = find_or_create_closest_bin(offer)
+      bin = find_or_create_closest_bin(offer.price)
       if offer.quantity == 0
         puts "bin #{bin.price}/#{bin.offers.size} removing offer #{offer.price}"
         bin.remove(offer)
@@ -46,12 +46,12 @@ module Wsarbi
       @bins.first
     end
 
-    def better_than(price : Float64)
-      @bins.select { |bin| @better_proc.call(bin.price, price) == -1 }
+    def better_than(price : FauxDecimal)
+      @bins.select { |bin| @better_proc.call(bin.price.to_f, price.to_f) == -1 }
     end
 
-    def find_or_create_closest_bin(offer : Offer)
-      bin_price = bin_price_for(offer.price)
+    def find_or_create_closest_bin(price : FauxDecimal)
+      bin_price = bin_price_for(price)
       close = @bins.find do |bin|
         bin.price == bin_price
       end
@@ -59,14 +59,13 @@ module Wsarbi
         close = OfferBin.new(bin_price, @decimals)
         # TODO: sorted insert
         @bins << close
-        @bins.sort! { |a, b| @better_proc.call(a.price, b.price) }
+        @bins.sort! { |a, b| @better_proc.call(a.price.to_f, b.price.to_f) }
       end
       close
     end
 
-    def bin_price_for(price : Float64)
-      shift = 10**@decimals
-      (price*shift).floor/shift
+    def bin_price_for(price : FauxDecimal)
+      FauxDecimal.new(price.to_s, @decimals)
     end
 
     def value : Float64

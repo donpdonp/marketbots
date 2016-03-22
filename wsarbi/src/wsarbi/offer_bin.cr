@@ -2,8 +2,8 @@ module Wsarbi
   class OfferBin
     getter :price, :offers
 
-    def initialize(price : Float64, decimals : Float64) # Int32 causes problems
-      @price = price.round(decimals)
+    def initialize(price : FauxDecimal, decimals : Int32)
+      @price = price
       @offers = [] of Offer
     end
 

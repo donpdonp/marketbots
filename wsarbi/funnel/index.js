@@ -64,7 +64,7 @@ bws.on('orderbook', function (pair, book) {
     exchange: 'bitfinex',
     market: 'ETH:BTC',
     type:   book.amount > 0 ? "bid" : "ask",
-    price:  ""+book.price,
+    price:  ""+book.price, // str to float to str, crosses fingers
     amount: book.count == 0 ? "0" : (""+Math.abs(book.amount))
   }
   redis.publish(channel_name, JSON.stringify(wsob))
