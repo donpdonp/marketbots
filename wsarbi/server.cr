@@ -52,8 +52,6 @@ redis.subscribe("orderbook") do |on|
       puts "Orderbook asks #{orderbook.asks.summary}"
       puts "          bids #{orderbook.bids.summary}"
       win_bid, win_ask = orderbook.profitables
-      puts "arb winning bids #{win_bid.summary}"
-      puts "arb winning asks #{win_ask.summary}"
 
       spend = win_ask.value
       earn = orderbook.arbitrage(win_bid, win_ask)
