@@ -52,7 +52,7 @@ redis.subscribe("orderbook") do |on|
       puts "Orderbook asks #{orderbook.asks.summary}"
       puts "          bids #{orderbook.bids.summary}"
       if orderbook.asks.size > 0
-        if orderbook.asks.bins.first.offers.first.price.to_f < orderbook.asks.bins.first.offers.first.price.to_f
+        if orderbook.asks.bins.first.offers.first.price.to_f < orderbook.bids.bins.first.offers.first.price.to_f
           puts "*!* INVERSION"
         end
       end
