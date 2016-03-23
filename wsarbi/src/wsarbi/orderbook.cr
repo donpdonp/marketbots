@@ -18,14 +18,12 @@ module Wsarbi
     end
 
     def arbitrage(bids : Market, asks : Market)
-      starting = asks.value
       purse = asks.quantity
-      remaining = bids.bins.reduce(0) do |m, bid_ob|
+      bids.bins.reduce(0) do |m, bid_ob|
         spend = Math.min(purse, bid_ob.quantity)
         purse -= spend
         m + bid_ob.price.to_f * spend
       end
-      remaining - starting
     end
   end
 end

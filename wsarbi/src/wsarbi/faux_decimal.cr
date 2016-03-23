@@ -1,5 +1,7 @@
 module Wsarbi
   class FauxDecimal
+    getter :decimal
+
     def initialize(decimal : String, decimals : Int32)
       @decimal = decimal
       resize!(decimals)
@@ -11,6 +13,10 @@ module Wsarbi
 
     def to_f
       @decimal.to_f
+    end
+
+    def ==(other : FauxDecimal)
+      @decimal == other.decimal
     end
 
     def resize!(decimals : Int32)
