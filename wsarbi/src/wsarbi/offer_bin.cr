@@ -26,9 +26,6 @@ module Wsarbi
       end
       if old_size == @offers.size
         puts "removed bin #{@price} #{x_offer.exchange} $#{x_offer.price} failed. still #{old_size}"
-        @offers.each do |offer|
-          puts "  bin #{@price} offer #{offer.exchange} #{offer.price} x#{offer.quantity}"
-        end
       else
         puts "removed bin #{@price} #{x_offer.exchange} $#{x_offer.price} (was: #{old_size})"
       end
