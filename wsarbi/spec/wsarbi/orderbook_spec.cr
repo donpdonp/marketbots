@@ -22,7 +22,7 @@ module Wsarbi
       asks.each do |ask|
         subject.asks.add(ask)
       end
-      good_bids, good_asks, profits = subject.profitables
+      good_bids, good_asks = subject.profitables
       good_asks.bins.size.should eq(1)
       good_asks.bins.first.price.to_s.should eq("1.0000")
     end

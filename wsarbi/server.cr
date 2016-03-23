@@ -49,8 +49,9 @@ redis.subscribe("orderbook") do |on|
       end
       puts "Orderbook asks #{orderbook.asks.summary}"
       puts "          bids #{orderbook.bids.summary}"
-      win_bid, win_ask, arb_total = orderbook.profitables
+      win_bid, win_ask = orderbook.profitables
       puts "good bids #{win_bid.bins.size} good asks #{win_ask.bins.size}"
+      arb_total = orderbook.arbitrage(win_bid, win_ask)
       if arb_total > 0
         puts "#### ARBITRAGE #{"%0.4f" % arb_total}btc"
         puts "Arbitrage ask value #{win_ask.value}btc  bid value #{win_bid.value}btc"

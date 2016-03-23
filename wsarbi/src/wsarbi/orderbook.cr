@@ -13,7 +13,7 @@ module Wsarbi
       good_asks.add(@asks.better_than(@bids.best.price))
       good_bids.add(@bids.better_than(@asks.best.price))
 
-      {good_bids, good_asks, arbitrage(good_bids, good_asks)}
+      {good_bids, good_asks}
     end
 
     def arbitrage(bids : Market, asks : Market)

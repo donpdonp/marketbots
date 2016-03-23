@@ -44,6 +44,7 @@ module Wsarbi
           puts "bin #{bin.price.to_s}/#{bin.offers.size} updated offer #{offer.price.to_s} to #{offer.quantity}"
         else
           bin.offers << offer
+          bin.offers.sort! { |a, b| @better_proc.call(a.price.to_f, b.price.to_f) }
           puts "bin #{bin.price.to_s}/#{bin.offers.size} added offer #{offer.price.to_s}"
         end
       end
@@ -53,8 +54,12 @@ module Wsarbi
       @bins.first
     end
 
+    def size
+      @bins.size
+    end
+
     def better_than(price : FauxDecimal)
-      [] of OfferBin # @bins.select { |bin| @better_proc.call(bin.price.to_f, price.to_f) == -1 }
+      @bins.select { |bin| @better_proc.call(bin.price.to_f, price.to_f) == -1 }
     end
 
     def find_or_create_closest_bin(price : FauxDecimal)
