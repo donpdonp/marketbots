@@ -7,7 +7,7 @@ module Wsarbi
       @offers = [] of Offer
     end
 
-    def quantity
+    def quantity : Float64
       @offers.sum { |offer| offer.quantity.to_f }
     end
 
@@ -15,7 +15,7 @@ module Wsarbi
       @offers.map(&.exchange).uniq
     end
 
-    def value
+    def value : Float64
       @offers.sum { |offer| offer.price.to_f * offer.quantity.to_f }
     end
 
