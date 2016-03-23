@@ -27,7 +27,7 @@ module Wsarbi
 
     def add(offer : Offer)
       bin = find_or_create_closest_bin(offer.price)
-      if offer.quantity == 0
+      if offer.quantity.to_f == 0
         puts "bin #{bin.price}/#{bin.offers.size} removing offer #{offer.price}"
         bin.remove(offer)
         if bin.offers.size == 0
