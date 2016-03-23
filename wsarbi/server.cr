@@ -51,25 +51,34 @@ redis.subscribe("orderbook") do |on|
       end
       puts "Orderbook asks #{orderbook.asks.summary}"
       puts "          bids #{orderbook.bids.summary}"
+      if orderbook.asks.size > 0
+        if orderbook.asks.bins.first.offers.first.price.to_f < orderbook.asks.bins.first.offers.first.price.to_f
+          puts "*!* INVERSION"
+        end
+      end
       win_bid, win_ask = orderbook.profitables
-
+      if win_bid.size > 0 || win_ask.size > 0
+        puts "arb winning bids #{win_bid.summary}"
+        puts "arb winning asks #{win_ask.summary}"
+      end
       spend = win_ask.value
       earn = orderbook.arbitrage(win_bid, win_ask)
       profit = earn - spend
       if profit > 0
-        puts "#### ARBITRAGE #{"%0.8f" % profit}btc #{"%0.2f" % (profit/spend*100)}% of #{spend}"
+        puts "#### ARBITRAGE #{"%0.8f" % profit}btc #{"%0.2f" % (profit/spend*100)}% of #{spend}btc"
+        File.open("arb.out", "a") { |f| f.puts "#{"%0.8f" % profit}btc #{"%0.2f" % (profit/spend*100)}% of #{spend}" }
         puts "Arbitrage ask value #{"%0.8f" % win_ask.value}btc  bid value #{"%0.8f" % win_bid.value}btc"
         win_ask.bins.each do |ob|
           puts "      ASK |#{ob.exchanges}| bin #{ob.price.to_s} x#{ob.quantity}"
-          ob.offers.each do |o|
-            puts "            offer #{o.exchange} ask #{o.price.to_s} x#{o.quantity.to_f.to_i}"
-          end
+          # ob.offers.each do |o|
+          #   puts "            offer #{o.exchange} ask #{o.price.to_s} x#{o.quantity.to_f.to_i}"
+          # end
         end
         win_bid.bins.each do |ob|
           puts "      BID |#{ob.exchanges}| bin #{ob.price} x#{ob.quantity}"
-          ob.offers.each do |o|
-            puts "            offer #{o.exchange} bid #{o.price} x#{o.quantity.to_f.to_i}"
-          end
+          # ob.offers.each do |o|
+          #   puts "            offer #{o.exchange} bid #{o.price} x#{o.quantity.to_f.to_i}"
+          # end
         end
       end
     rescue ex
