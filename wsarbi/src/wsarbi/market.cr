@@ -45,7 +45,6 @@ module Wsarbi
         else
           bin.offers << offer
           bin.offers.sort! { |a, b| @better_proc.call(a.price.to_f, b.price.to_f) }
-          puts "bin #{bin.price.to_s}/#{bin.offers.size} added offer #{offer.price.to_s}"
         end
       end
     end

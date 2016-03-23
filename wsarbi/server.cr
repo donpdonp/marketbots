@@ -20,8 +20,10 @@ redis.subscribe("orderbook") do |on|
   on.message do |channel, json|
     begin
       msg = JSON.parse(json)
-      if msg["type"].as_s == "bid"
+      if msg["type"].as_s == "bid" || msg["type"].as_s == "ask"
         puts "* #{msg["exchange"].as_s} #{msg["market"].as_s} #{msg["type"].as_s} #{msg["price"].as_s} x#{msg["amount"].as_s}"
+      else
+        puts "* #{msg["type"].as_s}"
       end
       if msg["type"] == "bid"
         orderbook.bids.add(Wsarbi::Offer.new(
@@ -50,8 +52,11 @@ redis.subscribe("orderbook") do |on|
       puts "Orderbook asks #{orderbook.asks.summary}"
       puts "          bids #{orderbook.bids.summary}"
       win_bid, win_ask = orderbook.profitables
-      puts "good bids #{win_bid.bins.size} good asks #{win_ask.bins.size}"
+      puts "arb winning bids #{win_bid.summary}"
+      puts "arb winning asks #{win_ask.summary}"
+
       arb_total = orderbook.arbitrage(win_bid, win_ask)
+      puts "arb total #{"%0.4f" % arb_total}btc"
       if arb_total > 0
         puts "#### ARBITRAGE #{"%0.4f" % arb_total}btc"
         puts "Arbitrage ask value #{win_ask.value}btc  bid value #{win_bid.value}btc"

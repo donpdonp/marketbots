@@ -10,8 +10,9 @@ module Wsarbi
     def profitables
       good_asks = Market.new(Market::BidAsk::Ask, 0.0001)
       good_bids = Market.new(Market::BidAsk::Bid, 0.0001)
-      good_asks.add(@asks.better_than(@bids.best.price))
-      good_bids.add(@bids.better_than(@asks.best.price))
+
+      good_asks.add(@asks.better_than(@bids.best.price)) if @bids.size > 0
+      good_bids.add(@bids.better_than(@asks.best.price)) if @asks.size > 0
 
       {good_bids, good_asks}
     end
@@ -24,7 +25,7 @@ module Wsarbi
         purse -= spend
         m + bid_ob.price.to_f * spend
       end
-      starting - remaining
+      remaining - starting
     end
   end
 end
