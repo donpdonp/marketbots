@@ -55,11 +55,12 @@ redis.subscribe("orderbook") do |on|
       puts "arb winning bids #{win_bid.summary}"
       puts "arb winning asks #{win_ask.summary}"
 
-      arb_total = orderbook.arbitrage(win_bid, win_ask)
-      puts "arb total #{"%0.4f" % arb_total}btc"
-      if arb_total > 0
-        puts "#### ARBITRAGE #{"%0.4f" % arb_total}btc"
-        puts "Arbitrage ask value #{win_ask.value}btc  bid value #{win_bid.value}btc"
+      spend = win_ask.value
+      earn = orderbook.arbitrage(win_bid, win_ask)
+      profit = earn - spend
+      if profit > 0
+        puts "#### ARBITRAGE #{"%0.8f" % profit}btc #{"%0.2f" % (profit/spend*100)}% of #{spend}"
+        puts "Arbitrage ask value #{"%0.8f" % win_ask.value}btc  bid value #{"%0.8f" % win_bid.value}btc"
         win_ask.bins.each do |ob|
           puts "      ASK |#{ob.exchanges}| bin #{ob.price.to_s} x#{ob.quantity}"
           ob.offers.each do |o|
