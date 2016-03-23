@@ -5,8 +5,8 @@ module Wsarbi
       resize!(decimals)
     end
 
-    def to_s
-      @decimal
+    def to_s(io)
+      io << @decimal
     end
 
     def to_f

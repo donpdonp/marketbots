@@ -11,10 +11,17 @@ module Wsarbi
       @precision = precision
       @decimals = Math.log10(1/precision).to_i32
       @bins = [] of OfferBin
+      @side = bidask
       if bidask == BidAsk::Bid
         @better_proc = ->(was : Float64, is : Float64) { is <=> was }
       else
         @better_proc = ->(was : Float64, is : Float64) { was <=> is }
+      end
+    end
+
+    def add(offer_bins : Array(OfferBin))
+      offer_bins.each do |ob|
+        ob.offers.each { |o| add(o) }
       end
     end
 
@@ -34,10 +41,10 @@ module Wsarbi
         end
         if match
           match.quantity = offer.quantity
-          puts "bin #{bin.price}/#{bin.offers.size} updated offer #{offer.price} to #{offer.quantity}"
+          puts "bin #{bin.price.to_s}/#{bin.offers.size} updated offer #{offer.price.to_s} to #{offer.quantity}"
         else
           bin.offers << offer
-          puts "bin #{bin.price}/#{bin.offers.size} added offer #{offer.price}"
+          puts "bin #{bin.price.to_s}/#{bin.offers.size} added offer #{offer.price.to_s}"
         end
       end
     end
@@ -47,7 +54,7 @@ module Wsarbi
     end
 
     def better_than(price : FauxDecimal)
-      @bins.select { |bin| @better_proc.call(bin.price.to_f, price.to_f) == -1 }
+      [] of OfferBin # @bins.select { |bin| @better_proc.call(bin.price.to_f, price.to_f) == -1 }
     end
 
     def find_or_create_closest_bin(price : FauxDecimal)
@@ -59,9 +66,13 @@ module Wsarbi
         close = OfferBin.new(bin_price, @decimals)
         # TODO: sorted insert
         @bins << close
-        @bins.sort! { |a, b| @better_proc.call(a.price.to_f, b.price.to_f) }
+        sort!
       end
       close
+    end
+
+    private def sort!
+      @bins.sort! { |a, b| @better_proc.call(a.price.to_f, b.price.to_f) }
     end
 
     def bin_price_for(price : FauxDecimal)
@@ -72,10 +83,14 @@ module Wsarbi
       @bins.sum { |ob| ob.value }
     end
 
+    def quantity : Float64
+      @bins.sum { |ob| ob.quantity }
+    end
+
     def summary
       if bins.size > 0
-        "$#{"%0.4f" % bins.first.price}/#{"%2d" % bins.first.offers.size}/#{bins.first.offers.first.price}" + " - " +
-          "$#{"%0.4f" % bins.last.price}/#{"%2d" % bins.last.offers.size} " + "value #{value}/#{bins.size}bins"
+        "$#{bins.first.price}/#{"%2d" % bins.first.offers.size}/#{bins.first.offers.first.price} #{bins.first.offers.map(&.exchange).uniq}" + " - " +
+          "$#{bins.last.price}/#{"%2d" % bins.last.offers.size} " + "value #{value}/#{bins.size}bins"
       else
         "empty"
       end

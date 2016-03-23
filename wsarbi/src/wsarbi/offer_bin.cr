@@ -8,7 +8,7 @@ module Wsarbi
     end
 
     def quantity
-      @offers.sum { |offer| offer.quantity }
+      @offers.sum { |offer| offer.quantity.to_f }
     end
 
     def exchanges
@@ -16,7 +16,7 @@ module Wsarbi
     end
 
     def value
-      @offers.sum { |offer| offer.price * offer.quantity }
+      @offers.sum { |offer| offer.price.to_f * offer.quantity.to_f }
     end
 
     def remove(x_offer : Offer)
