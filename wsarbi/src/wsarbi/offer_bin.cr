@@ -30,5 +30,13 @@ module Wsarbi
         puts "removed bin #{@price} #{x_offer.exchange} $#{x_offer.price} (was: #{old_size})"
       end
     end
+
+    def to_s(io)
+      io << "$#{price}/#{"%02d" % offers.size}"
+      if offers.size > 0
+        io << "/#{offers.first.price}"
+      end
+      io << " #{exchanges}"
+    end
   end
 end

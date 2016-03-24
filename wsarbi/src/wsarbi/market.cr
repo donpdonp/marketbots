@@ -93,8 +93,7 @@ module Wsarbi
 
     def summary
       if bins.size > 0
-        "$#{bins.first.price}/#{"%02d" % bins.first.offers.size}/#{bins.first.offers.first.price} #{bins.first.exchanges}" + " - " +
-          "$#{bins.last.price}/#{"%02d" % bins.last.offers.size} " + "value #{"%0.1f" % value}btc/#{bins.size}bins"
+        "value #{"%0.1f" % value}btc/#{bins.size}bins"
       else
         "empty"
       end
