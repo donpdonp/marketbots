@@ -2,3 +2,5 @@
 .shards/
 libs/
 shard.lock
+signal.log
+
