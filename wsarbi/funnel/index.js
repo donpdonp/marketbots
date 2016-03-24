@@ -1,5 +1,4 @@
 var BitfinexWS = require('bitfinex-api-node').WS;
-var bws = new BitfinexWS();
 
 var request = require('request')
 
@@ -13,15 +12,19 @@ var redis = require('redis').createClient()
 var channel_name = 'orderbook'
 
 
-stream_setup()
+//stream_setup()
 
 // Poloniex stream
-poloniex_stream.open()
+//poloniex_stream.open()
 
 // Kraken pump
 setInterval(kraken_refresh, 5000)
 // Bleutrade pump
 setInterval(bleu_refresh, 5000)
+// Poloniex pump
+setInterval(poloniex_refresh, 5000)
+// Bitfinex pump
+setInterval(bitfinex_refresh, 5000)
 
 
 function stream_setup() {
@@ -54,7 +57,8 @@ function stream_setup() {
   }
 
 
-
+  // starts automatically. boo.
+  var bws = new BitfinexWS();
   // Bitfinex pump
   bws.on('open', function () {
     bws.subscribeOrderBook('ETHBTC');
@@ -129,7 +133,7 @@ function bleu_refresh(){
 
 
 function kraken_refresh(){
-  request.get('https://api.kraken.com/0/public/Depth?pair=XETHXXBT&count=20', function (error, response, body) {
+  request.get('https://api.kraken.com/0/public/Depth?pair=XETHXXBT&count=50', function (error, response, body) {
     try {
       var book = JSON.parse(body).result.XETHXXBT
       console.log('KRAKEN ', book.bids.length, book.asks.length)
@@ -160,3 +164,69 @@ function kraken_refresh(){
   })
 }
 
+
+function poloniex_refresh(){
+  request.get('https://poloniex.com/public?command=returnOrderBook&currencyPair=BTC_ETH', function (error, response, body) {
+    try {
+      var book = JSON.parse(body)
+      console.log('POLONIEX ', book.bids.length, book.asks.length)
+      redis.publish(channel_name, JSON.stringify({exchange: "poloniex", type: "clear"}))
+      book.bids.forEach(function(o){
+        wsob = {
+          exchange: "poloniex",
+          market: "ETH:BTC",
+          type:   "bid",
+          price:  o[0],
+          amount: ""+o[1]
+        }
+        redis.publish(channel_name, JSON.stringify(wsob))
+      })
+      book.asks.forEach(function(o){
+        wsob = {
+          exchange: "poloniex",
+          market: "ETH:BTC",
+          type:   "ask",
+          price:  o[0],
+          amount: ""+o[1]
+        }
+        redis.publish(channel_name, JSON.stringify(wsob))
+      })
+    } catch (e) {
+      console.log('POLONIEX JSON ERR', e, body.substr(0,100))
+    }
+  })
+}
+
+
+
+function bitfinex_refresh(){
+  request.get('https://api.bitfinex.com/v1/book/ETHBTC', function (error, response, body) {
+    try {
+      var book = JSON.parse(body)
+      console.log('BITFINEX ', book.bids.length, book.asks.length)
+      redis.publish(channel_name, JSON.stringify({exchange: "bitfinex", type: "clear"}))
+      book.bids.forEach(function(o){
+        wsob = {
+          exchange: "bitfinex",
+          market: "ETH:BTC",
+          type:   "bid",
+          price:  o.price,
+          amount: o.amount
+        }
+        redis.publish(channel_name, JSON.stringify(wsob))
+      })
+      book.asks.forEach(function(o){
+        wsob = {
+          exchange: "bitfinex",
+          market: "ETH:BTC",
+          type:   "ask",
+          price:  o.price,
+          amount: o.amount
+        }
+        redis.publish(channel_name, JSON.stringify(wsob))
+      })
+    } catch (e) {
+      console.log('BITFINEX JSON ERR', e, body.substr(0,100))
+    }
+  })
+}
