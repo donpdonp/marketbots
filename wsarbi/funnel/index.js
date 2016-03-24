@@ -115,3 +115,38 @@ function bleu_refresh(){
   })
 }
 
+// Kraken pump
+setInterval(kraken_refresh, 5000)
+
+function kraken_refresh(){
+  request.get('https://api.kraken.com/0/public/Depth?pair=XETHXXBT&count=20', function (error, response, body) {
+    try {
+      var book = JSON.parse(body).result.XETHXXBT
+      console.log('KRAKEN ', book.bids.length, book.asks.length)
+      redis.publish(channel_name, JSON.stringify({exchange: "kraken", type: "clear"}))
+      book.bids.forEach(function(o){
+        wsob = {
+          exchange: "kraken",
+          market: "ETH:BTC",
+          type:   "bid",
+          price:  o[0],
+          amount: o[1]
+        }
+        redis.publish(channel_name, JSON.stringify(wsob))
+      })
+      book.asks.forEach(function(o){
+        wsob = {
+          exchange: "kraken",
+          market: "ETH:BTC",
+          type:   "ask",
+          price:  o[0],
+          amount: o[1]
+        }
+        redis.publish(channel_name, JSON.stringify(wsob))
+      })
+    } catch (e) {
+      console.log('KRAKEN JSON ERR', e, body.substr(0,100))
+    }
+  })
+}
+
