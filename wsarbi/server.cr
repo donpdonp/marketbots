@@ -72,7 +72,7 @@ redis.subscribe("orderbook") do |on|
       earn = orderbook.arbitrage(win_bid, win_ask)
       profit = earn - spend
       profit_percent = profit/spend*100
-      if profit_percent >= 0.01
+      if profit_percent >= config["signal_percentage"].as_f
         low_ask = orderbook.asks.bins.first.offers.first
         high_bid = orderbook.bids.bins.first.offers.first
         puts "#### ARBITRAGE #{"%0.8f" % profit}btc #{"%0.2f" % (profit_percent)}% of #{spend}btc"
