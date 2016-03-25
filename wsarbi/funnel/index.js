@@ -12,10 +12,10 @@ var redis = require('redis').createClient()
 var channel_name = 'orderbook'
 
 
-stream_setup()
+//stream_setup()
 
 // Poloniex stream
-poloniex_stream.open()
+//poloniex_stream.open()
 
 // Kraken pump
 setInterval(kraken_refresh, 5000)
@@ -100,133 +100,108 @@ function stream_setup() {
 
 
 function bleu_refresh(){
-  request.get('https://bleutrade.com/api/v2/public/getorderbook?type=ALL&market=ETH_BTC', function (error, response, body) {
-    try {
-      var book = JSON.parse(body)
-      console.log('BLUE ', book.result.buy.length, book.result.sell.length)
-      redis.publish(channel_name, JSON.stringify({exchange: "bleutrade", type: "clear"}))
-      book.result.buy.forEach(function(o){
-        wsob = {
-          exchange: "bleutrade",
-          market: "ETH:BTC",
-          type:   "bid",
-          price:  o.Rate,
-          amount: o.Quantity
-        }
-        redis.publish(channel_name, JSON.stringify(wsob))
-      })
-      book.result.sell.forEach(function(o){
-        wsob = {
-          exchange: "bleutrade",
-          market: "ETH:BTC",
-          type:   "ask",
-          price:  o.Rate,
-          amount: o.Quantity
-        }
-        redis.publish(channel_name, JSON.stringify(wsob))
-      })
-    } catch (e) {
-      console.log('BLUE JSON ERR', body[0,100])
-    }
+  exchange_reset('bleutrade',
+    'https://bleutrade.com/api/v2/public/getorderbook?type=ALL&market=ETH_BTC',
+    function(answer) {
+      return {
+        market: "ETH:BTC",
+        bids: answer.result.buy,
+        asks: answer.result.sell
+      }
+    },
+    function(offer){
+      return {
+        price:  offer.Rate,
+        amount: offer.Quantity
+      }
   })
 }
 
 
 function kraken_refresh(){
-  request.get('https://api.kraken.com/0/public/Depth?pair=XETHXXBT&count=50', function (error, response, body) {
-    try {
-      var book = JSON.parse(body).result.XETHXXBT
-      console.log('KRAKEN ', book.bids.length, book.asks.length)
-      redis.publish(channel_name, JSON.stringify({exchange: "kraken", type: "clear"}))
-      book.bids.forEach(function(o){
-        wsob = {
-          exchange: "kraken",
-          market: "ETH:BTC",
-          type:   "bid",
-          price:  o[0],
-          amount: o[1]
-        }
-        redis.publish(channel_name, JSON.stringify(wsob))
-      })
-      book.asks.forEach(function(o){
-        wsob = {
-          exchange: "kraken",
-          market: "ETH:BTC",
-          type:   "ask",
-          price:  o[0],
-          amount: o[1]
-        }
-        redis.publish(channel_name, JSON.stringify(wsob))
-      })
-    } catch (e) {
-      console.log('KRAKEN JSON ERR', e, body.substr(0,100))
-    }
+  exchange_reset('kraken',
+    'https://api.kraken.com/0/public/Depth?pair=XETHXXBT&count=50',
+    function(answer) {
+      return {
+        market: "ETH:BTC",
+        bids: answer.result.XETHXXBT.bids,
+        asks: answer.result.XETHXXBT.asks
+      }
+    },
+    function(offer){
+      return {
+        price:  offer[0],
+        amount: offer[1]
+      }
   })
 }
 
 
 function poloniex_refresh(){
-  request.get('https://poloniex.com/public?command=returnOrderBook&currencyPair=BTC_ETH', function (error, response, body) {
-    try {
-      var book = JSON.parse(body)
-      console.log('POLONIEX ', book.bids.length, book.asks.length)
-      redis.publish(channel_name, JSON.stringify({exchange: "poloniex", type: "clear"}))
-      book.bids.forEach(function(o){
-        wsob = {
-          exchange: "poloniex",
-          market: "ETH:BTC",
-          type:   "bid",
-          price:  o[0],
-          amount: ""+o[1]
-        }
-        redis.publish(channel_name, JSON.stringify(wsob))
-      })
-      book.asks.forEach(function(o){
-        wsob = {
-          exchange: "poloniex",
-          market: "ETH:BTC",
-          type:   "ask",
-          price:  o[0],
-          amount: ""+o[1]
-        }
-        redis.publish(channel_name, JSON.stringify(wsob))
-      })
-    } catch (e) {
-      console.log('POLONIEX JSON ERR', e, body.substr(0,100))
-    }
+  exchange_reset('poloniex',
+    'https://poloniex.com/public?command=returnOrderBook&currencyPair=BTC_ETH',
+    function(answer) {
+      return {
+        market: "ETH:BTC",
+        bids: answer.bids,
+        asks: answer.asks
+      }
+    },
+    function(offer){
+      return {
+        price:  offer[0],
+        amount: ""+offer[1]
+      }
   })
 }
-
 
 
 function bitfinex_refresh(){
-  request.get('https://api.bitfinex.com/v1/book/ETHBTC', function (error, response, body) {
+  exchange_reset('bitfinex',
+    'https://api.bitfinex.com/v1/book/ETHBTC',
+    function(answer) {
+      return {
+        market: "ETH:BTC",
+        bids: answer.bids,
+        asks: answer.asks
+      }
+    },
+    function(offer){
+      return {
+        price:  offer.price,
+        amount: offer.amount
+      }
+  })
+}
+
+function exchange_reset(name, api_url, answer_morph, offer_morph) {
+  console.log(api_url)
+  request.get(api_url, function (error, response, body) {
+    redis.publish(channel_name, JSON.stringify({exchange: name, type: "clear"}))
+
     try {
-      var book = JSON.parse(body)
-      console.log('BITFINEX ', book.bids.length, book.asks.length)
-      redis.publish(channel_name, JSON.stringify({exchange: "bitfinex", type: "clear"}))
-      book.bids.forEach(function(o){
-        wsob = {
-          exchange: "bitfinex",
-          market: "ETH:BTC",
-          type:   "bid",
-          price:  o.price,
-          amount: o.amount
-        }
-        redis.publish(channel_name, JSON.stringify(wsob))
+      var response = JSON.parse(body)
+
+      var book = answer_morph(response)
+      console.log(name, 'top bid', JSON.stringify(book.bids[0]),
+                        'top ask', JSON.stringify(book.asks[0]))
+
+      var sides = [ "bid", "ask" ]
+      sides.forEach(function(side){
+        var offers = book[side+'s']
+        offers.forEach(function(offer){
+          offer = offer_morph(offer)
+          offer['exchange'] = name,
+          offer['market'] = book['market']
+          offer['type'] = side
+          redis.publish(channel_name, JSON.stringify(offer))
+        })
       })
-      book.asks.forEach(function(o){
-        wsob = {
-          exchange: "bitfinex",
-          market: "ETH:BTC",
-          type:   "ask",
-          price:  o.price,
-          amount: o.amount
-        }
-        redis.publish(channel_name, JSON.stringify(wsob))
-      })
+
     } catch (e) {
-      console.log('BITFINEX JSON ERR', e, body.substr(0,100))
+      console.log(name, 'JSON ERR', e, body ? body.substr(0,100) : "empty body")
     }
   })
 }
+
+
