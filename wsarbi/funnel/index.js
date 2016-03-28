@@ -177,27 +177,26 @@ function bitfinex_refresh(){
 function exchange_reset(name, api_url, answer_morph, offer_morph) {
   console.log(api_url)
   request.get(api_url, function (error, response, body) {
-    redis.publish(channel_name, JSON.stringify({exchange: name, type: "clear"}))
+    var load = {
+      type: "load",
+      exchange: name
+    }
 
     try {
       var response = JSON.parse(body)
 
       var book = answer_morph(response)
+      load['market'] = book.market
       console.log(name, 'top bid', JSON.stringify(book.bids[0]),
                         'top ask', JSON.stringify(book.asks[0]))
 
       var sides = [ "bid", "ask" ]
       sides.forEach(function(side){
-        var offers = book[side+'s']
-        offers.forEach(function(offer){
-          offer = offer_morph(offer)
-          offer['exchange'] = name,
-          offer['market'] = book['market']
-          offer['type'] = side
-          redis.publish(channel_name, JSON.stringify(offer))
-        })
+        load[side+'s'] = book[side+'s'].map(offer_morph)
       })
 
+      redis.publish(channel_name, JSON.stringify(load))
+      console.log(load)
     } catch (e) {
       console.log(name, 'JSON ERR', e, body ? body.substr(0,100) : "empty body")
     }
