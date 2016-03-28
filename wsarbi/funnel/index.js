@@ -196,7 +196,6 @@ function exchange_reset(name, api_url, answer_morph, offer_morph) {
       })
 
       redis.publish(channel_name, JSON.stringify(load))
-      console.log(load)
     } catch (e) {
       console.log(name, 'JSON ERR', e, body ? body.substr(0,100) : "empty body")
     }
