@@ -16,7 +16,7 @@ module Wsarbi
     end
 
     def value : Float64
-      @offers.sum { |offer| offer.price.to_f * offer.quantity.to_f }
+      @offers.sum(&.value)
     end
 
     def remove(x_offer : Offer)

@@ -93,10 +93,17 @@ module Wsarbi
 
     def summary
       if bins.size > 0
-        "value #{"%0.1f" % value}btc/#{bins.size}bins"
+        "Xvalue #{"%0.1f" % value}btc/#{bins.size}bins"
+        groups.map do |k, v|
+          "#{k} #{v.sum(&.value)}"
+        end.join(' ')
       else
         "empty"
       end
+    end
+
+    def groups
+      @bins.map(&.offers).flatten.group_by(&.exchange)
     end
 
     def clear(exchange : String) : Int32

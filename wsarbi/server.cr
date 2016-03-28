@@ -86,13 +86,14 @@ redis.subscribe("orderbook") do |on|
         puts "arb winning bids #{win_bid.summary}"
         puts "arb winning asks #{win_ask.summary}"
       end
-      spend = win_ask.value
+      spend = Math.min(win_ask.value, win_bid.value)
       earn = orderbook.arbitrage(win_bid, win_ask)
       profit = earn - spend
       profit_percent = profit/spend*100
+      puts "spend #{spend} earn #{earn} profit #{profit} #{profit_percent}%"
       if profit_percent >= config["signal_percentage"].as_f
-        low_ask = orderbook.asks.bins.first.offers.first
-        high_bid = orderbook.bids.bins.first.offers.first
+        low_ask = orderbook.asks.best.offers.first
+        high_bid = orderbook.bids.best.offers.first
         puts "#### ARBITRAGE #{"%0.8f" % profit}btc #{"%0.2f" % (profit_percent)}% of #{spend}btc"
         File.open("signal.log", "a") { |f| f.puts "#{Time.now} #{"%0.8f" % profit}btc #{"%0.2f" % (profit/spend*100)}% of #{spend}  buy #{low_ask.exchange} sell #{high_bid.exchange}" }
         puts "Arbitrage ask value #{"%0.8f" % win_ask.value}btc  bid value #{"%0.8f" % win_bid.value}btc"
