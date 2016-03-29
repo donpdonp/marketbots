@@ -99,8 +99,9 @@ redis.subscribe("orderbook") do |on|
         if profit_percent >= config["signal_percentage"].as_f
           low_ask = orderbook.asks.best.offers.first
           high_bid = orderbook.bids.best.offers.first
-          puts "#### ARBITRAGE #{"%0.8f" % profit}btc #{"%0.2f" % (profit_percent)}% of #{spent}btc"
-          File.open("signal.log", "a") { |f| f.puts "#{Time.now} #{"%0.8f" % profit}btc #{"%0.2f" % profit_percent}% of #{spent}btc  buy #{low_ask.exchange} sell #{high_bid.exchange}" }
+          File.open("signal.log", "a") do |f|
+            f.puts "#{Time.now} spent #{spent} earned #{earned} profit #{"%0.8f" % profit}btc $#{"%0.2f" % (profit*420)} #{"%0.2f" % profit_percent}%"
+          end
           puts "Arbitrage ask value #{"%0.8f" % win_ask.value}btc  bid value #{"%0.8f" % win_bid.value}btc"
         end
       end
