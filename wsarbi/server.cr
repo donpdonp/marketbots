@@ -46,8 +46,7 @@ redis.subscribe("orderbook") do |on|
         ask_drop_count = orderbook.asks.clear(exchange_name)
         bid_drop_count = orderbook.bids.clear(exchange_name)
         puts "********"
-        puts "CLEARED #{exchange_name} #{ask_drop_count} #{bid_drop_count}"
-        puts "********"
+        puts "* CLEARED #{exchange_name} #{ask_drop_count} #{bid_drop_count}"
         msg["asks"].each do |ask|
           orderbook.asks.add(Wsarbi::Offer.new(
             msg["exchange"].as_s,
@@ -67,9 +66,11 @@ redis.subscribe("orderbook") do |on|
       end
 
       puts "Orderbook asks #{orderbook.asks.bins[0]}"
-      puts "               #{orderbook.asks.bins[1]}"
+      puts "               #{orderbook.asks.bins[1]}" if orderbook.asks.size > 1
+      puts "               #{orderbook.asks.bins.last}" if orderbook.asks.size > 2
       puts "          bids #{orderbook.bids.bins[0]}"
-      puts "               #{orderbook.bids.bins[1]}"
+      puts "               #{orderbook.bids.bins.[1]}" if orderbook.bids.size > 1
+      puts "               #{orderbook.bids.bins.last}" if orderbook.bids.size > 2
       if orderbook.asks.size > 0 && orderbook.bids.size > 0
         low_ask = orderbook.asks.bins.first.offers.first
         high_bid = orderbook.bids.bins.first.offers.first
@@ -83,25 +84,24 @@ redis.subscribe("orderbook") do |on|
 
       win_bid, win_ask = orderbook.profitables
       if win_bid.size > 0 || win_ask.size > 0
-        puts "arb winning bids #{win_bid.summary}"
-        puts "arb winning asks #{win_ask.summary}"
+        puts "arb winning #{win_bid.size} bids #{win_bid.summary}"
+        puts "arb winning #{win_ask.size} asks #{win_ask.summary}"
+        puts "arbcheck  asks #{win_ask.bins.first}"
+        puts "          last #{win_ask.bins.last}" if win_ask.size > 1
+        puts "          bids #{win_bid.bins.first}"
+        puts "          last #{win_bid.bins.last}" if win_bid.size > 1
       end
-      spend = Math.min(win_ask.value, win_bid.value)
-      earn = orderbook.arbitrage(win_bid, win_ask)
-      profit = earn - spend
-      profit_percent = profit/spend*100
-      puts "spend #{spend} earn #{earn} profit #{profit} #{profit_percent}%"
-      if profit_percent >= config["signal_percentage"].as_f
-        low_ask = orderbook.asks.best.offers.first
-        high_bid = orderbook.bids.best.offers.first
-        puts "#### ARBITRAGE #{"%0.8f" % profit}btc #{"%0.2f" % (profit_percent)}% of #{spend}btc"
-        File.open("signal.log", "a") { |f| f.puts "#{Time.now} #{"%0.8f" % profit}btc #{"%0.2f" % (profit/spend*100)}% of #{spend}  buy #{low_ask.exchange} sell #{high_bid.exchange}" }
-        puts "Arbitrage ask value #{"%0.8f" % win_ask.value}btc  bid value #{"%0.8f" % win_bid.value}btc"
-        win_ask.bins.each do |ob|
-          puts "      ASK |#{ob.exchanges}| bin #{ob.price.to_s} x#{ob.quantity}"
-        end
-        win_bid.bins.each do |ob|
-          puts "      BID |#{ob.exchanges}| bin #{ob.price} x#{ob.quantity}"
+      spent, earned = orderbook.arbitrage(win_bid, win_ask)
+      if spent > 0
+        profit = earned - spent
+        profit_percent = profit/spent*100
+        puts "spent #{spent} earned #{earned} profit #{"%0.8f" % profit}/$#{"%0.2f" % (profit*420)} #{"%0.2f" % profit_percent}%"
+        if profit_percent >= config["signal_percentage"].as_f
+          low_ask = orderbook.asks.best.offers.first
+          high_bid = orderbook.bids.best.offers.first
+          puts "#### ARBITRAGE #{"%0.8f" % profit}btc #{"%0.2f" % (profit_percent)}% of #{spent}btc"
+          File.open("signal.log", "a") { |f| f.puts "#{Time.now} #{"%0.8f" % profit}btc #{"%0.2f" % profit_percent}% of #{spent}btc  buy #{low_ask.exchange} sell #{high_bid.exchange}" }
+          puts "Arbitrage ask value #{"%0.8f" % win_ask.value}btc  bid value #{"%0.8f" % win_bid.value}btc"
         end
       end
       #    rescue ex

@@ -38,7 +38,7 @@ module Wsarbi
       end
       good_bids, good_asks = subject.profitables
       earn = subject.arbitrage(good_bids, good_asks)
-      earn.should eq(1.5)
+      earn.should eq({1.0, 1.5})
     end
   end
 end

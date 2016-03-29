@@ -32,7 +32,7 @@ module Wsarbi
     end
 
     def to_s(io)
-      io << "$#{price}/#{"%02d" % offers.size}"
+      io << "$#{price}/#{"%02d" % offers.size}ofrs"
       if offers.size > 0
         io << "/#{offers.first.price}"
       end

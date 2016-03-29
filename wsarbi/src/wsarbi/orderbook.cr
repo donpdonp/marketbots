@@ -17,13 +17,23 @@ module Wsarbi
       {good_bids, good_asks}
     end
 
-    def arbitrage(bids : Market, asks : Market)
-      purse = asks.quantity
-      bids.bins.reduce(0) do |m, bid_ob|
-        spend = Math.min(purse, bid_ob.quantity)
-        purse -= spend
-        m + bid_ob.price.to_f * spend
+    def arbitrage(bid_market : Market, ask_market : Market)
+      bids = bid_market.offers.map { |bo| {price: bo.price.to_f, quantity: bo.quantity.to_f} }
+      asks = ask_market.offers.map { |ao| {price: ao.price.to_f, quantity: ao.quantity.to_f} }
+      purse = 0.0
+      earned = 0.0
+      spent = asks.reduce(0) do |spent, ask_of|
+        start_qty = ask_of[:quantity]
+        earn = bids.reduce(0) do |earned, bid_of|
+          selling = Math.min(ask_of[:quantity], bid_of[:quantity])
+          ask_of[:quantity] -= selling
+          bid_of[:quantity] -= selling
+          earned + bid_of[:price] * selling
+        end
+        earned += earn
+        spent + ask_of[:price] * (start_qty - ask_of[:quantity])
       end
+      {spent, earned}
     end
   end
 end

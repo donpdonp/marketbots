@@ -102,8 +102,12 @@ module Wsarbi
       end
     end
 
+    def offers
+      @bins.map(&.offers).flatten
+    end
+
     def groups
-      @bins.map(&.offers).flatten.group_by(&.exchange)
+      offers.group_by(&.exchange)
     end
 
     def clear(exchange : String) : Int32
