@@ -18,22 +18,24 @@ module Wsarbi
     end
 
     def arbitrage(bid_market : Market, ask_market : Market)
-      bids = bid_market.offers.map { |bo| {price: bo.price.to_f, quantity: bo.quantity.to_f} }
-      asks = ask_market.offers.map { |ao| {price: ao.price.to_f, quantity: ao.quantity.to_f} }
-      purse = 0.0
-      earned = 0.0
-      spent = asks.reduce(0) do |spent, ask_of|
-        start_qty = ask_of[:quantity]
-        earn = bids.reduce(0) do |earned, bid_of|
-          selling = Math.min(ask_of[:quantity], bid_of[:quantity])
-          ask_of[:quantity] -= selling
-          bid_of[:quantity] -= selling
-          earned + bid_of[:price] * selling
+      bids = bid_market.offers.map(&.dup_worksheet)
+      asks = ask_market.offers.map(&.dup_worksheet)
+      orders = {bids: {} of String => Hash(Symbol, Float64),
+        asks: {} of String => Hash(Symbol, Float64)}
+      asks.each do |ask_ws|
+        bids.each do |bid_ws|
+          selling = Math.min(ask_ws.remaining, bid_ws.offer.quantity.to_f)
+          ask_ws.remaining -= selling
+          bid_ws.remaining -= selling
+          buy_order = (orders[:asks]["#{ask_ws.exchange}:#{bid_ws.exchange}"] ||= {amount: 0.0, price: 0.0})
+          buy_order[:amount] += selling
+          buy_order[:price] = ask_ws.price # highest price
+          sell_order = orders[:bids]["#{bid_ws.exchange}:#{ask_ws.exchange}"] ||= {amount: 0.0, price: 0.0}
+          sell_order[:amount] += selling
+          sell_order[:price] = bid_ws.price # lowest price
         end
-        earned += earn
-        spent + ask_of[:price] * (start_qty - ask_of[:quantity])
       end
-      {spent, earned}
+      orders
     end
   end
 end

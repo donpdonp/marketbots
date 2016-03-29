@@ -3,7 +3,7 @@ require "../spec_helper"
 module Wsarbi
   describe "Orderbook" do
     bids = [
-      Offer.new("shareco", "btc_usd", "1.5", "1.0"),
+      Offer.new("ezshare", "btc_usd", "1.5", "1.0"),
       Offer.new("shareco", "btc_usd", "1.0", "1.0"),
     ]
 
@@ -38,7 +38,8 @@ module Wsarbi
       end
       good_bids, good_asks = subject.profitables
       earn = subject.arbitrage(good_bids, good_asks)
-      earn.should eq({1.0, 1.5})
+      earn[:bids].should eq({"ezshare:shareco" => {:amount => 1, :price => 1.5}})
+      earn[:asks].should eq({"shareco:ezshare" => {:amount => 1, :price => 1}})
     end
   end
 end

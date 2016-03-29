@@ -91,8 +91,8 @@ redis.subscribe("orderbook") do |on|
         puts "          bids #{win_bid.bins.first}"
         puts "          last #{win_bid.bins.last}" if win_bid.size > 1
       end
-      spent, earned = orderbook.arbitrage(win_bid, win_ask)
-      if spent > 0
+      orders = orderbook.arbitrage(win_bid, win_ask)
+      if orders[:asks].size > 0
         profit = earned - spent
         profit_percent = profit/spent*100
         puts "spent #{spent} earned #{earned} profit #{"%0.8f" % profit}/$#{"%0.2f" % (profit*420)} #{"%0.2f" % profit_percent}%"
@@ -105,12 +105,6 @@ redis.subscribe("orderbook") do |on|
           puts "Arbitrage ask value #{"%0.8f" % win_ask.value}btc  bid value #{"%0.8f" % win_bid.value}btc"
         end
       end
-      #    rescue ex
-      #      ex.backtrace.each { |t| puts t }
-      #      puts ex.message
-      #      puts json.inspect
-
-
     end
   end
 end
