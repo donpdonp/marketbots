@@ -100,7 +100,7 @@ redis.subscribe("orderbook") do |on|
           low_ask = orderbook.asks.best.offers.first
           high_bid = orderbook.bids.best.offers.first
           File.open("signal.log", "a") do |f|
-            f.puts "#{Time.now} spent #{spent} earned #{earned} profit #{"%0.8f" % profit}btc $#{"%0.2f" % (profit*420)} #{"%0.2f" % profit_percent}%"
+            f.puts "#{Time.now} spent #{spent} earned #{earned} profit #{"%0.8f" % profit}btc #{"%0.2f" % profit_percent}% $#{"%0.2f" % (profit*420)}"
           end
           puts "Arbitrage ask value #{"%0.8f" % win_ask.value}btc  bid value #{"%0.8f" % win_bid.value}btc"
         end
