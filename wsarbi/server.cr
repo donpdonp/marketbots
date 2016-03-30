@@ -94,18 +94,23 @@ redis.subscribe("orderbook") do |on|
       orders = orderbook.arbitrage(win_bid, win_ask)
       if orders.keys.size > 0
         puts orders.inspect
-        spent = orders.reduce(0) { |memo, exch, order| memo + order[:amount] * order[:buy_price] }
-        earned = orders.reduce(0) { |memo, exch, order| memo + order[:amount] * order[:sell_price] }
-        profit = earned - spent
-        profit_percent = profit/spent*100
-        puts "spent #{spent} earned #{earned} profit #{"%0.8f" % profit}/$#{"%0.2f" % (profit*420)} #{"%0.2f" % profit_percent}%"
-        if profit_percent >= config["signal_percentage"].as_f
-          low_ask = orderbook.asks.best.offers.first
-          high_bid = orderbook.bids.best.offers.first
-          File.open("signal.log", "a") do |f|
-            f.puts "#{Time.now} spent #{spent} earned #{earned} profit #{"%0.8f" % profit}btc #{"%0.2f" % profit_percent}% $#{"%0.2f" % (profit*420)}"
+        orders.each do |pair, order|
+          spent = order[:amount] * order[:buy_price]
+          earned = order[:amount] * order[:sell_price]
+          profit = earned - spent
+          profit_percent = profit/spent*100
+          profit_after_fee = earned * (1 - 0.005) - spent * (1 - 0.005)
+          profit_after_fee_percent = profit_after_fee / spent * (1 - 0.005)
+          alert = "#{pair} spent #{spent} earned #{earned} " +
+            "profit #{"%0.8f" % profit}/$#{"%0.2f" % (profit*420)}" +
+            " #{"%0.2f" % profit_percent}% " +
+            "$#{"%0.2f" % (profit_after_fee*420)} profit after fee #{"%0.2f" % profit_after_fee_percent}%"
+          puts alert
+          if profit_percent >= config["signal_percentage"].as_f
+            File.open("signal.log", "a") do |f|
+              f.puts alert
+            end
           end
-          puts "Arbitrage ask value #{"%0.8f" % win_ask.value}btc  bid value #{"%0.8f" % win_bid.value}btc"
         end
       end
     end
