@@ -113,10 +113,12 @@ redis.subscribe("orderbook") do |on|
             "after fee $#{"%0.2f" % (profit_after_fee*btc_usd)} " +
             "#{"%0.2f" % profit_after_fee_percent}%"
           puts alert
+          # redis.lpush("wsarbi:signals", alert)
           if profit_percent >= config["signal_percentage"].as_f
             File.open("signal.log", "a") do |f|
-              f.puts alert
+              f.puts "#{Time.now.to_s("%Y-%m-%d %H:%M:%S")} #{alert}"
             end
+            # redis.set("wsarbi:plan", orders.to_json)
           end
         end
       end
