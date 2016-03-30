@@ -106,7 +106,7 @@ redis.subscribe("orderbook") do |on|
           profit = earned - spent
           profit_percent = profit/spent*100
           profit_after_fee = earned * (1 - 0.0025) - spent * (1 + 0.0025)
-          profit_after_fee_percent = profit_after_fee / spent * (1 - 0.005)
+          profit_after_fee_percent = profit_after_fee / spent * (1 + 0.0025)
           alert = "#{pair} spent #{spent} earned #{earned} " +
             "profit #{"%0.8f" % profit}btc/$#{"%0.2f" % (profit*btc_usd)}" +
             " #{"%0.2f" % profit_percent}% " +
