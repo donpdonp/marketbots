@@ -1,6 +1,7 @@
 # system
 require "yaml"
 require "json"
+require "http"
 
 # shards
 require "redis"
@@ -14,6 +15,11 @@ puts "wsarbi #{shard["version"]}"
 
 redis = Redis.new
 orderbook = Wsarbi::Orderbook.new
+
+# btc price spot
+response = HTTP::Client.get "https://blockchain.info/q/24hrprice"
+btc_usd = response.body.to_f
+puts "BTC price set to $#{btc_usd}"
 
 # Blocking subscribe
 redis.subscribe("orderbook") do |on|
@@ -102,9 +108,9 @@ redis.subscribe("orderbook") do |on|
           profit_after_fee = earned * (1 - 0.005) - spent * (1 - 0.005)
           profit_after_fee_percent = profit_after_fee / spent * (1 - 0.005)
           alert = "#{pair} spent #{spent} earned #{earned} " +
-            "profit #{"%0.8f" % profit}btc/$#{"%0.2f" % (profit*420)}" +
+            "profit #{"%0.8f" % profit}btc/$#{"%0.2f" % (profit*btc_usd)}" +
             " #{"%0.2f" % profit_percent}% " +
-            "after fee $#{"%0.2f" % (profit_after_fee*420)} #{"%0.2f" % profit_after_fee_percent}%"
+            "after fee $#{"%0.2f" % (profit_after_fee*btc_usd)} #{"%0.2f" % profit_after_fee_percent}%"
           puts alert
           if profit_percent >= config["signal_percentage"].as_f
             File.open("signal.log", "a") do |f|
