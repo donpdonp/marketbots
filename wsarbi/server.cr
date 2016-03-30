@@ -102,9 +102,9 @@ redis.subscribe("orderbook") do |on|
           profit_after_fee = earned * (1 - 0.005) - spent * (1 - 0.005)
           profit_after_fee_percent = profit_after_fee / spent * (1 - 0.005)
           alert = "#{pair} spent #{spent} earned #{earned} " +
-            "profit #{"%0.8f" % profit}/$#{"%0.2f" % (profit*420)}" +
+            "profit #{"%0.8f" % profit}btc/$#{"%0.2f" % (profit*420)}" +
             " #{"%0.2f" % profit_percent}% " +
-            "$#{"%0.2f" % (profit_after_fee*420)} profit after fee #{"%0.2f" % profit_after_fee_percent}%"
+            "after fee $#{"%0.2f" % (profit_after_fee*420)} #{"%0.2f" % profit_after_fee_percent}%"
           puts alert
           if profit_percent >= config["signal_percentage"].as_f
             File.open("signal.log", "a") do |f|
