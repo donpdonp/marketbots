@@ -45,8 +45,7 @@ redis.subscribe("orderbook") do |on|
         exchange_name = msg["exchange"].as_s
         ask_drop_count = orderbook.asks.clear(exchange_name)
         bid_drop_count = orderbook.bids.clear(exchange_name)
-        puts "********"
-        puts "* CLEARED #{exchange_name} #{ask_drop_count} #{bid_drop_count}"
+        puts "* cleared #{exchange_name} #{ask_drop_count} #{bid_drop_count}"
         msg["asks"].each do |ask|
           orderbook.asks.add(Wsarbi::Offer.new(
             msg["exchange"].as_s,
@@ -63,6 +62,7 @@ redis.subscribe("orderbook") do |on|
             ask["amount"].as_s
           ))
         end
+        puts "*  loaded #{exchange_name} #{msg["asks"].size} #{msg["bids"].size}"
       end
 
       puts "Orderbook asks #{orderbook.asks.bins[0]}"
@@ -92,7 +92,10 @@ redis.subscribe("orderbook") do |on|
         puts "          last #{win_bid.bins.last}" if win_bid.size > 1
       end
       orders = orderbook.arbitrage(win_bid, win_ask)
-      if orders[:asks].size > 0
+      if orders.keys.size > 0
+        puts orders.inspect
+        spent = orders.reduce(0) { |memo, exch, order| memo + order[:amount] * order[:buy_price] }
+        earned = orders.reduce(0) { |memo, exch, order| memo + order[:amount] * order[:sell_price] }
         profit = earned - spent
         profit_percent = profit/spent*100
         puts "spent #{spent} earned #{earned} profit #{"%0.8f" % profit}/$#{"%0.2f" % (profit*420)} #{"%0.2f" % profit_percent}%"

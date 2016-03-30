@@ -37,9 +37,8 @@ module Wsarbi
         subject.asks.add(ask)
       end
       good_bids, good_asks = subject.profitables
-      earn = subject.arbitrage(good_bids, good_asks)
-      earn[:bids].should eq({"ezshare:shareco" => {:amount => 1, :price => 1.5}})
-      earn[:asks].should eq({"shareco:ezshare" => {:amount => 1, :price => 1}})
+      order = subject.arbitrage(good_bids, good_asks)
+      order.should eq({"shareco:ezshare" => {amount: 1, buy_price: 1.0, sell_price: 1.5}})
     end
   end
 end
