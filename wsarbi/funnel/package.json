@@ -8,6 +8,7 @@
     "gulp": "*",
     "gulp-babel": "*",
     "babel-preset-es2015": "*",
+    "plnx": "*",
     "websock": "*"
   }
 }
