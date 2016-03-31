@@ -5,6 +5,9 @@
     "autobahn": "*",
     "redis": "*",
     "request": "*",
+    "gulp": "*",
+    "gulp-babel": "*",
+    "babel-preset-es2015": "*",
     "websock": "*"
   }
 }
