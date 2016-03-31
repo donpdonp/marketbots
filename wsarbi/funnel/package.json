@@ -9,6 +9,7 @@
     "gulp-babel": "*",
     "babel-preset-es2015": "*",
     "plnx": "*",
+    "kraken-api":"*",
     "websock": "*"
   }
 }
