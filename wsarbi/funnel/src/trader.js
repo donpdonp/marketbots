@@ -41,3 +41,7 @@ console.log('kraken balance load')
 kraken.api('Balance', null, function(error, data) {
   console.log('kraken', error, data)
 })
+kraken.api('OpenOrders', null, function(error, data) {
+  console.log('kraken', error, data)
+})
+
