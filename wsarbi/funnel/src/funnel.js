@@ -1,5 +1,4 @@
 var BitfinexWS = require('bitfinex-api-node').WS;
-
 var request = require('request')
 
 var autobahn = require('autobahn');
