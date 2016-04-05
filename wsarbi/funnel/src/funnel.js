@@ -13,13 +13,7 @@ var channel_name = 'orderbook'
 
 
 // buggy delay
-// setTimeout(function(){
-//   // Bitfinex stream
-//   stream_setup()
-
-//   // Poloniex stream
-//   poloniex_stream.open()
-// }, 15000)
+// setTimeout(stream_setup, 15000)
 
 // Kraken pump
 setInterval(kraken_refresh, 5000)
@@ -60,6 +54,8 @@ function stream_setup() {
     //session.subscribe('trollbox', trollboxEvent);
   }
 
+  // start here because reasons
+  poloniex_stream.open()
 
   // starts automatically. boo.
   var bws = new BitfinexWS();
