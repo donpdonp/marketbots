@@ -12,10 +12,14 @@ var redis = require('redis').createClient()
 var channel_name = 'orderbook'
 
 
-//stream_setup()
+// buggy delay
+// setTimeout(function(){
+//   // Bitfinex stream
+//   stream_setup()
 
-// Poloniex stream
-//poloniex_stream.open()
+//   // Poloniex stream
+//   poloniex_stream.open()
+// }, 15000)
 
 // Kraken pump
 setInterval(kraken_refresh, 5000)
