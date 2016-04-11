@@ -11,5 +11,8 @@
     "plnx": "*",
     "kraken-api":"git://github.com/donpdonp/npm-kraken-api.git",
     "websock": "*"
+  },
+  "devDependencies": {
+    "standard-format": "*"
   }
 }
