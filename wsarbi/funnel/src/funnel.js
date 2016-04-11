@@ -1,3 +1,4 @@
+"use strict"
 // public APIs are all http
 var request = require('request')
 
