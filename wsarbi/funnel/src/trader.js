@@ -9,7 +9,9 @@ let request = require('request')
 let config = JSON.parse(fs.readFileSync(__dirname+'/../../config.json'))
 
 // Exchanges
-let bitfinex = require('bitfinex-api-node');
+let bitfinexClient = require('bitfinex-api-node').APIRest
+var bitfinex = new bitfinexClient(config.exchanges.bitfinex.key,
+                                  config.exchanges.bitfinex.secret)
 let poloniex = require('plnx')
 let krakenClient = require('kraken-api')
 var kraken = new krakenClient(config.exchanges.kraken.key,
@@ -35,7 +37,7 @@ poloniex.returnCompleteBalances({ key: creds.key, secret: creds.secret }, functi
   } else {
     console.log('poloniex', err, data);
   }
-});
+})
 
 console.log('kraken balance load')
 kraken.api('Balance', null, function(error, data) {
@@ -45,3 +47,11 @@ kraken.api('OpenOrders', null, function(error, data) {
   console.log('kraken', error, data)
 })
 
+
+console.log('bitfinex balance load')
+bitfinex.wallet_balances(function(error, balances){
+  console.log('bitfinex', error, balances)
+})
+bitfinex.active_orders(function(error, orders){
+  console.log('bitfinex', error, orders)
+})
