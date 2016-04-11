@@ -21,7 +21,7 @@ var kraken = new Kraken(config.exchanges.kraken.key,
 // Redis
 let redis = require('redis').createClient()
 
-let balances = {}
+let balances = new Map()
 
 console.log('trader')
 
@@ -58,8 +58,19 @@ bitfinex.active_orders(function (error, orders) {
   console.log('bitfinex', error, orders)
 })
 
-console.log('doing brpop')
-redis.brpop('wsarbi:plan', 0, function (error, plan) {
-  console.log('redis', error, plan)
-})
-console.log('after brpop')
+function plan_listen () {
+  redis.brpop('wsarbi:plan', 0, function (error, data) {
+    console.log('NEW PLAN')
+    plan_execute(JSON.parse(data[1]))
+  })
+}
+
+plan_listen()
+
+function plan_execute (plan) {
+  // check balances
+  Object.keys(plan).forEach(function (epair) {
+    console.log('TRADE', epair)
+  })
+  plan_listen()
+}

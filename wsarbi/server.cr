@@ -14,6 +14,7 @@ config = JSON.parse(File.read("config.json"))
 puts "wsarbi #{shard["version"]}"
 
 redis = Redis.new
+redis_sub = Redis.new
 orderbook = Wsarbi::Orderbook.new
 
 # btc price spot
@@ -22,7 +23,7 @@ btc_usd = response.body.to_f
 puts "BTC price set to $#{btc_usd}"
 
 # Blocking subscribe
-redis.subscribe("orderbook") do |on|
+redis_sub.subscribe("orderbook") do |on|
   on.message do |channel, json|
     begin
       msg = JSON.parse(json)
@@ -119,7 +120,10 @@ redis.subscribe("orderbook") do |on|
             File.open("signal.log", "a") do |f|
               f.puts "#{alert}"
             end
-            redis.set("wsarbi:plan", orders.to_json)
+            File.open("orders.log", "a") do |f|
+              f.puts "#{Time.now.to_s("%Y-%m-%d %H:%M:%S")} #{orders.to_json}"
+            end
+            redis.lpush("wsarbi:plan", orders.to_json)
           end
         end
       end
