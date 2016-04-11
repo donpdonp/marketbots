@@ -1,6 +1,7 @@
 {
   "signal_percentage": 0.1,
-  "vault_token": "hashicorp-vault-token",
+  "vault": { "url": "https://example.com:8200/",
+             "token": "<token>"},
   "exchanges": {
     "poloniex" : { "key": "<api key>",
                    "fee": 0.25 },
