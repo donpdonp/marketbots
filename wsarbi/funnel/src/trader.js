@@ -4,7 +4,7 @@ let fs = require('fs')
 let path = require('path')
 
 // npm
-let request = require('request')
+//let request = require('request')
 
 // config
 let config = JSON.parse(fs.readFileSync(path.join(__dirname, '/../../config.json')))
@@ -27,18 +27,20 @@ console.log('trader')
 
 console.log('poloniex balance load')
 let creds = config.exchanges.poloniex
-poloniex.returnCompleteBalances({ key: creds.key, secret: creds.secret }, function (err, data) {
-  if (!err) {
-    Object.keys(data).forEach(function (currency) {
-      let money = data[currency]
-      if (money.available > 0) {
-        console.log('poloniex', currency, money)
-      }
-    })
-  } else {
-    console.log('poloniex', err, data)
-  }
-})
+poloniex.returnCompleteBalances(
+  { key: creds.key, secret: creds.secret },
+  function (err, data) {
+    if (!err) {
+      Object.keys(data).forEach(function (currency) {
+        let money = data[currency]
+        if (money.available > 0) {
+          console.log('poloniex', currency, money)
+        }
+      })
+    } else {
+      console.log('poloniex', err, data)
+    }
+  })
 
 console.log('kraken balance load')
 kraken.api('Balance', null, function (error, data) {
@@ -55,3 +57,9 @@ bitfinex.wallet_balances(function (error, balances) {
 bitfinex.active_orders(function (error, orders) {
   console.log('bitfinex', error, orders)
 })
+
+console.log('doing brpop')
+redis.brpop('wsarbi:plan', 0, function (error, plan) {
+  console.log('redis', error, plan)
+})
+console.log('after brpop')

@@ -119,7 +119,7 @@ redis.subscribe("orderbook") do |on|
             File.open("signal.log", "a") do |f|
               f.puts "#{alert}"
             end
-            # redis.set("wsarbi:plan", orders.to_json)
+            redis.set("wsarbi:plan", orders.to_json)
           end
         end
       end
