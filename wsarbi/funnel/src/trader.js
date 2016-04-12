@@ -21,6 +21,7 @@ console.log('trader')
 
 key_master().then(function (keys) {
   balance_master(keys)
+  plan_listen()
 }, function (err) {
   console.log('auth failed', err)
 })
@@ -29,7 +30,6 @@ function key_master () {
   return Promise.all(
     Object.keys(config.exchanges).map(function (name) {
       return new Promise(function (resolve, reject) {
-        console.log('vault try', name)
         request.get({ url: config.vault.url + '/v1/secret/exchanges/' + name,
            headers: {'X-Vault-Token': config.vault.token}},
           function (err, result, body) {
@@ -57,17 +57,18 @@ function key_master () {
 }
 
 function balance_master (creds) {
+  let balances = new Map()
+  for (let exchange in creds) {
+    balances[exchange] = {}
+  }
   console.log('poloniex balance load')
   poloniex.returnCompleteBalances(
     creds.poloniex,
     function (err, data) {
       if (!err) {
-        Object.keys(data).forEach(function (currency) {
-          let money = data[currency]
-          if (money.available > 0) {
-            console.log('poloniex', currency, money)
-          }
-        })
+        balances.poloniex.btc = data['BTC'].available
+        balances.poloniex.eth = data['ETH'].available
+        console.log('poloniex', 'btc', balances.poloniex.btc, 'eth', balances.poloniex.eth)
       } else {
         console.log('poloniex', err, data)
       }
@@ -76,11 +77,17 @@ function balance_master (creds) {
   let kraken = new Kraken(creds.kraken.key, creds.kraken.secret)
   console.log('kraken balance load')
   kraken.api('Balance', null, function (error, data) {
-    console.log('kraken', error, data)
+    console.log('kraken balance', error, data)
+    if (data.result.btc) {
+      balances.kraken = data.result.btc
+    } else {
+      balances.kraken = 0
+    }
+    console.log('kraken', 'btc', balances.kraken.btc, 'eth', balances.kraken.eth)
   })
   console.log('kraken order load')
   kraken.api('OpenOrders', null, function (error, data) {
-    console.log('kraken', error, data)
+    console.log('kraken orders', error, data)
   })
 
   let bitfinex = new Bitfinex(creds.bitfinex.key, creds.bitfinex.secret)
@@ -96,12 +103,14 @@ function balance_master (creds) {
 
 function plan_listen () {
   redis.brpop('wsarbi:plan', 0, function (error, data) {
-    console.log('NEW PLAN')
-    plan_execute(JSON.parse(data[1]))
+    if (error) {
+      console.log('redis plan error!')
+    } else {
+      console.log('NEW PLAN')
+      plan_execute(JSON.parse(data[1]))
+    }
   })
 }
-
-plan_listen()
 
 function plan_execute (plan) {
   // check plan freshness
@@ -110,5 +119,7 @@ function plan_execute (plan) {
   Object.keys(plan).forEach(function (epair) {
     console.log('TRADE', epair)
   })
+
+  // play it again, sam.
   plan_listen()
 }
