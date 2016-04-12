@@ -25,6 +25,8 @@ setInterval(bleu_refresh, 5000)
 setInterval(poloniex_refresh, 5000)
 // Bitfinex pump
 setInterval(bitfinex_refresh, 5000)
+// Bittrex pump
+setInterval(bittrex_refresh, 5000)
 
 function stream_setup () {
   // poloniex pump
@@ -170,8 +172,26 @@ function bitfinex_refresh () {
     })
 }
 
+function bittrex_refresh () {
+  exchange_reset('bittrex',
+    'https://bittrex.com/api/v1.1/public/getorderbook?market=BTC-ETH&type=both&depth=50',
+    function (answer) {
+      return {
+        market: 'ETH:BTC',
+        bids: answer.result.buy,
+        asks: answer.result.sell
+      }
+    },
+    function (offer) {
+      return {
+        price: '' + offer.Rate,
+        amount: '' + offer.Quantity
+      }
+    })
+}
+
 function exchange_reset (name, api_url, answer_morph, offer_morph) {
-  console.log(api_url)
+  // console.log(api_url)
   request.get(api_url, function (error, response, body) {
     var load = {
       type: 'load',
@@ -179,17 +199,19 @@ function exchange_reset (name, api_url, answer_morph, offer_morph) {
     }
 
     try {
-      var response = JSON.parse(body)
+      var data = JSON.parse(body)
 
-      var book = answer_morph(response)
+      var book = answer_morph(data)
       load['market'] = book.market
-      console.log(name, 'top bid', JSON.stringify(book.bids[0]),
-        'top ask', JSON.stringify(book.asks[0]))
 
       var sides = [ 'bid', 'ask' ]
       sides.forEach(function (side) {
         load[side + 's'] = book[side + 's'].map(offer_morph)
       })
+
+      console.log('*', name)
+      console.log('* top bid', JSON.stringify(book.bids[0]), JSON.stringify(load.bids[0]))
+      console.log('* top ask', JSON.stringify(book.asks[0]), JSON.stringify(load.asks[0]))
 
       redis.publish(channel_name, JSON.stringify(load))
     } catch (e) {
