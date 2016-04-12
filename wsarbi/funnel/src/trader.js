@@ -11,12 +11,8 @@ let config = JSON.parse(fs.readFileSync(path.join(__dirname, '/../../config.json
 
 // Exchanges
 let Bitfinex = require('bitfinex-api-node').APIRest
-var bitfinex = new Bitfinex(config.exchanges.bitfinex.key,
-  config.exchanges.bitfinex.secret)
 let poloniex = require('plnx')
 let Kraken = require('kraken-api')
-var kraken = new Kraken(config.exchanges.kraken.key,
-  config.exchanges.kraken.secret)
 
 // Redis
 let redis = require('redis').createClient()
@@ -24,7 +20,6 @@ let redis = require('redis').createClient()
 console.log('trader')
 
 key_master().then(function (keys) {
-  console.log('auth done', keys)
   balance_master(keys)
 }, function (err) {
   console.log('auth failed', err)
@@ -64,7 +59,7 @@ function key_master () {
 function balance_master (creds) {
   console.log('poloniex balance load')
   poloniex.returnCompleteBalances(
-    { key: creds.poloniex.key, secret: creds.poloniex.secret },
+    creds.poloniex,
     function (err, data) {
       if (!err) {
         Object.keys(data).forEach(function (currency) {
@@ -78,18 +73,22 @@ function balance_master (creds) {
       }
     })
 
+  let kraken = new Kraken(creds.kraken.key, creds.kraken.secret)
   console.log('kraken balance load')
   kraken.api('Balance', null, function (error, data) {
     console.log('kraken', error, data)
   })
+  console.log('kraken order load')
   kraken.api('OpenOrders', null, function (error, data) {
     console.log('kraken', error, data)
   })
 
+  let bitfinex = new Bitfinex(creds.bitfinex.key, creds.bitfinex.secret)
   console.log('bitfinex balance load')
   bitfinex.wallet_balances(function (error, balances) {
     console.log('bitfinex', error, balances)
   })
+  console.log('bitfinex order load')
   bitfinex.active_orders(function (error, orders) {
     console.log('bitfinex', error, orders)
   })
