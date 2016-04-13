@@ -1,14 +1,11 @@
 {
   "signal_percentage": 0.1,
-  "vault": { "url": "https://example.com:8200/",
+  "vault": { "url": "https://vault.example.com:8200/",
              "token": "<token>"},
   "exchanges": {
-    "poloniex" : { "key": "<api key>",
-                   "fee": 0.25 },
-    "bitfinex" : { "key": "<api key>",
-                   "fee": 0.25 },
-    "kraken": { "key":  "<api key>",
-                "fee": 0.25 }
+    "poloniex" : { "fee": 0.25 },
+    "bitfinex" : { "fee": 0.25 },
+    "kraken": { "fee": 0.25 }
   }
 }
 
