@@ -10,7 +10,8 @@
     "babel-preset-es2015": "*",
     "plnx": "*",
     "kraken-api":"git://github.com/donpdonp/npm-kraken-api.git",
-    "websock": "*"
+    "websock": "*",
+    "nodemailer": "*"
   },
   "devDependencies": {
     "standard-format": "*"
