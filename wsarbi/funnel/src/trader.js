@@ -171,10 +171,10 @@ function plan_execute (plan, balances) {
       alert += '  btc_spend ' + btc_spend + '\n'
       let eth_spend = Math.min(order['amount'], bide.eth)
       alert += '  eth_spend ' + eth_spend + '\n'
+      email(alert)
     } else {
       alert += 'error missing balances' + JSON.stringify(exs) + '\n'
     }
-    email(alert)
   })
 
   // play it again, sam.
