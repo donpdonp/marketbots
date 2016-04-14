@@ -172,13 +172,13 @@ function plan_execute (plan, balances) {
     alert += JSON.stringify(order) + '\n'
     if (aske.fresh && bide.fresh) {
       alert += '  ask balance ' + aske.fresh + ' ' + aske.btc + 'btc' + '\n'
-      alert += '  bid balance ' + bide.fresh + ' ' + bide.btc + 'etc' + '\n'
+      alert += '  bid balance ' + bide.fresh + ' ' + bide.btc + 'eth' + '\n'
       alert += '  balances FRESH' + '\n'
-      let btc_amount = order['amount'] * 420 // placeholder
-      let btc_spend = Math.min(btc_amount, aske.btc)
+      let eth_spend = Math.min(order['amount'], aske.btc * 0.020, bide.eth)
+      let btc_spend = eth_spend * 420 // placeholder
       alert += '  btc_spend ' + btc_spend + '\n'
-      let eth_spend = Math.min(order['amount'], bide.eth)
       alert += '  eth_spend ' + eth_spend + '\n'
+      alert += '  eth_profit ' + eth_spend * (order['sell_price'] - order['buy_price']) + '\n'
       email(alert)
     } else {
       alert += 'error missing balances' + JSON.stringify(exs) + '\n'
@@ -200,6 +200,6 @@ function email (text) {
     if (error) {
       return console.log(error)
     }
-    console.log('Message sent: ', info)
+    console.log('Message sent: ', info.accepted)
   })
 }
