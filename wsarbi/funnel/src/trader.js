@@ -16,6 +16,7 @@ let config = JSON.parse(fs.readFileSync(path.join(__dirname, '/../../config.json
 let Bitfinex = require('bitfinex-api-node').APIRest
 let poloniex = require('plnx')
 let Kraken = require('kraken-api')
+let bittrex = require('node.bittrex.api')
 
 // Redis
 let redis = require('redis').createClient()
@@ -65,6 +66,7 @@ function balance_master (creds, balances) {
   for (let exchange in creds) {
     balances[exchange] = new Map([['fresh', false]])
   }
+
   console.log('poloniex balance load')
   poloniex.returnCompleteBalances(
     creds.poloniex,
@@ -109,6 +111,29 @@ function balance_master (creds, balances) {
   console.log('bitfinex order load')
   bitfinex.active_orders(function (error, orders) {
     console.log('bitfinex', error, orders)
+  })
+
+  console.log('bittrex balance load')
+  bittrex.options({
+    'apikey': creds.bittrex.key,
+    'apisecret': creds.bittrex.secret })
+  bittrex.getbalances(function (data) {
+    if (data.success) {
+      let btc_data = data.result.filter(function (dat) { return dat.Currency === 'BTC' })[0]
+      if (btc_data) {
+        balances.bittrex.btc = btc_data.Available
+      } else {
+        balances.bittrex.btc = 0
+      }
+      let eth_data = data.result.filter(function (dat) { return dat.Currency === 'ETH' })[0]
+      if (eth_data) {
+        balances.bittrex.eth = eth_data.Available
+      } else {
+        balances.bittrex.eth = 0
+      }
+      balances.bittrex.fresh = true
+      console.log('bittrex', 'btc', balances.bittrex.btc, 'eth', balances.bittrex.eth)
+    }
   })
 }
 

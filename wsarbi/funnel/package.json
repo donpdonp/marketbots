@@ -11,7 +11,8 @@
     "plnx": "*",
     "kraken-api":"git://github.com/donpdonp/npm-kraken-api.git",
     "websock": "*",
-    "nodemailer": "*"
+    "nodemailer": "*",
+    "node.bittrex.api": "*"
   },
   "devDependencies": {
     "standard-format": "*"
