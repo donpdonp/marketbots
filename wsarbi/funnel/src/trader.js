@@ -105,8 +105,16 @@ function balance_master (creds, balances) {
 
   let bitfinex = new Bitfinex(creds.bitfinex.key, creds.bitfinex.secret)
   console.log('bitfinex balance load')
-  bitfinex.wallet_balances(function (error, balances) {
-    console.log('bitfinex', error, balances)
+  bitfinex.wallet_balances(function (error, data) {
+    console.log('bitfinex', error, data)
+    if (error) {
+      //
+    } else {
+      balances.bitfinex.btc = data['btc'] || 0
+      balances.bitfinex.eth = data['eth'] || 0
+      balances.bitfinex.fresh = true
+      console.log('bitfinex', 'btc', balances.bitfinex.btc, 'eth', balances.bitfinex.eth)
+    }
   })
   console.log('bitfinex order load')
   bitfinex.active_orders(function (error, orders) {
