@@ -135,20 +135,19 @@ function plan_execute (plan, balances) {
     let bide = balances[exs[1]]
 
     let alert
-    if (aske && bide) {
-      alert = 'TRADE ' + epair + '\n'
-      alert += '  ask balance ' + aske.fresh + aske.btc + 'btc' + '\n'
-      alert += '  bid balance ' + bide.fresh + bide.btc + 'etc' + '\n'
-      if (aske.fresh && bide.fresh) {
-        alert += '  balances FRESH' + '\n'
-        let btc_amount = order['amount'] * 1
-        let btc_spend = Math.min(btc_amount, aske.btc)
-        alert += '  btc_spend ' + btc_spend + '\n'
-        let eth_spend = Math.min(order['amount'], bide.eth)
-        alert += '  eth_spend ' + eth_spend + '\n'
-      }
+    alert = 'Order ' + epair + '\n'
+    alert += JSON.stringify(order) + '\n'
+    if (aske.fresh && bide.fresh) {
+      alert += '  ask balance ' + aske.fresh + ' ' + aske.btc + 'btc' + '\n'
+      alert += '  bid balance ' + bide.fresh + ' ' + bide.btc + 'etc' + '\n'
+      alert += '  balances FRESH' + '\n'
+      let btc_amount = order['amount'] * 420 // placeholder
+      let btc_spend = Math.min(btc_amount, aske.btc)
+      alert += '  btc_spend ' + btc_spend + '\n'
+      let eth_spend = Math.min(order['amount'], bide.eth)
+      alert += '  eth_spend ' + eth_spend + '\n'
     } else {
-      alert = 'error missing balances' + JSON.stringify(exs) + '\n'
+      alert += 'error missing balances' + JSON.stringify(exs) + '\n'
     }
     email(alert)
   })
