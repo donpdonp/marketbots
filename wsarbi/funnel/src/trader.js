@@ -172,7 +172,7 @@ function plan_execute (plan, balances) {
     alert += JSON.stringify(order) + '\n'
     if (aske.fresh && bide.fresh) {
       alert += '  ask balance ' + aske.fresh + ' ' + aske.btc + 'btc' + '\n'
-      alert += '  bid balance ' + bide.fresh + ' ' + bide.btc + 'eth' + '\n'
+      alert += '  bid balance ' + bide.fresh + ' ' + bide.eth + 'eth' + '\n'
       alert += '  balances FRESH' + '\n'
       let eth_spend = Math.min(order['amount'], aske.btc * 0.020, bide.eth)
       let btc_spend = eth_spend * 420 // placeholder
@@ -181,7 +181,7 @@ function plan_execute (plan, balances) {
       alert += '  eth_profit ' + eth_spend * (order['sell_price'] - order['buy_price']) + '\n'
       email(alert)
     } else {
-      alert += 'error missing balances' + JSON.stringify(exs) + '\n'
+      alert += 'error missing/unfresh balances' + JSON.stringify(exs) + '\n'
     }
   })
 
