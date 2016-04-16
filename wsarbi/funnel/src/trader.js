@@ -171,15 +171,20 @@ function plan_execute (plan, balances) {
     alert = 'Order ' + epair + '\n'
     alert += JSON.stringify(order) + '\n'
     if (aske.fresh && bide.fresh) {
-      alert += '  ask balance ' + aske.fresh + ' ' + aske.btc + 'btc' + '\n'
-      alert += '  bid balance ' + bide.fresh + ' ' + bide.eth + 'eth' + '\n'
-      alert += '  balances FRESH' + '\n'
-      let eth_spend = Math.min(order['amount'], aske.btc * 0.020, bide.eth)
-      let btc_spend = eth_spend * 420 // placeholder
-      alert += '  btc_spend ' + btc_spend + '\n'
-      alert += '  eth_spend ' + eth_spend + '\n'
-      alert += '  eth_profit ' + eth_spend * (order['sell_price'] - order['buy_price']) + '\n'
-      email(alert)
+      if (order['amount'] > 1) {
+        let profit_ratio = (order['sell_price'] - order['buy_price']) / order['buy_price']
+        alert += '  profit ratio ' + profit_ratio + ' minus 0.5% ' + (profit_ratio - 0.005)
+        let profit = order['amount'] * (profit_ratio - 0.005)
+        alert += '  ask balance ' + aske.fresh + ' ' + aske.btc + 'btc' + '\n'
+        alert += '  bid balance ' + bide.fresh + ' ' + bide.eth + 'eth' + '\n'
+        alert += '  balances FRESH' + '\n'
+        let eth_spend = Math.min(order['amount'], aske.btc * 0.020, bide.eth)
+        let btc_spend = eth_spend * 420 // placeholder
+        alert += '  btc_spend ' + btc_spend + '\n'
+        alert += '  eth_spend ' + eth_spend + '\n'
+        alert += '  eth_profit ' + eth_spend * (order['sell_price'] - order['buy_price']) + '\n'
+        email(os.hostname() + ' plan ' + profit + 'eth', alert)
+      }
     } else {
       alert += 'error missing/unfresh balances' + JSON.stringify(exs) + '\n'
     }
@@ -189,11 +194,11 @@ function plan_execute (plan, balances) {
   plan_listen(balances)
 }
 
-function email (text) {
+function email (subject, text) {
   let email = {
     from: config.email.from, // sender address
     to: config.email.to, // list of receivers
-    subject: os.hostname() + ' plan execute',
+    subject: subject,
     text: text
   }
   mailer.sendMail(email, function (error, info) {
