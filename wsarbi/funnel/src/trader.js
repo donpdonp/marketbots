@@ -198,6 +198,7 @@ function plan_execute (plan, balances) {
       alert += 'error missing/unfresh balances' + JSON.stringify(exs) + '\n'
       console.log(alert)
     }
+    console.log('influx write', {resp: 'pairs'}, {pair: epair})
     influx.writePoint('pairs', {resp: 'pairs'}, {pair: epair}, function (err, response) {
       if (err) { console.log(err) }
     })
