@@ -175,17 +175,18 @@ function plan_execute (plan, balances) {
         let profit_ratio = (order['sell_price'] - order['buy_price']) / order['buy_price']
         let profit_fee_ratio = profit_ratio - 0.005
         if (profit_fee_ratio > 0) {
-          alert += '  profit ratio ' + profit_ratio + ' minus 0.5% ' + profit_fee_ratio
+          alert += '  profit ratio ' + profit_ratio.toFixed(4) + ' minus 0.5% ' + profit_fee_ratio.toFixed(4) + '\n'
           let profit = order['amount'] * profit_fee_ratio
           alert += '  ask balance ' + aske.fresh + ' ' + aske.btc + 'btc' + '\n'
           alert += '  bid balance ' + bide.fresh + ' ' + bide.eth + 'eth' + '\n'
-          alert += '  balances FRESH' + '\n'
+          alert += '  balances min' + order['amount'] + ', ' + (aske.btc * 0.020).toFixed(4) +
+                   ', ' + bide.eth + '\n'
           let eth_spend = Math.min(order['amount'], aske.btc * 0.020, bide.eth)
           let btc_spend = eth_spend * 420 // placeholder
-          alert += '  btc_spend ' + btc_spend + '\n'
-          alert += '  eth_spend ' + eth_spend + '\n'
-          alert += '  eth_profit ' + eth_spend * (order['sell_price'] - order['buy_price']) + '\n'
-          email(os.hostname() + ' plan ' + profit + 'eth', alert)
+          alert += '  btc_spend ' + btc_spend.toFixed(4) + '\n'
+          alert += '  eth_spend ' + eth_spend.toFixed(1) + ' (min win)\n'
+          alert += '  eth_profit ' + eth_spend * profit_fee_ratio + '\n'
+          email(os.hostname() + ' total ' + profit.toFixed(1) + 'eth', alert)
         }
       }
     } else {
