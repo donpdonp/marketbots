@@ -186,7 +186,9 @@ function plan_execute (plan, balances) {
           alert += '  btc_spend ' + btc_spend.toFixed(4) + '\n'
           alert += '  eth_spend ' + eth_spend.toFixed(1) + ' (min win)\n'
           alert += '  eth_profit ' + eth_spend * profit_fee_ratio + '\n'
-          email(os.hostname() + ' total ' + profit.toFixed(1) + 'eth', alert)
+          if (profit > 1) {
+            email(os.hostname() + ' total ' + profit.toFixed(1) + 'eth', alert)
+          }
         }
       }
     } else {
