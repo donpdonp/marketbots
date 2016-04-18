@@ -191,9 +191,7 @@ function plan_execute (plan, balances) {
 
         email(os.hostname() + ' total ' + profit.toFixed(1) + 'eth', alert)
       }
-      let exch_magnitude = {}
-      exch_magnitude[epair] = profit
-      influx.writePoint('pairs', {resp: 'pairs'}, exch_magnitude, function (err, response) {
+      influx.writePoint('pairs', profit, {pair: epair}, function (err, response) {
         if (err) { console.log(err) }
       })
     } else {
