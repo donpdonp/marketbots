@@ -21,6 +21,9 @@ let bittrex = require('node.bittrex.api')
 // Redis
 let redis = require('redis').createClient()
 
+let Influx = require('influx')
+let influx = Influx(config.influx)
+
 console.log('trader')
 
 key_master().then(function (keys) {
@@ -193,7 +196,11 @@ function plan_execute (plan, balances) {
       }
     } else {
       alert += 'error missing/unfresh balances' + JSON.stringify(exs) + '\n'
+      console.log(alert)
     }
+    influx.writePoint('pairs', {resp: 'pairs'}, {pair: epair}, function (err, response) {
+      if (err) { console.log(err) }
+    })
   })
 
   // play it again, sam.
