@@ -177,7 +177,7 @@ function plan_execute (plan, balances) {
       let profit_ratio = (order['sell_price'] - order['buy_price']) / order['buy_price']
       let profit_fee_ratio = profit_ratio - 0.005
       let profit = order['amount'] * profit_fee_ratio
-      if (profit_ratio > 0) {
+      if (profit_fee_ratio > 0) {
         if (profit > 1) {
           alert += '  profit ratio ' + profit_ratio.toFixed(4) + ' minus 0.5% ' + profit_fee_ratio.toFixed(4) + '\n'
           alert += '  ask balance ' + aske.fresh + ' ' + aske.btc + 'btc' + '\n'
