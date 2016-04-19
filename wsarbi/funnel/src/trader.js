@@ -153,7 +153,7 @@ function plan_listen (balances) {
     if (error) {
       console.log('redis plan error!')
     } else {
-      console.log('NEW PLAN RECEIVED')
+      console.log(new Date(), 'NEW PLAN')
       plan_execute(JSON.parse(data[1]), balances)
     }
   })
@@ -191,6 +191,7 @@ function plan_execute (plan, balances) {
 
         email(os.hostname() + ' total ' + profit.toFixed(1) + 'eth', alert)
       }
+      console.log('influxdb', 'pairs', profit, {pair: epair})
       influx.writePoint('pairs', profit, {pair: epair}, function (err, response) {
         if (err) { console.log(err) }
       })
