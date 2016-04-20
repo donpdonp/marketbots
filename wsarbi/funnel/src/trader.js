@@ -217,7 +217,7 @@ function plan_execute (plan, balances) {
 
           email(os.hostname() + ' total ' + profit.toFixed(1) + 'eth', alert)
         }
-        let data = {order_amount: order['amount'], profit_ratio: profit_ratio}
+        let data = {order_amount: order['amount'], profit_ratio: profit_ratio, profit: profit}
         let tags = {pair: epair}
         console.log('influxdb', 'pairs', data, tags)
         influx.writePoint('pairs', data, tags, function (err, response) {
