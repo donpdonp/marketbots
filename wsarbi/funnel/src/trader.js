@@ -150,14 +150,24 @@ function balance_master (creds, balances) {
 
   console.log('bleutrade balance load')
   let bleutrade = new Bleutrade(creds.bleutrade.key, creds.bleutrade.secret)
-  bleutrade.getcurrencies('BTC;ETH', function (error, data) {
+  bleutrade.getbalances('BTC;ETH', function (error, data) {
     if (error) {
       console.log('bleutrade api error!')
     } else {
-      console.log('bleutrade balances', data)
-      balances.bleutrade.btc = 0
-      balances.bleutrade.eth = 0
+      let btc_data = data.result.filter(function (dat) { return dat.Currency === 'BTC' })[0]
+      if (btc_data) {
+        balances.bleutrade.btc = btc_data.Available
+      } else {
+        balances.bleutrade.btc = 0
+      }
+      let eth_data = data.result.filter(function (dat) { return dat.Currency === 'ETH' })[0]
+      if (eth_data) {
+        balances.bleutrade.eth = eth_data.Available
+      } else {
+        balances.bleutrade.eth = 0
+      }
       balances.bleutrade.fresh = true
+      console.log('bleutrade', 'btc', balances.bleutrade.btc, 'eth', balances.bleutrade.eth)
     }
   })
 }
