@@ -193,7 +193,7 @@ function plan_execute (plan, balances) {
 
           email(os.hostname() + ' total ' + profit.toFixed(1) + 'eth', alert)
         }
-        console.log('influxdb', 'pairs', profit, {pair: epair})
+        console.log('influxdb', 'pairs', profit, {pair: epair.replace(':', '')})
         influx.writePoint('pairs', profit, {pair: epair.replace(':', '')}, function (err, response) {
           if (err) { console.log(err) }
         })
