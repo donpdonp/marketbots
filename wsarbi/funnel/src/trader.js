@@ -17,6 +17,7 @@ let Bitfinex = require('bitfinex-api-node').APIRest
 let poloniex = require('plnx')
 let Kraken = require('kraken-api')
 let bittrex = require('node.bittrex.api')
+let Bleutrade = require('bleutrade-api')
 
 // Redis
 let redis = require('redis').createClient()
@@ -144,6 +145,19 @@ function balance_master (creds, balances) {
       }
       balances.bittrex.fresh = true
       console.log('bittrex', 'btc', balances.bittrex.btc, 'eth', balances.bittrex.eth)
+    }
+  })
+
+  console.log('bleutrade balance load')
+  let bleutrade = new Bleutrade(creds.bleutrade.key, creds.bleutrade.secret)
+  bleutrade.getcurrencies('BTC;ETH', function (error, data) {
+    if (error) {
+      console.log('bleutrade api error!')
+    } else {
+      console.log('bleutrade balances', data)
+      balances.bleutrade.btc = 0
+      balances.bleutrade.eth = 0
+      balances.bleutrade.fresh = true
     }
   })
 }

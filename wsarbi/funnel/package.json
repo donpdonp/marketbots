@@ -13,7 +13,8 @@
     "websock": "*",
     "nodemailer": "*",
     "node.bittrex.api": "*",
-    "influx": "*"
+    "influx": "*",
+    "bleutrade-api": "*"
   },
   "devDependencies": {
     "standard-format": "*"
